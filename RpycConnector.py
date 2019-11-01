@@ -1,4 +1,4 @@
-class Ctxctl(object):
+class RpycConnector(object):
     __c = None
     @staticmethod 
     def get_c():
