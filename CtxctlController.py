@@ -3,6 +3,9 @@
 """
 Created on Sun Apr  7 12:29:23 2019
 
+The CtxctlController class is a wrapper around ctxctl python API that stores the
+ctxctl model and handles the neuron connections.
+
 @author: nrisi
 """
 import numpy as np    
@@ -121,6 +124,7 @@ class CtxctlController(object):
         self.CtxDynapse.dynapse.monitor_neuron(chip_id,neuron_id)  
         print(self.__class__.__name__+ ' : Check trace on the oscilloscope! ')
         
+    #TODO: Replace this with separate class
     def set_spikemonitor(self, neuron_ids):
         """ Initialize Ctxctl BufferedEventFilter with list of neuron ids to be 
         monitored.
