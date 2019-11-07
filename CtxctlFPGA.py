@@ -13,16 +13,17 @@ import numpy as np
 
 class CtxctlFPGA(object):
     
-    def __init__(self, neurons, model):
+    def __init__(self, dynapse, neurons_pre=[]):
         """
         Args:
-            neurons             (list): list of input neuron ids (in range [0:1023])
-            model   (CtxDynapse.model): Ctxctl model
+            dynapse              low level class of dynapse
+            neurons_pre             (list): list of input neuron ids (in range [0:1023])
         """
         print(self.__class__.__name__ + ' __init__()')
         
-        self.neurons = neurons
-        self.model = model
+        self.dynapse = dynapse
+        self.neurons_pre = neurons_pre
+        self.model = self.dynapse.model
         
         # Set FPGA constraints
         ADDR_NUM_BITS = 15
@@ -74,16 +75,16 @@ class CtxctlFPGA(object):
             ' and neuron ids need to have the same length'
         
         unit_fpga = isi_base/90 #us
-        spike_times_us = spike_times*1e6
+        spike_times_us = np.array(spike_times)*1e6
         spike_times_unit_fpga = spike_times_us / unit_fpga
         
-        fpga_isi = [0]+list(np.diff(spike_times_unit_fpga))   
+        fpga_isi = np.array([0]+list(np.diff(spike_times_unit_fpga)))
         fpga_nrn_ids = np.array(neuron_ids)
         fpga_target_chips = np.array(target_chips)
         
         fpga_events = []
         for idx_isi, isi in enumerate(fpga_isi):
-            fpga_event = self.DC.CtxDynapse.FpgaSpikeEvent()
+            fpga_event = self.dynapse.FpgaSpikeEvent()
             fpga_event.core_mask = 15
             fpga_event.target_chip = fpga_target_chips[idx_isi]
             fpga_event.neuron_id = fpga_nrn_ids[idx_isi]
@@ -92,7 +93,7 @@ class CtxctlFPGA(object):
             
         assert all(np.asarray(fpga_isi) < self.max_isi), 'isi is too large for'+\
                 'the specified isi_base!'
-        assert len(isi) < self.max_fpga_len , 'Input stimulus is too long!'
+        assert len(fpga_isi) < self.max_fpga_len , 'Input stimulus is too long!'
         
         # Set spikeGen:
         self.spikeGen.set_variable_isi(True)
@@ -119,7 +120,7 @@ class CtxctlFPGA(object):
         if reset:
         # Reset to zero neurons for which the poisson mean firing rate
         # is not explicitely set.
-            non_defined_neurons = set(self.neurons)-set(neuron_ids)
+            non_defined_neurons = set(self.neurons_pre)-set(neuron_ids)
             if non_defined_neurons:
                 print(self.__class__.__name__ + ': Setting to 0 Hz non specified neurons')
                 for nrn_id in non_defined_neurons:
