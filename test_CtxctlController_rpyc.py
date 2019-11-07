@@ -3,22 +3,24 @@
 """
 Created on Sun Nov  3 12:41:13 2019
 
-CtxCtl unittest for rpyc connection.
-Run from a parent directory that contains the cortexcontrol folder.
+Unittest for class CtxctlController (backend: rpyc).
 
-Files required to run the unittest:
+Run from the parent folder of the cortexcontrol folder.
+
+Files required to run:
     CtxctlController.py
     RpycConnector.py
     run_rpyc.py
+Make sure that these files are inside the cortexcontrol folder before running
+the unittest.
     
-Before running the unitest make sure that all 3 files are in the ctxctl folder.
-
 @author: nrisi
 """
 
 import unittest
 from cortexcontrol.CtxctlController import CtxctlController
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
 import os
 
@@ -28,7 +30,7 @@ class TestCtxctlController(unittest.TestCase):
     
     def test___init__(self):
         print(self.__class__.__name__ + ' : __init__')
-        pass
+        print(self.__class__.__name__ + ' : Testing backend: rpyc')
     
     def test_connect(self):
         """ Test class function self.connect.
@@ -55,13 +57,20 @@ class TestCtxctlController(unittest.TestCase):
                       cc.connector.receiving_connections_from[cc.neurons[post[0]]])
         
         if SHOW_PLOTS_IN_TESTS:
+            # Set binary colormap:
+            sns.set()
+            colors = ((0.0, 0.0, 0.0), (1, 1.0, 1.0))
+            cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
             weight_matrix = cc.get_connectivity_matrix()
             _ = plt.figure()
-            sns.heatmap(weight_matrix)
+            ax = sns.heatmap(weight_matrix, cmap=cmap)
+            colorbar = ax.collections[0].colorbar
+            colorbar.set_ticks([0.25,0.75])
+            colorbar.set_ticklabels(['0', '1'])
             plt.title('pre-post CAMs')
             plt.xlabel('post')
             plt.ylabel('pre')
-            plt.axis('equal')             
+            plt.axis('equal')            
         
     def test_remove_connection(self):              
         """ Test class funciton self.remove_connection()
