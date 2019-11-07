@@ -51,29 +51,33 @@ class CtxctlController(object):
             self.SynType = self.CtxDynapse.DynapseCamType           
             self.PyCtxUtils = PyCtxUtils 
         
-        self.connector = self.NeuronNeuronConnector.DynapseConnector()
-        self.model = self.CtxDynapse.model
-        self.neurons = self.model.get_shadow_state_neurons()
-        
         #TODO : Add instantiation of BiasTunter
         # self.BiasTuner = BiasTuner()            
         #TODO : Add instantiation of FPGA SpikeGenerator
         # self.FpgaController = FpgaController()
-        self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(4096)}
         
         self._start_ctxctl()
         
     def _start_ctxctl(self):
+        # Reset cams and srams		
+        self.reset_cams()		
+        self.reset_srams()		
+        self.reset_model()		
+        
         self.groups = self.model.get_bias_groups()
         self.virtual_model = self.CtxDynapse.VirtualModel()
         self.virtual_neurons = self.virtual_model.get_neurons()
 
-        # Reset cams and srams
-        self.reset_cams()
-        self.reset_srams()
-
         print(self.__class__.__name__ + ' : Ctxctl initialized!') 
-                        
+
+    def reset_model(self):		
+        """ Reset the software model.		
+        """		
+        self.model = self.CtxDynapse.model		
+        self.neurons = self.model.get_shadow_state_neurons()        		
+        self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(4096)}		
+        self.connector = self.NeuronNeuronConnector.DynapseConnector()		
+                                
     def reset_cams(self):
         """ Reset all the cams for all the cores.
         """
