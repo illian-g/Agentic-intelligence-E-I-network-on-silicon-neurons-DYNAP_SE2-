@@ -9,7 +9,8 @@ ctxctl model and handles the neuron connections.
 @author: nrisi
 """
 import numpy as np    
-            
+from ctxctl_contrib.CtxctlFPGA import CtxctlFPGA
+
 class CtxctlController(object):
     
     def __init__(self, 
@@ -53,24 +54,24 @@ class CtxctlController(object):
             self.NeuronNeuronConnector = NeuronNeuronConnector
             self.SynType = self.CtxDynapse.DynapseCamType           
             self.PyCtxUtils = PyCtxUtils 
-        
-        #TODO : Add instantiation of BiasTunter
-        # self.BiasTuner = BiasTuner()            
-        #TODO : Add instantiation of FPGA SpikeGenerator
-        # self.FpgaController = FpgaController()
-        
+
         self._start_ctxctl()
-        
+                
     def _start_ctxctl(self):
         # Reset cams, srams and model
         self.reset_cams()		
         self.reset_srams()		
-        self.reset_model()		
-        
+        self.reset_model()		        
         self.groups = self.model.get_bias_groups()
         self.virtual_model = self.CtxDynapse.VirtualModel()
         self.virtual_neurons = self.virtual_model.get_neurons()
 
+        #TODO:
+        # Ctxctl wrappers =====================================================
+        self.fpga = CtxctlFPGA(self.CtxDynapse)
+        # self.calbrator = CtxctlCalibrator()    
+        # self.monitor = CtxctlMonitor()
+        
         print(self.__class__.__name__ + ' : Ctxctl initialized!') 
 
     def reset_model(self):		
