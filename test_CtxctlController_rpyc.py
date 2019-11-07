@@ -18,7 +18,7 @@ the unittest.
 """
 
 import unittest
-from cortexcontrol.CtxctlController import CtxctlController
+from ctxctl_contrib.CtxctlController import CtxctlController
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
