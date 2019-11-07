@@ -59,7 +59,7 @@ class CtxctlController(object):
         self._start_ctxctl()
         
     def _start_ctxctl(self):
-        # Reset cams and srams		
+        # Reset cams, srams and model
         self.reset_cams()		
         self.reset_srams()		
         self.reset_model()		
@@ -116,7 +116,8 @@ class CtxctlController(object):
             chip_id (int): chip id
             neuron_id (int): neuron id within the chip [0:1024)
         """
-        print(self.__class__.__name__+ ' : Monitoring neuron ' + str(neuron_id) + ' in chip '+ str(chip_id))
+        print(self.__class__.__name__+ ' : Monitoring neuron ' + str(neuron_id) +\
+              ' in chip '+ str(chip_id))
         self.CtxDynapse.dynapse.monitor_neuron(chip_id,neuron_id)  
         print(self.__class__.__name__+ ' : Check trace on the oscilloscope! ')
         
@@ -127,13 +128,15 @@ class CtxctlController(object):
             neuron_ids (list): list of neuron ids in range [0:1024)
         """ 
         print(self.__class__.__name__+ ' : BufferEventFilter' )
-        self.eventfilter = self.CtxDynapse.BufferedEventFilter(self.model, neuron_ids)        
+        self.eventfilter = self.CtxDynapse.BufferedEventFilter(self.model, 
+                                                               neuron_ids)        
         print(self.__class__.__name__+ ' : done!' )        
         
     def write_sram(self, pre, sy, dy, sx, dx, sram_id=2):
         """ Write SRAM for a list of neurons.
         Args:
-            pre (list): list of neuron ids (in the same chip!) that send out spikes [0:4096]
+            pre (list): list of neuron ids (in the same chip!) that send out 
+            spikes [0:4096]
             sy, dy, sx, dx (int): see 6 bit header below
         NOTE:
             SRAM is a 20 bit string with:
@@ -151,16 +154,17 @@ class CtxctlController(object):
         is used to send spikes to the fpga on the board)
         """
         
-        #TODO: Add wrapper to this to be able to set srams of neurons from multiple chips and multiple cores
+        #TODO: Add wrapper to this to be able to set srams of neurons from multiple 
+        # chips and multiple cores
         print(self.__class__.__name__ + ' : Writing SRAMs')
         chip = np.unique(np.array(pre) // 1024)
-        assert len(chip)==1, "ERROR: This funciton assumes that all pre neurons are in one chip"
+        assert len(chip)==1, "All pre neurons should be in one chip"
         
         print(self.name+'Setting SRAMs of chip '+str(chip[0]))
         self.CtxDynapse.dynapse.set_config_chip_id(chip[0])
 
         pre_core_id = np.unique(np.array(pre) // 256)
-        assert len(pre_core_id)==1, "ERROR: This funciton assumes that all pre neurons are in one core"
+        assert len(pre_core_id)==1, "All pre neurons should be in one core"
         
         for idx_dyn in pre:
             pre_neuron_addr = idx_dyn % 256
@@ -198,7 +202,8 @@ class CtxctlController(object):
                         neuron_pre = self.virtual_neurons[pre_]
                         neuron_pos = self.neurons[post_]
                         syn_type = syn_type
-                        self.connector.add_virtual_connection(neuron_pre,neuron_pos, syn_type)
+                        self.connector.add_virtual_connection(neuron_pre,neuron_pos, 
+                                                              syn_type)
                         self.num_cams_used[post_] += 1
                 print(self.__class__.__name__ + ' : Virtual connection created!')
                 
@@ -207,7 +212,8 @@ class CtxctlController(object):
                 neuron_pos = [self.neurons[idx] for idx in post]
                 for post_ in post:
                     self.num_cams_used[post_] += 1
-                self.connector.add_connection_from_list(neuron_pre, neuron_pos, [syn_type])
+                self.connector.add_connection_from_list(neuron_pre, neuron_pos, 
+                                                        [syn_type])
                 print(self.__class__.__name__ + ' : Onchip connection created!')
                 
             elif connection_type == 'offchip':   
@@ -219,7 +225,8 @@ class CtxctlController(object):
                         pre_id  = pre_id %1024
                         post_id = pos_id %1024
                         cam_id = self.num_cams_used[post_id]   
-                        self.CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id, syn_type)
+                        self.CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id, 
+                                                          syn_type)
                 print(self.__class__.__name__ + ' : Offchip connection created!')
             else:
                 raise ValueError
@@ -299,7 +306,7 @@ class CtxctlController(object):
                     self._c.execute('connector.remove_connection(neuron_pre, neuron_post)')
                 self.num_cams_used[post_] -= 1            
             
-        #TODO : Ask if this is required         # Apply connections to the model:   
+        #TODO : Is this needed?
         self.model.apply_diff_state()
         print(self.__class__.__name__+ ' : done!' )
         
@@ -331,14 +338,7 @@ class CtxctlController(object):
             list_neuron_ids = []
             for nrn in list_neurons_pre:
                 list_neuron_ids.append(nrn.get_neuron_id() + nrn.get_core_id()*256 + nrn.get_chip_id()*1024)
-            weigh_matrix[:, nrn_id_post] = np.bincount(list_neuron_ids, minlength=self.NUM_NEURONS_PER_BOARD) 
+            weigh_matrix[:, nrn_id_post] = np.bincount(list_neuron_ids, 
+                        minlength=self.NUM_NEURONS_PER_BOARD) 
         
         return weigh_matrix
-    
-    def get_rates(self):
-        """ Get rates of specified input neurons.
-        """ 
-        #TODO: Decide wether to have it with continous tracking or with buffer 
-        # event filter.
-        
-        pass
