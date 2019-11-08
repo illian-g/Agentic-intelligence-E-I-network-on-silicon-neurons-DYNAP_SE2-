@@ -6,6 +6,8 @@ Created on Thu Nov  7 17:46:24 2019
 Example for class CtxctlFPGA (backend: rpyc).
 Check the expected stimulus with the oscilloscope.
 
+Run from the cortexcontrol parent folder.
+
 @author: nrisi
 """
 
