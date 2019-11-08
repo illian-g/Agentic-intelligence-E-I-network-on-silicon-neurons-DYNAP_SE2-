@@ -78,7 +78,7 @@ class CtxctlFPGA(object):
         spike_times_us = np.array(spike_times)*1e6
         spike_times_unit_fpga = spike_times_us / unit_fpga
         
-        fpga_isi = np.array([0]+list(np.diff(spike_times_unit_fpga)))
+        fpga_isi = np.array([0]+list(np.diff(spike_times_unit_fpga)), dtype=int)
         fpga_nrn_ids = np.array(neuron_ids)
         fpga_target_chips = np.array(target_chips)
         
