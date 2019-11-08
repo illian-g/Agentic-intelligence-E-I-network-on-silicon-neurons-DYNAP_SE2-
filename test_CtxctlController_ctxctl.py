@@ -5,28 +5,25 @@ Created on Thu Nov  7 14:42:48 2019
 
 Unittest for class CtxctlController (backend: ctxctl).
 
-Run from the parent folder of the cortexcontrol folder.
-
-Files required to run:
-    CtxctlController.py
-Make sure that this file is included in cortexcontrol folder before running.
-
 To run the test open ctxctl gui. 
 And exectute:
-    >>> import test_CtxctlController_ctxctl
-    >>> test = test_CtxctlController_ctxctl.TestCtxctlController()
+    >>> import os
+    >>> os.chdir('..')
+    >>> import ctxctl_contrib.test_CtxctlController_ctxctl as tc
+    >>> os.chdir('./cortexcontrol')
+    >>> test = tc.TestCtxctlController()
     
 @author: nrisi
 """
-from CtxctlController import CtxctlController
-import time
 
-class TestCtxctlController():
+import time
+from ctxctl_contrib.CtxctlController import CtxctlController
+
+class TestCtxctlController(object):
     
     def __init__(self):
         print(self.__class__.__name__ + ' : __init__')
         print(self.__class__.__name__ + ' : Testing backend: ctxctl')
-        
         start = time.time()            
         
         # Test to run:
