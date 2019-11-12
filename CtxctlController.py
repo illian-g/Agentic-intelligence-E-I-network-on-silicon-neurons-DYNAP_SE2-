@@ -9,7 +9,8 @@ ctxctl model and handles the neuron connections.
 @author: nrisi
 """
 import numpy as np    
-            
+from ctxctl_contrib.CtxctlFPGA import CtxctlFPGA
+
 class CtxctlController(object):
     
     def __init__(self, 
@@ -31,9 +32,12 @@ class CtxctlController(object):
         self.path_rec = path_rec
 
         self.NUM_NEURONS_PER_CORE = 256
-        self.NUM_NEURONS_PER_CHIP = 1024
-        self.NUM_NEURONS_PER_BOARD = 4096
-
+        self.NUM_CORES_PER_CHIP = 4
+        self.NUM_CHIPS_PER_BOARD = 4
+        self.NUM_NEURONS_PER_CHIP = self.NUM_NEURONS_PER_CORE*self.NUM_CORES_PER_CHIP 
+        self.NUM_NEURONS_PER_BOARD = self.NUM_NEURONS_PER_CHIP*self.NUM_CHIPS_PER_BOARD
+        self.NUM_CAMS_PER_NEURON = 64
+    
         if self.backend=='rpyc':
             from cortexcontrol.RpycConnector import RpycConnector
             self._c = RpycConnector().get_c()
@@ -53,24 +57,24 @@ class CtxctlController(object):
             self.NeuronNeuronConnector = NeuronNeuronConnector
             self.SynType = self.CtxDynapse.DynapseCamType           
             self.PyCtxUtils = PyCtxUtils 
-        
-        #TODO : Add instantiation of BiasTunter
-        # self.BiasTuner = BiasTuner()            
-        #TODO : Add instantiation of FPGA SpikeGenerator
-        # self.FpgaController = FpgaController()
-        
+
         self._start_ctxctl()
-        
+                
     def _start_ctxctl(self):
         # Reset cams, srams and model
         self.reset_cams()		
         self.reset_srams()		
-        self.reset_model()		
-        
+        self.reset_model()		        
         self.groups = self.model.get_bias_groups()
         self.virtual_model = self.CtxDynapse.VirtualModel()
         self.virtual_neurons = self.virtual_model.get_neurons()
 
+        #TODO:
+        # Ctxctl wrappers =====================================================
+        self.fpga = CtxctlFPGA(self.CtxDynapse)
+        # self.calbrator = CtxctlCalibrator()    
+        # self.monitor = CtxctlMonitor()
+        
         print(self.__class__.__name__ + ' : Ctxctl initialized!') 
 
     def reset_model(self):		
@@ -78,7 +82,7 @@ class CtxctlController(object):
         """		
         self.model = self.CtxDynapse.model		
         self.neurons = self.model.get_shadow_state_neurons()        		
-        self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(4096)}		
+        self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(self.NUM_NEURONS_PER_BOARD)}		
         self.connector = self.NeuronNeuronConnector.DynapseConnector()		
                                 
     def reset_cams(self):
@@ -87,14 +91,14 @@ class CtxctlController(object):
         print(self.__class__.__name__+ ' : Clearing CAMs..')
         
         if self.backend=='ctxctl':
-            for i in range(4):
+            for i in range(self.NUM_CHIPS_PER_BOARD):
                 self.CtxDynapse.dynapse.clear_cam(i)
         elif self.backend=='rpyc':
-            for i in range(4):
+            for i in range(self.NUM_CHIPS_PER_BOARD):
                 self._c.namespace['i']=i
                 self._c.execute('CtxDynapse.dynapse.clear_cam(i)')
         
-        self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(4096)}
+        self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(self.NUM_NEURONS_PER_BOARD)}
         print(self.__class__.__name__+ ' : done!')
                 
     def reset_srams(self):
@@ -103,11 +107,11 @@ class CtxctlController(object):
         print(self.__class__.__name__+ ' : Clearing SRAMs..')
         
         if self.backend=='ctxctl':
-            for i in range(4):
+            for i in range(self.NUM_CHIPS_PER_BOARD):
                 self.CtxDynapse.dynapse.clear_sram(i)
                 
         elif self.backend=='rpyc':
-            for i in range(4):
+            for i in range(self.NUM_CHIPS_PER_BOARD):
                 self._c.namespace['i']=i
                 self._c.execute('CtxDynapse.dynapse.clear_sram(i)')
             
@@ -161,17 +165,17 @@ class CtxctlController(object):
         #TODO: Add wrapper to this to be able to set srams of neurons from multiple 
         # chips and multiple cores
         print(self.__class__.__name__ + ' : Writing SRAMs')
-        chip = np.unique(np.array(pre) // 1024)
+        chip = np.unique(np.array(pre) // self.NUM_NEURONS_PER_CHIP)
         assert len(chip)==1, "All pre neurons should be in one chip"
         
         print(self.name+'Setting SRAMs of chip '+str(chip[0]))
         self.CtxDynapse.dynapse.set_config_chip_id(chip[0])
 
-        pre_core_id = np.unique(np.array(pre) // 256)
+        pre_core_id = np.unique(np.array(pre) // self.NUM_NEURONS_PER_CORE)
         assert len(pre_core_id)==1, "All pre neurons should be in one core"
         
         for idx_dyn in pre:
-            pre_neuron_addr = idx_dyn % 256
+            pre_neuron_addr = idx_dyn % self.NUM_NEURONS_PER_CORE
             core_mask = 15
             self.CtxDynapse.dynapse.write_sram(pre_neuron_addr, sram_id, pre_core_id, sx, 
                                           dx, sy, dy, core_mask)     
@@ -222,12 +226,12 @@ class CtxctlController(object):
                 
             elif connection_type == 'offchip':   
                 for i, (pre_id, pos_id) in enumerate(zip(pre, post)):
-                    targetchip = post[i]//1024  
+                    targetchip = post[i] // self.NUM_NEURONS_PER_CHIP   
                     self.CtxDynapse.dynapse.set_config_chip_id(targetchip)
                     for n_cam in range(syn_weight):
                         self.num_cams_used[pos_id] += 1
-                        pre_id  = pre_id %1024
-                        post_id = pos_id %1024
+                        pre_id  = pre_id % self.NUM_NEURONS_PER_CHIP 
+                        post_id = pos_id % self.NUM_NEURONS_PER_CHIP 
                         cam_id = self.num_cams_used[post_id]   
                         self.CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id, 
                                                           syn_type)
@@ -262,12 +266,12 @@ class CtxctlController(object):
             elif connection_type=='offchip':                 
                 for i, (pre_id, pos_id) in enumerate(zip(pre, post)):
     
-                    self._c.namespace['targetchip'] = post[i]//1024  
+                    self._c.namespace['targetchip'] = post[i] // self.NUM_NEURONS_PER_CHIP   
                     self._c.execute("CtxDynapse.dynapse.set_config_chip_id(targetchip)")
                     for n_cam in range(syn_weight):
                         self.num_cams_used[pos_id] += 1
-                        self._c.namespace['pre_id'] = pre_id %1024
-                        self._c.namespace['pos_id'] = pos_id %1024
+                        self._c.namespace['pre_id'] = pre_id % self.NUM_NEURONS_PER_CHIP 
+                        self._c.namespace['pos_id'] = pos_id % self.NUM_NEURONS_PER_CHIP 
                         self._c.namespace['cam_id'] = self.num_cams_used[pos_id]   
                         self._c.namespace['syn_type'] = syn_type                          
                         self._c.execute("CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id, syn_type)")
@@ -328,21 +332,21 @@ class CtxctlController(object):
         belongs to.
         """
         cams = self.neurons[neuron_id].get_cams()
-        cams_id = [cams[cam_id].get_pre_neuron_id()+256*cams[cam_id].get_pre_neuron_core_id() for cam_id in range(64)]
+        cams_id = [cams[cam_id].get_pre_neuron_id()+self.NUM_NEURONS_PER_CORE*cams[cam_id].get_pre_neuron_core_id() for cam_id in range(self.NUM_CAMS_PER_NEURON)]
         
         return cams_id
     
     def get_connectivity_matrix(self):
         """ Get connectivity board matrix
         """
-        weigh_matrix = np.zeros((self.NUM_NEURONS_PER_BOARD, self.NUM_NEURONS_PER_BOARD))
+        weight_matrix = np.zeros((self.NUM_NEURONS_PER_BOARD, self.NUM_NEURONS_PER_BOARD))
         for key in self.connector.receiving_connections_from.keys():
-            nrn_id_post = key.get_neuron_id() + key.get_core_id()*256 + key.get_chip_id()*1024
+            nrn_id_post = key.get_neuron_id() + key.get_core_id()*self.NUM_NEURONS_PER_CORE + key.get_chip_id()*self.NUM_NEURONS_PER_CHIP 
             list_neurons_pre = self.connector.receiving_connections_from[key]
             list_neuron_ids = []
             for nrn in list_neurons_pre:
-                list_neuron_ids.append(nrn.get_neuron_id() + nrn.get_core_id()*256 + nrn.get_chip_id()*1024)
-            weigh_matrix[:, nrn_id_post] = np.bincount(list_neuron_ids, 
+                list_neuron_ids.append(nrn.get_neuron_id() + nrn.get_core_id()*self.NUM_NEURONS_PER_CORE + nrn.get_chip_id()*self.NUM_NEURONS_PER_CHIP )
+            weight_matrix[:, nrn_id_post] = np.bincount(list_neuron_ids, 
                         minlength=self.NUM_NEURONS_PER_BOARD) 
         
-        return weigh_matrix
+        return weight_matrix

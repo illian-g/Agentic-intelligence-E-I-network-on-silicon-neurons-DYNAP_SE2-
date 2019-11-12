@@ -5,20 +5,13 @@ Created on Sun Nov  3 12:41:13 2019
 
 Unittest for class CtxctlController (backend: rpyc).
 
-Run from the parent folder of the cortexcontrol folder.
+Run from the cortexcontrol parent folder.
 
-Files required to run:
-    CtxctlController.py
-    RpycConnector.py
-    run_rpyc.py
-Make sure that these files are inside the cortexcontrol folder before running
-the unittest.
-    
 @author: nrisi
 """
 
 import unittest
-from cortexcontrol.CtxctlController import CtxctlController
+from ctxctl_contrib.CtxctlController import CtxctlController
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
