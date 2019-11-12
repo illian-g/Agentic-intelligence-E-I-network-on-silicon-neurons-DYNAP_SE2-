@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Nov  7 14:42:48 2019
+
+Unittest for class CtxctlController (backend: ctxctl).
+
+Run from the parent folder of the cortexcontrol folder.
+
+Files required to run:
+    CtxctlController.py
+Make sure that this file is included in cortexcontrol folder before running.
+
+To run the test open ctxctl gui. 
+And exectute:
+    >>> import test_CtxctlController_ctxctl
+    >>> test = test_CtxctlController_ctxctl.TestCtxctlController()
+    
+@author: nrisi
+"""
+from CtxctlController import CtxctlController
+import time
+
+class TestCtxctlController():
+    
+    def __init__(self):
+        print(self.__class__.__name__ + ' : __init__')
+        print(self.__class__.__name__ + ' : Testing backend: ctxctl')
+        
+        start = time.time()            
+        
+        # Test to run:
+        self.test_connect()
+        self.test_remove_connection()
+        
+        end = time.time()    
+        print('Ran 2 tests in {} s'.format(end-start))
+        print('OK')        
+        
+    def test_connect(self):
+        """ Test class function self.connect.
+        Connect two cores and check created connections
+        """
+        print(self.__class__.__name__ + ' : test_connect')
+        cc = CtxctlController(backend='ctxctl')
+        pre = list(range(1,256))
+        post = list(range(257, 512))
+        
+        # Tested function: Create connections
+        # *********************************************************************        
+        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+                   syn_weight=1, 
+                   connection_type='onchip')
+        # *********************************************************************
+        
+        # Check that neuron pre ids are in stored in cams of neuron post
+        cams_id = cc.get_cams(post[0])
+        assert(pre[0] in cams_id), 'Neuron pre not listed in CAMs'
+
+        # Check attribute receiving connection from:
+        assert(cc.neurons[pre[0]] in 
+               cc.connector.receiving_connections_from[cc.neurons[post[0]]]), \
+               'Neuron pre not listed in dictionary of connections'
+        print(self.__class__.__name__ + ' : OK!')
+
+    def test_remove_connection(self):              
+        """ Test class funciton self.remove_connection()
+        """
+        print(self.__class__.__name__ + ' : test_remove_connection')
+        cc = CtxctlController(backend='ctxctl')
+        pre = list(range(1025, 1025+256))
+        post = list(range(1025+256, 1025+512))
+
+        # Make sure that all previous connections have been removed correctly
+        cams_id = cc.get_cams(post[0])
+        assert(not(pre[0] in cams_id)), 'Neuron pre already stored in cams'
+                
+        # Create connections
+        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+                   syn_weight=1, 
+                   connection_type='onchip')
+
+        # Tested function: Remove all connections        
+        # *********************************************************************
+        cc.remove_connection(pre, post)
+        # *********************************************************************
+        
+        # Cehck that neuron pre is no longer listed in neuron post cams
+        cams_id = cc.get_cams(post[0])
+        assert(not(pre[0] in cams_id)), 'Neuron pre not removed from cams'
+        print(self.__class__.__name__ + ' : OK!')        
