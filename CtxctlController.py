@@ -68,8 +68,13 @@ class CtxctlController(object):
         self.groups = self.model.get_bias_groups()
         self.virtual_model = self.CtxDynapse.VirtualModel()
         self.virtual_neurons = self.virtual_model.get_neurons()
-
-        #TODO:
+        
+        # Dictionary to track weight matrices and synapses
+        self.weights_lookup = {}
+        self.synapse_lookup = {}
+        self.is_pre = {}
+        self.is_post = {}
+        
         # Ctxctl wrappers =====================================================
         self.fpga = CtxctlFPGA(self.CtxDynapse)
         # self.calbrator = CtxctlCalibrator()    
@@ -182,7 +187,7 @@ class CtxctlController(object):
         print(self.__class__.__name__ + ' : done!')
         
     
-    def connect(self, pre, post, syn_type, syn_weight=1, connection_type='onchip'):
+    def connect(self, pre, post, syn_type, syn_weight=1, connection_type='onchip', name=None):
         """ Connect neurons from list.
         Args:
             pre                           (list): neuron ids of neurons pre [0:4095)
@@ -199,6 +204,7 @@ class CtxctlController(object):
                                             dynapse board to neurons on an external 
                                             fpga or to connect chips on differernt
                                             boards.)
+            name                           (str): synapse name
         """
         if 0 in pre:
             raise Warning('Avoid using neuron id 0 as neuron pre')
@@ -281,7 +287,10 @@ class CtxctlController(object):
                         
         # Apply connections to the model:   
         self.model.apply_diff_state()
-    
+        
+        # Update dictionary of weight matrices and synapse groups
+        update_connections_lookup(self.weights_lookup, self.synapse_lookup, pre, post, name)
+
     def remove_connection(self, pre, post):
         """ Remove connections from list.
         This funcion expects as many pairs of pre post in the input list as the
@@ -314,7 +323,6 @@ class CtxctlController(object):
                     self._c.execute('connector.remove_connection(neuron_pre, neuron_post)')
                 self.num_cams_used[post_] -= 1            
             
-        #TODO : Is this needed?
         self.model.apply_diff_state()
         print(self.__class__.__name__+ ' : done!' )
         
@@ -350,3 +358,19 @@ class CtxctlController(object):
                         minlength=self.NUM_NEURONS_PER_BOARD) 
         
         return weight_matrix
+
+def update_connections_lookup(dict_weights, dict_synapse, pre, post, synapse_name):
+    """ This updates the dictionary of weights, synapse_gorups and neurons_tags
+    (is_pre, is_post)
+    """
+    # Update dictionary of synapse groups
+    if not(synapse_name in dict_synapse.keys()):
+        dict_synapse[synapse_name] = (pre, post)
+        
+    # Update dictionary of weights
+    for pre_, post_ in zip(pre, post):
+        if (pre_, post_) in dict_weights.keys():
+            dict_weights[(pre_, post_)][1] +=1
+        else:
+            dict_weights[(pre_, post_)] = (synapse_name, 1)
+            
