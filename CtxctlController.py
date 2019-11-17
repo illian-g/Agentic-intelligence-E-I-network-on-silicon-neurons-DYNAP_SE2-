@@ -10,13 +10,14 @@ ctxctl model and handles the neuron connections.
 """
 import numpy as np    
 from ctxctl_contrib.CtxctlFPGA import CtxctlFPGA
+from ctxctl_contrib.CtxctlCalibrator import CtxctlCalib
 
 class CtxctlController(object):
     
     def __init__(self, 
                  backend='rpyc', 
-                 path_biases='',
-                 path_rec='',
+                 path_bias=None,
+                 path_rec=None,
                  verbose=False):
         """ This class is a wrapper around ctxctl functionalities. 
         Args:
@@ -28,7 +29,7 @@ class CtxctlController(object):
         """
         self.verbose = verbose
         self.backend = backend
-        self.path_biases = path_biases
+        self.path_bias = path_bias
         self.path_rec = path_rec
 
         self.NUM_NEURONS_PER_CORE = 256
@@ -45,6 +46,7 @@ class CtxctlController(object):
             self._c.execute("import numpy as np")     
             self.CtxDynapse = self._c.modules.CtxDynapse
             self._c.namespace['CtxDynapse'] = self.CtxDynapse
+            self.CtxCtlTools = self._c.modules.CtxCtlTools
             self.NeuronNeuronConnector = self._c.modules.NeuronNeuronConnector
             self.SynType = self.CtxDynapse.DynapseCamType
             self.PyCtxUtils = self._c.modules.PyCtxUtils
@@ -52,8 +54,11 @@ class CtxctlController(object):
         elif self.backend=='ctxctl':
             import NeuronNeuronConnector 
             import PyCtxUtils
-            import CtxDynapse           
+            import CtxDynapse  
+            import CtxCtlTools
+            self._c = None
             self.CtxDynapse = CtxDynapse
+            self.CtxCtlTools = CtxCtlTools
             self.NeuronNeuronConnector = NeuronNeuronConnector
             self.SynType = self.CtxDynapse.DynapseCamType           
             self.PyCtxUtils = PyCtxUtils 
@@ -68,17 +73,16 @@ class CtxctlController(object):
         self.groups = self.model.get_bias_groups()
         self.virtual_model = self.CtxDynapse.VirtualModel()
         self.virtual_neurons = self.virtual_model.get_neurons()
-        
-        # Dictionary to track weight matrices and synapses
-        self.weights_lookup = {}
-        self.synapse_lookup = {}
-        self.is_pre = {}
-        self.is_post = {}
-        
+                
         # Ctxctl wrappers =====================================================
-        self.fpga = CtxctlFPGA(self.CtxDynapse)
-        # self.calbrator = CtxctlCalibrator()    
-        # self.monitor = CtxctlMonitor()
+        self.fpga      = CtxctlFPGA(self.CtxDynapse)
+        self.calbrator = CtxctlCalib(self.CtxDynapse, 
+                                     self.PyCtxUtils, 
+                                     self.fpga,
+                                     rpyc_conneciton=self._c, 
+                                     path_rec=self.path_rec, 
+                                     path_bias=self.path_bias)    
+        #self.monitor   = CtxctlMonitor()
         
         print(self.__class__.__name__ + ' : Ctxctl initialized!') 
 
@@ -89,7 +93,9 @@ class CtxctlController(object):
         self.neurons = self.model.get_shadow_state_neurons()        		
         self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(self.NUM_NEURONS_PER_BOARD)}		
         self.connector = self.NeuronNeuronConnector.DynapseConnector()		
-                                
+        self.weights_lookup = {}
+        self.synapse_lookup = {}     
+                           
     def reset_cams(self):
         """ Reset all the cams for all the cores.
         """
@@ -144,7 +150,8 @@ class CtxctlController(object):
         self.eventfilter = self.CtxDynapse.BufferedEventFilter(self.model, 
                                                                neuron_ids)        
         print(self.__class__.__name__+ ' : done!' )        
-        
+    
+    #TODO: Remove this    
     def write_sram(self, pre, sy, dy, sx, dx, sram_id=2):
         """ Write SRAM for a list of neurons.
         Args:
