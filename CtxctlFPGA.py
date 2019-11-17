@@ -19,7 +19,7 @@ class CtxctlFPGA(object):
             dynapse              low level class of dynapse
             neurons_pre             (list): list of input neuron ids (in range [0:1023])
         """
-        print(self.__class__.__name__ + ' __init__()')
+        self.name = self.__class__.__name__+' : '
         
         self.dynapse = dynapse
         self.neurons_pre = neurons_pre
@@ -101,16 +101,16 @@ class CtxctlFPGA(object):
         self.spikeGen.set_isi_multiplier(isi_base)
         self.spikeGen.set_repeat_mode(repeat_mode)       
 
-        print(self.__class__.__name__ + ': FpgaSpikeGen set')
-        print(self.__class__.__name__ + ': To start: self.spikeGen.start()')
-        print(self.__class__.__name__ + ': To stop: self.spikeGen.stop()')
+        print(self.__class__.__name__ + ' : FpgaSpikeGen set')
+        print('    To start: self.spikeGen.start()')
+        print('    To stop: self.spikeGen.stop()')
         
     def set_poissGen(self, poisson_rates_hz, neuron_ids, target_chip, reset=True):
         """
         This sets the PoissonGen object.
         Args:
             poisson_rates_hz (list): list of poisson mean firing rate
-            neuron_ids       (list): list of input neuron ids
+            neuron_ids       (list): list of input neuron ids (ids on fpga)
             target_chip       (int): chip id that the PoissonSpikeGen will target
         """
         self.poissGen.set_chip_id(target_chip)  
@@ -130,7 +130,7 @@ class CtxctlFPGA(object):
         for nrn_id, rateHz in zip(neuron_ids, poisson_rates_hz):
             self.poissGen.write_poisson_rate_hz(nrn_id, rateHz)
         
-        print(self.__class__.__name__ + ': PoissonGen set')
-        print(self.__class__.__name__ + ': To start: self.poissGen.start()')            
-        print(self.__class__.__name__ + ': To start: self.poissGen.stop()')       
+        print(self.__class__.__name__ + ' : PoissonGen set')
+        print(self.__class__.__name__ + ' : To start: self.poissGen.start()')            
+        print(self.__class__.__name__ + ' : To start: self.poissGen.stop()')       
         
