@@ -18,6 +18,8 @@ class CtxctlController(object):
                  backend='rpyc', 
                  path_bias=None,
                  path_rec=None,
+                 path_fig=None,
+                 path_calib=None,
                  verbose=False):
         """ This class is a wrapper around ctxctl functionalities. 
         Args:
@@ -29,9 +31,12 @@ class CtxctlController(object):
         """
         self.verbose = verbose
         self.backend = backend
+        
         self.path_bias = path_bias
         self.path_rec = path_rec
-
+        self.path_fig = path_fig
+        self.path_calib = path_calib
+        
         self.NUM_NEURONS_PER_CORE = 256
         self.NUM_CORES_PER_CHIP = 4
         self.NUM_CHIPS_PER_BOARD = 4
@@ -64,24 +69,36 @@ class CtxctlController(object):
             self.PyCtxUtils = PyCtxUtils 
 
         self._start_ctxctl()
-                
-    def _start_ctxctl(self):
-        # Reset cams, srams and model
+        self.syn_type = {'PS_WEIGHT_EXC_F_N' : self.SynType.FAST_EXC,
+                         'PS_WEIGHT_EXC_S_N' : self.SynType.SLOW_EXC,
+                         'PS_WEIGHT_INH_F_N' : self.SynType.FAST_INH,
+                         'PS_WEIGHT_INH_S_N' : self.SynType.SLOW_INH,
+                    }
+        
+    def _reset_ctxctl(self):
+        """ Reset cams, srams and model.
+        """
         self.reset_cams()		
         self.reset_srams()		
-        self.reset_model()		        
+        self.reset_model()		   
+        
+    def _start_ctxctl(self):
+        # Reset cams, srams and model
+        self._reset_ctxctl()
         self.groups = self.model.get_bias_groups()
         self.virtual_model = self.CtxDynapse.VirtualModel()
         self.virtual_neurons = self.virtual_model.get_neurons()
                 
         # Ctxctl wrappers =====================================================
         self.fpga      = CtxctlFPGA(self.CtxDynapse)
-        self.calbrator = CtxctlCalib(self.CtxDynapse, 
+        self.calibrator = CtxctlCalib(self.CtxDynapse, 
                                      self.PyCtxUtils, 
                                      self.fpga,
-                                     rpyc_conneciton=self._c, 
+                                     rpyc_connection=self._c, 
                                      path_rec=self.path_rec, 
-                                     path_bias=self.path_bias)    
+                                     path_bias=self.path_bias, 
+                                     path_fig=self.path_fig,
+                                     path_calib=self.path_calib)    
         #self.monitor   = CtxctlMonitor()
         
         print(self.__class__.__name__ + ' : Ctxctl initialized!') 
