@@ -29,10 +29,10 @@ class TestCtxctlCalbr(unittest.TestCase):
         print(self.__class__.__name__ + ' : test__ffcurve')
         
         cc = CtxctlController(backend='rpyc', 
-                              path_bias='./relationalnet_onchip/biases/',
-                              path_rec='./relationalnet_onchip/rec/')
+                              path_bias='./ctxctl_contrib/',
+                              path_rec='./ctxctl_contrib/')
         # Load biases:
-        cc.calibrator.load_biases('20191105_170010_DYNAPseBiases.py')
+        cc.calibrator.load_biases('example_biases.py')
 
         # Connect neurons to input neurons on FPGA with one to one connections        
         nrn_id_fpga = np.arange(1,256) 
