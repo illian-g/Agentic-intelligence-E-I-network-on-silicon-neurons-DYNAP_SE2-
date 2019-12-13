@@ -32,7 +32,7 @@ class TestCtxctlCalbr(unittest.TestCase):
                               path_bias='./relationalnet_onchip/biases/',
                               path_rec='./relationalnet_onchip/rec/')
         # Load biases:
-        cc.calbrator.load_biases('20191105_170010_DYNAPseBiases.py')
+        cc.calibrator.load_biases('20191105_170010_DYNAPseBiases.py')
 
         # Connect neurons to input neurons on FPGA with one to one connections        
         nrn_id_fpga = np.arange(1,256) 
@@ -50,12 +50,12 @@ class TestCtxctlCalbr(unittest.TestCase):
                    connection_type='virtual')        
         
         # Run ff curve:
-        cc.calbrator.ff_curve(pre, 
+        cc.calibrator.ff_curve(pre, 
                               post, 
                               list_input_frequencies)
         
         if SHOW_PLOTS_IN_TESTS:
-            array_rates = np.loadtxt(cc.path_rec+str(cc.calbrator.creation_time) + '_ffcurve_.txt')
+            array_rates = np.loadtxt(cc.path_rec+str(cc.calibrator.creation_time) + '_ffcurve_.txt')
             plt.figure()
             plt.plot(list_input_frequencies, array_rates, '*')
             plt.xlabel('Input frequency [Hz]')
