@@ -45,8 +45,8 @@ A good, minimal commit has the following characteristics:
 
 How to get started: 
 ---------
--Create a parent folder (e.g. /Repositories/)
--Clone cortexcontrol/ and ctxctl_contrib/ inside the parent folder
--Move RpycConnector.py and run_rpyc.py from the ctxctlcontrib/ to cortexcontrol/
+- Create a parent folder (e.g. /Repositories/)
+- Clone cortexcontrol/ and ctxctl_contrib/ inside the parent folder
+- Move RpycConnector.py and run_rpyc.py from the ctxctlcontrib/ to cortexcontrol/
 
 
