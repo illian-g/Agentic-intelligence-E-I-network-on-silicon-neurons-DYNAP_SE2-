@@ -43,4 +43,10 @@ A good, minimal commit has the following characteristics:
   - It contains only logically related changes in the code. "add something here" and "fix something there" are not good commit messages.
   - Each commit must leave the code in a working state.
 
+How to get started: 
+---------
+-Create a parent folder (e.g. /Repositories/)
+-Clone cortexcontrol/ and ctxctl_contrib/ inside the parent folder
+-Move RpycConnector.py and run_rpyc.py from the ctxctlcontrib/ to cortexcontrol/
+
 
