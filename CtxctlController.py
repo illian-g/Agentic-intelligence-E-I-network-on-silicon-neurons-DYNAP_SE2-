@@ -425,7 +425,6 @@ class CtxctlController(object):
 
     def clash_checker(self, neuron_ids):
         """
-        CAM clash occurs if
         For every neuron, we check the CAMS, and then of those neurons we check the SRAMS
 
         Parameters:
