@@ -47,8 +47,6 @@ class CtxctlController(object):
         if self.backend=='rpyc':
             from cortexcontrol.RpycConnector import RpycConnector
             self._c = RpycConnector().get_c()
-            #self._c.execute("import time")
-            #self._c.execute("import numpy as np")
             self.CtxDynapse = self._c.modules.CtxDynapse
             self._c.namespace['CtxDynapse'] = self.CtxDynapse
             self.CtxCtlTools = self._c.modules.CtxCtlTools
@@ -492,6 +490,11 @@ def update_connections_lookup(dict_weights, dict_synapse, pre, post, synapse_nam
     # Update dictionary of weights
     for pre_, post_ in zip(pre, post):
         if (pre_, post_) in dict_weights.keys():
-            dict_weights[(pre_, post_)][1] +=1
+            try:
+                dict_weights[(pre_, post_)][1] = dict_weights[(pre_, post_)][1] + 1
+            except:
+                print(dict_weights[(pre_, post_)][1])
+                print('Tuple Error!')
+                raise ValueError
         else:
             dict_weights[(pre_, post_)] = (synapse_name, 1)
