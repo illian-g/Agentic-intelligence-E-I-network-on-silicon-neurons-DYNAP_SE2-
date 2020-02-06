@@ -15,8 +15,6 @@ import unittest
 import numpy as np
 from ctxctl_contrib.CtxctlController import CtxctlController
 
-
-
 class TestCtxctlCamclash(unittest.TestCase):
 
     def test___init__(self):
@@ -31,43 +29,41 @@ class TestCtxctlCamclash(unittest.TestCase):
 
         pre= [2, 1026]
         post= [2000, 2000]
-        cc.connect(pre,
-                   post,
-                   syn_type=cc.SynType.FAST_EXC,
-                   syn_weight=1,
-                   connection_type='onchip')
+        cc.connector.connect(pre,
+                       post,
+                       syn_type=cc.SynType.FAST_EXC,
+                       syn_weight=1,
+                       connection_type='onchip')
 
-        c = cc.clash_checker([2000])
+        c = cc.connector.clash_checker([2000])
         self.assertEqual(c,True)
-        cc.remove_connection(pre, post)
+        cc.connector.remove_connection(pre, post)
 
 
         pre= [1]
         post= [1025]
-        cc.connect(pre,
+        cc.connector.connect(pre,
                    post,
                    syn_type=cc.SynType.FAST_EXC,
                    syn_weight=1,
                    connection_type='onchip')
 
-        c = cc.clash_checker([1025])
+        c = cc.connector.clash_checker([1025])
         self.assertEqual(c,True)
-        cc.remove_connection(pre, post)
+        cc.connector.remove_connection(pre, post)
 
 
         pre= [10]
         post= [1022]
-        cc.connect(pre,
+        cc.connector.connect(pre,
                    post,
                    syn_type=cc.SynType.FAST_EXC,
                    syn_weight=1,
                    connection_type='onchip')
 
-        c = cc.clash_checker([1022])
+        c = cc.connector.clash_checker([1022])
         self.assertEqual(c,False)
-        cc.remove_connection(pre, post)
-
-
+        cc.connector.remove_connection(pre, post)
 
 
 if __name__ == '__main__':
