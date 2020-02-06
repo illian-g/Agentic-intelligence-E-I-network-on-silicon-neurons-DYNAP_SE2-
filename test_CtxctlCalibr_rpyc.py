@@ -43,11 +43,11 @@ class TestCtxctlCalbr(unittest.TestCase):
         list_input_frequencies = list(np.linspace(min_freq, max_freq, len(pre)))
         
         # Connect neurons
-        cc.connect(pre, 
-                   post, 
-                   syn_type=cc.SynType.FAST_EXC, 
-                   syn_weight=1, 
-                   connection_type='virtual')        
+        cc.connector.connect(pre, 
+                       post, 
+                       syn_type=cc.SynType.FAST_EXC, 
+                       syn_weight=1, 
+                       connection_type='virtual')        
         
         # Run ff curve:
         cc.calibrator.ff_curve(pre, 
