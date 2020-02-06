@@ -67,7 +67,7 @@ class CtxcctlConnector(object):
                     target_chip, core_mask = self.get_srams(neu)
                     for pos, mask in enumerate((core_mask[1:4])):
                         if mask != 0:
-                            target_cores.append(list(self.core_mask_to_core_number(mask) +\
+                            target_cores.append(list(core_mask_to_core_number(mask) +\
                              (NUM_CORES_PER_CHIP*target_chip[pos+1]))[0])
                             neurons.append(unique_id)
                 compressed = list(zip(neurons, target_cores))
