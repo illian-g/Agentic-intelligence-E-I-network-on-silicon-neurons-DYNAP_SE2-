@@ -10,6 +10,7 @@ inputs from FPGA (Poisson or SpikeGenerator).
 """
 
 import numpy as np
+from ctxctl_contrib.constants import *
 
 class CtxctlFPGA(object):
     
@@ -26,8 +27,7 @@ class CtxctlFPGA(object):
         self.model = self.dynapse.model
         
         # Set FPGA constraints
-        ADDR_NUM_BITS = 15
-        ISI_NUM_BITS = 16
+
         self.max_fpga_len = 2**ADDR_NUM_BITS-1
         self.max_isi = 2**ISI_NUM_BITS-1 
         self.fpgaModules = self.model.get_fpga_modules()

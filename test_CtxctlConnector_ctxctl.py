@@ -9,9 +9,9 @@ To run the test open ctxctl gui.
 And exectute:
     >>> import os
     >>> os.chdir('..')
-    >>> import ctxctl_contrib.test_CtxctlController_ctxctl as tc
+    >>> import ctxctl_contrib.test_CtxctlConnector_ctxctl as tc
     >>> os.chdir('./cortexcontrol')
-    >>> test = tc.TestCtxctlController()
+    >>> test = tc.TestCtxctlConnector()
     
 @author: nrisi
 """
@@ -19,7 +19,7 @@ And exectute:
 import time
 from ctxctl_contrib.CtxctlController import CtxctlController
 
-class TestCtxctlController(object):
+class TestCtxctlConnector(object):
     
     def __init__(self):
         print(self.__class__.__name__ + ' : __init__')
@@ -29,9 +29,10 @@ class TestCtxctlController(object):
         # Test to run:
         self.test_connect()
         self.test_remove_connection()
+        self.test_clash_checker()
         
         end = time.time()    
-        print('Ran 2 tests in {} s'.format(end-start))
+        print('Ran 3 tests in {} s'.format(end-start))
         print('OK')        
         
     def test_connect(self):
@@ -45,18 +46,18 @@ class TestCtxctlController(object):
         
         # Tested function: Create connections
         # *********************************************************************        
-        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
-                   syn_weight=1, 
-                   connection_type='onchip')
+        cc.connector.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+                             syn_weight=1, 
+                             connection_type='onchip')
         # *********************************************************************
         
         # Check that neuron pre ids are in stored in cams of neuron post
-        cams_id = cc.get_cams(post[0])
+        cams_id = cc.connector.get_cams(post[0])
         assert(pre[0] in cams_id), 'Neuron pre not listed in CAMs'
 
         # Check attribute receiving connection from:
         assert(cc.neurons[pre[0]] in 
-               cc.connector.receiving_connections_from[cc.neurons[post[0]]]), \
+               cc.connector.CtxConnector.receiving_connections_from[cc.neurons[post[0]]]), \
                'Neuron pre not listed in dictionary of connections'
         print(self.__class__.__name__ + ' : OK!')
 
@@ -69,20 +70,66 @@ class TestCtxctlController(object):
         post = list(range(1025+256, 1025+512))
 
         # Make sure that all previous connections have been removed correctly
-        cams_id = cc.get_cams(post[0])
+        cams_id = cc.connector.get_cams(post[0])
         assert(not(pre[0] in cams_id)), 'Neuron pre already stored in cams'
                 
         # Create connections
-        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+        cc.connector.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
                    syn_weight=1, 
                    connection_type='onchip')
 
         # Tested function: Remove all connections        
         # *********************************************************************
-        cc.remove_connection(pre, post)
+        cc.connector.remove_connection(pre, post)
         # *********************************************************************
         
         # Cehck that neuron pre is no longer listed in neuron post cams
-        cams_id = cc.get_cams(post[0])
+        cams_id = cc.connector.get_cams(post[0])
         assert(not(pre[0] in cams_id)), 'Neuron pre not removed from cams'
+        print(self.__class__.__name__ + ' : OK!')        
+        
+    def test_clash_checker(self):
+        '''
+        Test clash_checker.
+        '''
+        print(self.__class__.__name__ + ' : test_clash_checker')
+        cc = CtxctlController(backend='ctxctl')
+
+        pre= [2, 1026]
+        post= [2000, 2000]
+        cc.connector.connect(pre,
+                       post,
+                       syn_type=cc.SynType.FAST_EXC,
+                       syn_weight=1,
+                       connection_type='onchip')
+
+        c = cc.connector.clash_checker([2000])
+        assert(c==True)
+        cc.connector.remove_connection(pre, post)
+
+
+        pre= [1]
+        post= [1025]
+        cc.connector.connect(pre,
+                   post,
+                   syn_type=cc.SynType.FAST_EXC,
+                   syn_weight=1,
+                   connection_type='onchip')
+
+        c = cc.connector.clash_checker([1025])
+        assert(c==True)
+        cc.connector.remove_connection(pre, post)
+
+
+        pre= [10]
+        post= [1022]
+        cc.connector.connect(pre,
+                   post,
+                   syn_type=cc.SynType.FAST_EXC,
+                   syn_weight=1,
+                   connection_type='onchip')
+
+        c = cc.connector.clash_checker([1022])
+        assert(c==False)
+        cc.connector.remove_connection(pre, post)
         print(self.__class__.__name__ + ' : OK!')        

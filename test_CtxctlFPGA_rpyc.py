@@ -32,9 +32,9 @@ class TestCtxctlFPGA(unittest.TestCase):
         post = list(range(1, 256))
 
         # Connect neurons to input neurons on FPGA with one to one connections
-        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
-                   syn_weight=1, 
-                   connection_type='virtual')
+        cc.connector.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+                             syn_weight=1, 
+                             connection_type='virtual')
         
         # Load biases
         #TODO: Replace this with functions from calibrator
@@ -92,9 +92,9 @@ class TestCtxctlFPGA(unittest.TestCase):
         post = list(range(256, 256+256))
 
         # Connect neurons to input neurons on FPGA with one to one connections
-        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
-                   syn_weight=1, 
-                   connection_type='virtual')
+        cc.connector.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+                             syn_weight=1, 
+                             connection_type='virtual')
         
         # Load biases
         #TODO: Replace this with functions from calibrator

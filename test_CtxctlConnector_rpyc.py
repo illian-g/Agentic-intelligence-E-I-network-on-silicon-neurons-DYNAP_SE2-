@@ -19,7 +19,7 @@ import os
 
 SHOW_PLOTS_IN_TESTS = True
 
-class TestCtxctlController(unittest.TestCase):
+class TestCtxctlConnector(unittest.TestCase):
     
     def test___init__(self):
         print(self.__class__.__name__ + ' : __init__')
@@ -33,28 +33,27 @@ class TestCtxctlController(unittest.TestCase):
         cc = CtxctlController(backend='rpyc')
         pre = list(range(1,256))
         post = list(range(257, 512))
-        
-        # Tested function: Create connections
-        # *********************************************************************        
-        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
-                   syn_weight=1, 
-                   connection_type='onchip')
+
+        # *********************************************************************     
+        cc.connector.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+                       syn_weight=1, 
+                       connection_type='onchip')
         # *********************************************************************
         
         # Check that neuron pre ids are in stored in cams of neuron post
-        cams_id = cc.get_cams(post[0])
+        cams_id = cc.connector.get_cams(post[0])
         self.assertIn(pre[0],cams_id)
 
         # Check attribute receiving connection from:
         self.assertIn(cc.neurons[pre[0]], 
-                      cc.connector.receiving_connections_from[cc.neurons[post[0]]])
-        
+                      cc.connector.CtxConnector.receiving_connections_from[cc.neurons[post[0]]])
+
         if SHOW_PLOTS_IN_TESTS:
             # Set binary colormap:
             sns.set()
             colors = ((0.0, 0.0, 0.0), (1, 1.0, 1.0))
             cmap = LinearSegmentedColormap.from_list('Custom', colors, len(colors))
-            weight_matrix = cc.get_connectivity_matrix()
+            weight_matrix = cc.connector.get_connectivity_matrix()
             _ = plt.figure()
             ax = sns.heatmap(weight_matrix, cmap=cmap)
             colorbar = ax.collections[0].colorbar
@@ -74,23 +73,67 @@ class TestCtxctlController(unittest.TestCase):
         post = list(range(1025+256, 1025+512))
 
         # Make sure that all previous connections have been removed correctly
-        cams_id = cc.get_cams(post[0])
+        cams_id = cc.connector.get_cams(post[0])
         self.assertNotIn(pre[0],cams_id)
                 
         # Create connections
-        cc.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
-                   syn_weight=1, 
-                   connection_type='onchip')
+        cc.connector.connect(pre, post, syn_type=cc.SynType.FAST_EXC, 
+                          syn_weight=1, 
+                          connection_type='onchip')
 
         # Tested function: Remove all connections        
         # *********************************************************************
-        cc.remove_connection(pre, post)
+        cc.connector.remove_connection(pre, post)
         # *********************************************************************
         
         # Cehck that neuron pre is no longer listed in neuron post cams
-        cams_id = cc.get_cams(post[0])
+        cams_id = cc.connector.get_cams(post[0])
         self.assertNotIn(pre[0],cams_id)
         
+    def test_clash_checker(self):
+        '''
+        Test clash_checker.
+        '''
+        print(self.__class__.__name__ + ' : test_clash_checker')
+        cc = CtxctlController(backend='rpyc')
+
+        pre= [2, 1026]
+        post= [2000, 2000]
+        cc.connector.connect(pre,
+                       post,
+                       syn_type=cc.SynType.FAST_EXC,
+                       syn_weight=1,
+                       connection_type='onchip')
+
+        c = cc.connector.clash_checker([2000])
+        self.assertEqual(c,True)
+        cc.connector.remove_connection(pre, post)
+
+
+        pre= [1]
+        post= [1025]
+        cc.connector.connect(pre,
+                   post,
+                   syn_type=cc.SynType.FAST_EXC,
+                   syn_weight=1,
+                   connection_type='onchip')
+
+        c = cc.connector.clash_checker([1025])
+        self.assertEqual(c,True)
+        cc.connector.remove_connection(pre, post)
+
+
+        pre= [10]
+        post= [1022]
+        cc.connector.connect(pre,
+                   post,
+                   syn_type=cc.SynType.FAST_EXC,
+                   syn_weight=1,
+                   connection_type='onchip')
+
+        c = cc.connector.clash_checker([1022])
+        self.assertEqual(c,False)
+        cc.connector.remove_connection(pre, post)
         
 if __name__ == '__main__':
     os.chdir('./cortexcontrol/')
