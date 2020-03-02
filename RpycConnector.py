@@ -1,3 +1,5 @@
+import rpyc
+
 class RpycConnector(object):
     __c = None
     @staticmethod 
