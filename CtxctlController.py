@@ -137,7 +137,7 @@ class CtxctlController(object):
                                           self.NeuronNeuronConnector,
                                           self.neurons, 
                                           self.virtual_neurons,
-                                          self._c)
+                                          _c=self._c)
         
         #self.monitor   = CtxctlMonitor()
         self.ctxctl_started=True
