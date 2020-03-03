@@ -41,7 +41,7 @@ class CtxctlController(object):
         self.path_calib = path_calib
 
         if self.backend=='rpyc':
-            from RpycConnector import RpycConnector
+            from ctxctl_contrib.RpycConnector import RpycConnector
             self._c = RpycConnector().get_c()
             self.CtxDynapse = self._c.modules.CtxDynapse
             self._c.namespace['CtxDynapse'] = self.CtxDynapse
