@@ -135,7 +135,7 @@ class CtxcctlConnector(object):
                                           dx, sy, dy, core_mask)
         print(self.__class__.__name__ + ' : done!')
         
-    def connect(self, pre, post, syn_type, syn_weight=1, connection_type='onchip', name=None):
+    def connect(self, pre, post, syn_type, syn_weight=1, connection_type='onchip', name=None, verbose=False):
         """ Connect neurons from list.
         Args:
             pre                           (list): neuron ids of neurons pre [0:4095)
@@ -153,7 +153,12 @@ class CtxcctlConnector(object):
                                             fpga or to connect chips on differernt
                                             boards.)
             name                           (str): synapse name
+            verbose                        (bool): if True, a print with the connection 
+                                            created will be shown
         """
+        if verbose:
+            print(self.__class__.__name__ + ' : creating connection ' + name )
+            
         if 0 in pre:
             raise Warning('Avoid using neuron id 0 as neuron pre')
 
@@ -259,7 +264,7 @@ class CtxcctlConnector(object):
         # Update dictionary of weight matrices and synapse groups
         update_connections_lookup(self.weights_lookup, self.synapse_lookup, pre, post, name)
 
-    def remove_connection(self, pre, post):
+    def remove_connection(self, pre, post, verbose=False):
         """ Remove connections from list.
         This funcion expects as many pairs of pre post in the input list as the
         number of connections between pre and post.
@@ -349,12 +354,8 @@ def update_connections_lookup(dict_weights, dict_synapse, pre, post, synapse_nam
     # Update dictionary of weights
     for pre_, post_ in zip(pre, post):
         if (pre_, post_) in dict_weights.keys():
-            try:
-                dict_weights[(pre_, post_)][1] = dict_weights[(pre_, post_)][1] + 1
-            except:
-                print(dict_weights[(pre_, post_)][1])
-                print('Tuple Error!')
-                raise ValueError
+            # Replace dict value with updated tuple
+            dict_weights[(pre_, post_)] = (synapse_name, dict_weights[(pre_, post_)][1] + 1)
         else:
             dict_weights[(pre_, post_)] = (synapse_name, 1)
 
