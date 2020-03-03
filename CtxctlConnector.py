@@ -12,8 +12,7 @@ from ctxctl_contrib.constants import *
 
 class CtxcctlConnector(object):
     
-    def __init__(self, CtxDynapse, CtxConnector, neurons, virtual_neurons, backend, 
-                 _c=None):
+    def __init__(self, CtxDynapse, CtxConnector, neurons, virtual_neurons, _c=None):
         """
         Args:
             CtxDynapse           low level class of dynapse model
@@ -22,7 +21,7 @@ class CtxcctlConnector(object):
             vittual_neurons      Ctxctl virtual neurons
             _c                   (rpyc connection): if backend=ctxctl _c=None (default type)
         """
-        self.name = self.__class__.__name__+' : '
+        self.name = self.__class__.__name__+' : __init__()'
         
         self.CtxDynapse = CtxDynapse
         self.model = self.CtxDynapse.model              
@@ -33,6 +32,7 @@ class CtxcctlConnector(object):
         self._c = _c
         
         self.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(NUM_NEURONS_PER_BOARD)}
+        self.offchip_cams_id = {neuron_id_post : [] for neuron_id_post in range(NUM_NEURONS_PER_BOARD)}
         self.weights_lookup = {}
         self.synapse_lookup = {}
         
@@ -135,7 +135,7 @@ class CtxcctlConnector(object):
                                           dx, sy, dy, core_mask)
         print(self.__class__.__name__ + ' : done!')
         
-    def connect(self, pre, post, syn_type, syn_weight=1, connection_type='onchip', name=None):
+    def connect(self, pre, post, syn_type, syn_weight=1, connection_type='onchip', name=None, verbose=False):
         """ Connect neurons from list.
         Args:
             pre                           (list): neuron ids of neurons pre [0:4095)
@@ -153,7 +153,12 @@ class CtxcctlConnector(object):
                                             fpga or to connect chips on differernt
                                             boards.)
             name                           (str): synapse name
+            verbose                        (bool): if True, a print with the connection 
+                                            created will be shown
         """
+        if verbose:
+            print(self.__class__.__name__ + ' : creating connection ' + name )
+            
         if 0 in pre:
             raise Warning('Avoid using neuron id 0 as neuron pre')
 
@@ -186,13 +191,24 @@ class CtxcctlConnector(object):
 
                     self._c.namespace['targetchip'] = post[i] // NUM_NEURONS_PER_CHIP
                     self._c.execute("CtxDynapse.dynapse.set_config_chip_id(targetchip)")
-                    for n_cam in range(syn_weight):
-                        self.num_cams_used[pos_id] += 1
-                        self._c.namespace['pre_id'] = pre_id % NUM_NEURONS_PER_CHIP
-                        self._c.namespace['pos_id'] = pos_id % NUM_NEURONS_PER_CHIP
-                        self._c.namespace['cam_id'] = self.num_cams_used[pos_id]
+                    for n_cam in range(syn_weight): 
+#                        self._c.namespace['pre_id'] = pre_id % NUM_NEURONS_PER_CHIP
+#                        self._c.namespace['pos_id'] = pos_id % NUM_NEURONS_PER_CHIP
+#                        self._c.namespace['cam_id'] = self.num_cams_used[pos_id]
+#                        self._c.namespace['syn_type'] = syn_type
+#                        self._c.execute("CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id, syn_type)")
+
+                        self._c.namespace['post_cam_id'] = self.neurons[pos_id].get_cams()[self.num_cams_used[pos_id]]
+                        self._c.namespace['pre_neuron_id'] = pre_id % NUM_NEURONS_PER_CORE
+                        self._c.namespace['pre_core_id'] = pre_id // NUM_NEURONS_PER_CORE
+                        self._c.execute("post_cam_id.set_pre_neuron_id(pre_neuron_id)")
+                        self._c.execute("post_cam_id.set_pre_neuron_core_id(pre_core_id)")
                         self._c.namespace['syn_type'] = syn_type
-                        self._c.execute("CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id, syn_type)")
+                        self._c.execute("post_cam_id.set_type(syn_type)")
+                        
+                        self.num_cams_used[pos_id] += 1
+                        self.offchip_cams_id[pos_id].append(pre_id)
+                        
                 print(self.__class__.__name__ + ' : Offchip connection created!')
             else:
                 raise ValueError
@@ -222,12 +238,22 @@ class CtxcctlConnector(object):
                     targetchip = post[i] // NUM_NEURONS_PER_CHIP
                     self.CtxDynapse.dynapse.set_config_chip_id(targetchip)
                     for n_cam in range(syn_weight):
+#                        pre_id  = pre_id % NUM_NEURONS_PER_CHIP
+#                        post_id = pos_id % NUM_NEURONS_PER_CHIP
+#                        cam_id = self.num_cams_used[post_id]
+#                        self.CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id,
+#                                                          syn_type)
+ 
+                        post_cam_id = self.neurons[pos_id].get_cams()[self.num_cams_used[pos_id]]
+                        pre_neuron_id = pre_id % NUM_NEURONS_PER_CORE
+                        pre_core_id = pre_id // NUM_NEURONS_PER_CORE
+                        post_cam_id.set_pre_neuron_id(pre_neuron_id)
+                        post_cam_id.set_pre_neuron_core_id(pre_core_id)
+                        syn_type = syn_type
+                        post_cam_id.set_type(syn_type)
+                        
                         self.num_cams_used[pos_id] += 1
-                        pre_id  = pre_id % NUM_NEURONS_PER_CHIP
-                        post_id = pos_id % NUM_NEURONS_PER_CHIP
-                        cam_id = self.num_cams_used[post_id]
-                        self.CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id,
-                                                          syn_type)
+                        self.offchip_cams_id[pos_id].append(pre_id)
                 print(self.__class__.__name__ + ' : Offchip connection created!')
             else:
                 raise ValueError
@@ -238,7 +264,7 @@ class CtxcctlConnector(object):
         # Update dictionary of weight matrices and synapse groups
         update_connections_lookup(self.weights_lookup, self.synapse_lookup, pre, post, name)
 
-    def remove_connection(self, pre, post):
+    def remove_connection(self, pre, post, verbose=False):
         """ Remove connections from list.
         This funcion expects as many pairs of pre post in the input list as the
         number of connections between pre and post.
@@ -328,12 +354,8 @@ def update_connections_lookup(dict_weights, dict_synapse, pre, post, synapse_nam
     # Update dictionary of weights
     for pre_, post_ in zip(pre, post):
         if (pre_, post_) in dict_weights.keys():
-            try:
-                dict_weights[(pre_, post_)][1] = dict_weights[(pre_, post_)][1] + 1
-            except:
-                print(dict_weights[(pre_, post_)][1])
-                print('Tuple Error!')
-                raise ValueError
+            # Replace dict value with updated tuple
+            dict_weights[(pre_, post_)] = (synapse_name, dict_weights[(pre_, post_)][1] + 1)
         else:
             dict_weights[(pre_, post_)] = (synapse_name, 1)
 
