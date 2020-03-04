@@ -5,7 +5,7 @@ Created on Sun Nov 17 10:30:43 2019
 
 @author: nrisi
 """
-
+from ctxctl_contrib.constants import NUM_NEURONS_PER_CORE, NUM_NEURONS_PER_CHIP
 from datetime import datetime
 import numpy as np
 import time
@@ -62,7 +62,47 @@ class CtxctlCalib(object):
         """ Set fig path
         """ 
         self.path_fig = path_fig
+    
+    def get_hot_nrn_ids(self, core_id):
+        """ Get 'hot' neuron ids in core_id.
+        Args:
+            core_id (int): core id, from 0 to 15
+        Return:
+            hot_nrn_ids (list, int): list of neuron ids firing
+            
+        Use this function to find unexpectdly firing neurons with the
+        currently set biases.
+        See method 'silence_neurons' to silence them.
+        """
+        buf_evt_filter = self.CtxDynapse.BufferedEventFilter(self.CtxDynapse.model, 
+                                                             np.arange(NUM_NEURONS_PER_CORE)+\
+                                                             NUM_NEURONS_PER_CORE*core_id)
+        evts = buf_evt_filter.get_events()
+        time.sleep(5)
+        evts = buf_evt_filter.get_events()
+        buf_evt_filter.clear()
+    
+        hot_nrn_ids = []
+        for evt in evts:
+            global_nrn_id = evt.neuron.get_neuron_id() +\
+                            NUM_NEURONS_PER_CORE*evt.neuron.get_core_id() +\
+                            NUM_NEURONS_PER_CHIP*evt.neuron.get_chip_id()
+            hot_nrn_ids.append(global_nrn_id)
+        hot_nrn_ids = np.unique(hot_nrn_ids)
         
+        return hot_nrn_ids
+            
+    def silence_nrn_ids(self, nrn_ids):
+        """ Silence neuron ids in list by setting them to tau2 and increasing
+        tau2. 
+        Args: 
+            list_nrn_ids (numpy array) : list of neuron ids to be silenced.
+        """
+        for nrn_id in nrn_ids:
+            self.CtxDynapse.dynapse.set_tau_2(nrn_id//NUM_NEURONS_PER_CHIP,
+                                              nrn_id%NUM_NEURONS_PER_CHIP)
+            self.groups[nrn_id//NUM_NEURONS_PER_CORE].set_bias("IF_TAU2_N", 50, 7)
+            
     def set_path_calib(self, path_calib):		
         """ Set calibration path
         """
