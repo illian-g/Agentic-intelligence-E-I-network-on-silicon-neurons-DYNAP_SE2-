@@ -45,8 +45,11 @@ A good, minimal commit has the following characteristics:
 
 How to get started: 
 ---------
-- Create a parent folder (e.g. /Repositories/)
-- Clone cortexcontrol/ and ctxctl_contrib/ inside the parent folder
-- Move RpycConnector.py and run_rpyc.py from the ctxctlcontrib/ to cortexcontrol/
+- Install [`CTXCTL Primer`](http://ai-ctx.gitlab.io/ctxctl/primer.html#).
+- Clone `ctxctl_contrib` inside the parent folder of /cortexcontrol 
+```
+git clone https://code.ini.uzh.ch/ncs/libs/ctxctl_contrib.git
+```
+- Copy `run_rpyc.py` from ctxctl_contrib/ to cortexcontrol/
 
 
