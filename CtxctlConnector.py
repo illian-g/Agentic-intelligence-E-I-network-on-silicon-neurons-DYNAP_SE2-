@@ -8,11 +8,14 @@ Wrapper around NeuronNeuronConnector class
 """
 
 import numpy as np
-from ctxctl_contrib.constants import *
+from ctxctl_contrib.constants import NUM_NEURONS_PER_BOARD, NUM_CORES_PER_CHIP,\
+                                    NUM_NEURONS_PER_CORE, NUM_NEURONS_PER_CHIP, \
+                                    NUM_CAMS_PER_NEURON
 
 class CtxcctlConnector(object):
     
-    def __init__(self, CtxDynapse, CtxConnector, neurons, virtual_neurons, _c=None):
+    def __init__(self, CtxDynapse, CtxConnector, neurons, virtual_neurons, _c=None, 
+                 verbose=False):
         """
         Args:
             CtxDynapse           low level class of dynapse model
@@ -22,7 +25,8 @@ class CtxcctlConnector(object):
             _c                   (rpyc connection): if backend=ctxctl _c=None (default type)
         """
         self.name = self.__class__.__name__+' : __init__()'
-        
+        if verbose:
+            print(self.__class__.__name__+' : __init__()')
         self.CtxDynapse = CtxDynapse
         self.model = self.CtxDynapse.model              
 
@@ -158,6 +162,9 @@ class CtxcctlConnector(object):
         """
         if verbose:
             print(self.__class__.__name__ + ' : creating connection ' + name )
+        if not(name):
+            num_syn_created=len(self.synapse_lookup.keys())
+            name='Connection_'+str(num_syn_created)
             
         if 0 in pre:
             raise Warning('Avoid using neuron id 0 as neuron pre')
@@ -192,12 +199,6 @@ class CtxcctlConnector(object):
                     self._c.namespace['targetchip'] = post[i] // NUM_NEURONS_PER_CHIP
                     self._c.execute("CtxDynapse.dynapse.set_config_chip_id(targetchip)")
                     for n_cam in range(syn_weight): 
-#                        self._c.namespace['pre_id'] = pre_id % NUM_NEURONS_PER_CHIP
-#                        self._c.namespace['pos_id'] = pos_id % NUM_NEURONS_PER_CHIP
-#                        self._c.namespace['cam_id'] = self.num_cams_used[pos_id]
-#                        self._c.namespace['syn_type'] = syn_type
-#                        self._c.execute("CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id, syn_type)")
-
                         self._c.namespace['post_cam_id'] = self.neurons[pos_id].get_cams()[self.num_cams_used[pos_id]]
                         self._c.namespace['pre_neuron_id'] = pre_id % NUM_NEURONS_PER_CORE
                         self._c.namespace['pre_core_id'] = pre_id // NUM_NEURONS_PER_CORE
@@ -238,12 +239,6 @@ class CtxcctlConnector(object):
                     targetchip = post[i] // NUM_NEURONS_PER_CHIP
                     self.CtxDynapse.dynapse.set_config_chip_id(targetchip)
                     for n_cam in range(syn_weight):
-#                        pre_id  = pre_id % NUM_NEURONS_PER_CHIP
-#                        post_id = pos_id % NUM_NEURONS_PER_CHIP
-#                        cam_id = self.num_cams_used[post_id]
-#                        self.CtxDynapse.dynapse.write_cam(pre_id, pos_id, cam_id,
-#                                                          syn_type)
- 
                         post_cam_id = self.neurons[pos_id].get_cams()[self.num_cams_used[pos_id]]
                         pre_neuron_id = pre_id % NUM_NEURONS_PER_CORE
                         pre_core_id = pre_id // NUM_NEURONS_PER_CORE
@@ -262,7 +257,8 @@ class CtxcctlConnector(object):
         self.model.apply_diff_state()
 
         # Update dictionary of weight matrices and synapse groups
-        update_connections_lookup(self.weights_lookup, self.synapse_lookup, pre, post, name)
+        if connection_type=='onchip':
+            update_connections_lookup('connect', self.weights_lookup, self.synapse_lookup, pre, post, name)
 
     def remove_connection(self, pre, post, verbose=False):
         """ Remove connections from list.
@@ -273,9 +269,8 @@ class CtxcctlConnector(object):
             post                          (list): neuron ids of neurons post [0:4095)
             connection_type             (string): 'virtual' or 'onchip' or 'offchip'
         """
-        print(self.__class__.__name__+ ' : Removing connections..' )
         if self._c:
-            self._c.namespace['CtxConnector'] = self.connector
+            self._c.namespace['CtxConnector'] = self.CtxConnector
             for (pre_, post_) in zip(pre, post):
                 self._c.namespace['neuron_post'] = self.neurons[post_]
                 if self.neurons[pre_].is_virtual():
@@ -294,10 +289,22 @@ class CtxcctlConnector(object):
                     self.CtxConnector.remove_connection(self.neurons[pre_],
                                                      self.neurons[post_])
                 self.num_cams_used[post_] -= 1
-        
+               
         self.model.apply_diff_state()
-        print(self.__class__.__name__+ ' : done!' )
-
+        
+        try:
+            # If this runs the connection must be onchip, otherwise it raises an
+            # error since the pairs (pre, post) must be unique to avoid cam clash
+            # And so if there is a pair pre, post it must be onchip and therefore
+            # it can be correctly removed from the dictionary
+            update_connections_lookup('remove', self.weights_lookup, self.synapse_lookup, pre, post)
+        except:
+            # For virtual or offchip connections there is no record kept in the 
+            # dictionary
+            pass
+            
+        print(self.__class__.__name__+ ' : Connection removed!' )        
+        
     def get_cams(self, neuron_id):
         """ Returns the list of cams for the input neuron.
         Args:
@@ -342,23 +349,69 @@ class CtxcctlConnector(object):
         return target_chip, core_mask        
 
 #%% Utils:    
-        
-def update_connections_lookup(dict_weights, dict_synapse, pre, post, synapse_name):
+def update_connections_lookup(action_type, dict_weights, dict_synapse, pre, post, synapse_name=None):
     """ This updates the dictionary of weights, synapse_gorups and neurons_tags
     (is_pre, is_post)
+    Args:
+        action_type (str): 'connect' or 'remove'
+        dict_weights (dict): dictionary with tuple of (pre, post) as keys and 
+                            connection name and weight as values.
+        pre,                     
     """
-    # Update dictionary of synapse groups
-    if not(synapse_name in dict_synapse.keys()):
-        dict_synapse[synapse_name] = (pre, post)
-
-    # Update dictionary of weights
-    for pre_, post_ in zip(pre, post):
-        if (pre_, post_) in dict_weights.keys():
-            # Replace dict value with updated tuple
-            dict_weights[(pre_, post_)] = (synapse_name, dict_weights[(pre_, post_)][1] + 1)
+    if action_type=='connect':
+        # Update dictionary of synapses:
+        if synapse_name not in dict_synapse.keys():
+            dict_synapse[synapse_name]=(pre, post)
         else:
-            dict_weights[(pre_, post_)] = (synapse_name, 1)
+            # append indices to existing synapse type:
+            pre = dict_synapse[synapse_name][0].extend(pre)
+            post = dict_synapse[synapse_name][0].extend(post)
+            dict_synapse[synapse_name] = (pre, post)
+            
+        # Update dictionary of weights
+        for pre_, post_ in zip(pre, post):
+            if (pre_, post_) in dict_weights.keys():
+                # Replace dict value with updated tuple
+                dict_weights[(pre_, post_)] = (synapse_name, dict_weights[(pre_, post_)][1] + 1)
+            else:
+                dict_weights[(pre_, post_)] = (synapse_name, 1)
+    
+    elif action_type=='remove':        
 
+        for pre_, post_ in zip(pre, post):
+            
+            
+            if (pre_, post_) in dict_weights.keys(): # if there is a connection
+                
+                # Get synapse name:
+                synapse_name = dict_weights[(pre_, post_)][0]
+                
+                # Update dictionary of weights: ================================
+                if dict_weights[(pre_, post_)][1]>1:
+                    
+                    # Decrease number of connections
+                    dict_weights[(pre_, post_)] = (synapse_name, dict_weights[(pre_, post_)][1] - 1)
+                    
+                else:
+                    # remove pair pre post from dictionary key:
+                    del dict_weights[(pre_, post_)]
+                # ==============================================================
+                
+                # Update dictionary of synapses: ===============================
+                list_current_pres = dict_synapse[synapse_name][0]
+                list_current_posts = dict_synapse[synapse_name][1]
+                list_current_pres.remove(pre_)
+                list_current_posts.remove(post_)
+                if not( list_current_pres and list_current_posts ): 
+                    del dict_synapse[synapse_name]
+                else:
+                    dict_synapse[synapse_name] = (list_current_pres, list_current_posts)
+                # ==============================================================
+
+            else:
+                # Connection not existing
+                raise ValueError       
+                
 def core_mask_to_core_number(core_mask):
     """
     This function returns the core represented by the binary representation encoded in the SRAMS.

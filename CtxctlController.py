@@ -32,6 +32,8 @@ class CtxctlController(object):
             verbose        (bool): if True more messages will be printed
         """
         self.verbose = verbose
+        if verbose:
+            print(self.__class__.__name__+' : __init__()')
         self.backend = backend
         self.ctxctl_started=False
         
@@ -76,8 +78,8 @@ class CtxctlController(object):
         self.neurons = self.model.get_shadow_state_neurons()
         if self.ctxctl_started:
             self.connector.num_cams_used = {neuron_id_post : 0 for neuron_id_post in range(NUM_NEURONS_PER_BOARD)}
-            self.weights_lookup = {}
-            self.synapse_lookup = {}
+            self.connector.weights_lookup = {}
+            self.connector.synapse_lookup = {}
 
     def reset_cams(self):
         """ Reset all the cams for all the cores.
@@ -91,7 +93,7 @@ class CtxctlController(object):
             for i in range(NUM_CHIPS_PER_BOARD):
                 self._c.namespace['i']=i
                 self._c.execute('CtxDynapse.dynapse.clear_cam(i)')
-
+            
         print(self.__class__.__name__+ ' : done!')
 
     def reset_srams(self):
@@ -107,7 +109,8 @@ class CtxctlController(object):
             for i in range(NUM_CHIPS_PER_BOARD):
                 self._c.namespace['i']=i
                 self._c.execute('CtxDynapse.dynapse.clear_sram(i)')
-                
+        print(self.__class__.__name__+ ' : done!') 
+               
     def _reset_ctxctl(self):
         """ Reset cams, srams and model.
         """
@@ -124,7 +127,8 @@ class CtxctlController(object):
         self.virtual_neurons = self.virtual_model.get_neurons()
         
         # Ctxctl wrappers =====================================================
-        self.fpga      = CtxctlFPGA(self.CtxDynapse)
+        self.fpga      = CtxctlFPGA(self.CtxDynapse,
+                                    verbose=self.verbose)
         self.calibrator = CtxctlCalib(self.CtxDynapse,
                                      self.PyCtxUtils,
                                      self.fpga,
@@ -132,12 +136,14 @@ class CtxctlController(object):
                                      path_rec=self.path_rec,
                                      path_bias=self.path_bias,
                                      path_fig=self.path_fig,
-                                     path_calib=self.path_calib)
+                                     path_calib=self.path_calib, 
+                                     verbose=self.verbose)
         self.connector = CtxcctlConnector(self.CtxDynapse, 
                                           self.NeuronNeuronConnector,
                                           self.neurons, 
                                           self.virtual_neurons,
-                                          _c=self._c)
+                                          _c=self._c, 
+                                          verbose=self.verbose)
         
         #self.monitor   = CtxctlMonitor()
         self.ctxctl_started=True
