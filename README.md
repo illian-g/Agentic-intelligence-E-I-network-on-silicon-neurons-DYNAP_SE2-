@@ -39,17 +39,15 @@ commit:
 Good commit hygiene makes it easier to understand how the code changes over time and fix issues as they appear.
 It also saves time during code review when the development of a feature and the decisions being made are documented in the commit messages instead of being hidden behind a wall of code.
 A good, minimal commit has the following characteristics:
-  - The commit message header succinctly describes the change introduced in the commit. 
+  - The commit message header succinctly describes the change introduced in the commit.
   - It contains only logically related changes in the code. "add something here" and "fix something there" are not good commit messages.
   - Each commit must leave the code in a working state.
 
-How to get started: 
+How to get started:
 ---------
-- Install [`CTXCTL Primer`](http://ai-ctx.gitlab.io/ctxctl/primer.html#).
-- Clone `ctxctl_contrib` inside the parent folder of /cortexcontrol 
+- Install [`CTXCTL Primer`](http://ai-ctx.gitlab.io/ctxctl/primer.html#) into
+- Clone `ctxctl_contrib` inside the parent folder of /cortexcontrol.
 ```
 git clone https://code.ini.uzh.ch/ncs/libs/ctxctl_contrib.git
 ```
-- Copy `run_rpyc.py` from ctxctl_contrib/ to cortexcontrol/
-
-
+- Copy `run_rpyc.py` from `ctxctl_contrib/` to `cortexcontrol/`
