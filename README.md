@@ -47,7 +47,9 @@ How to get started:
 ---------
 - Install [`CTXCTL Primer`](http://ai-ctx.gitlab.io/ctxctl/primer.html#) into
 - Clone `ctxctl_contrib` inside the parent folder of /cortexcontrol.
+
 ```
 git clone https://code.ini.uzh.ch/ncs/libs/ctxctl_contrib.git
 ```
+
 - Copy `run_rpyc.py` from `ctxctl_contrib/` to `cortexcontrol/`
