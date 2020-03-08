@@ -14,14 +14,16 @@ from ctxctl_contrib.constants import *
 
 class CtxctlFPGA(object):
     
-    def __init__(self, dynapse, neurons_pre=[]):
+    def __init__(self, dynapse, neurons_pre=[], verbose=False):
         """
         Args:
             dynapse              low level class of dynapse
             neurons_pre             (list): list of input neuron ids (in range [0:1023])
         """
         self.name = self.__class__.__name__+' : '
-        
+        if verbose:
+            print(self.__class__.__name__+' : __init__()')
+            
         self.dynapse = dynapse
         self.neurons_pre = neurons_pre
         self.model = self.dynapse.model

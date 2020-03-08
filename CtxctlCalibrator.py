@@ -20,14 +20,16 @@ class CtxctlCalib(object):
                  path_bias=None, 
                  path_fig = None,
                  path_calib=None,
-                 save_rec=True):
+                 save_rec=True, 
+                 verbose=False):
         """
         Args:
             CtxDynapse 
             bias_path  (str): path to bias file
         """
         self.name = self.__class__.__name__+' : '
-        
+        if verbose:
+            print(self.__class__.__name__+' : __init__()')
         self.CtxDynapse       = CtxDynapse
         self.PyCtxUtils       = PyCtxUtils
         self.SpikeGen         = SpikeGen
