@@ -120,13 +120,26 @@ class CtxctlCalib(object):
         """
         self.path_rec = path_rec
         
-    def save_biases(self):
+    def save_biases(self, log_file=None):
         """ Save biases to file.
+        Args:
+            log_file (file id): write comment to log file.
         """
         filename = self.path_bias + datetime.now().strftime('%Y%m%d_%H%M%S') + '_DYNAPseBiases.py'
         self.PyCtxUtils.save_biases('../'+filename)
         print(self.name+'Biases saved to ' + filename)
         
+        if log_file:
+            try:
+                timestr = time.strftime("%Y%m%d-%H%M%S")
+                # Write message to log file:
+                log = input('Enter comment: >>')
+                log_file.write(timestr + ': save_biases \n')
+                log_file.write('Log: '+ log + '\n')
+                log_file.close()
+            except:
+                print('Log file not opened')
+            
     def load_biases(self, filename):
         """ Load bias file.
         """
