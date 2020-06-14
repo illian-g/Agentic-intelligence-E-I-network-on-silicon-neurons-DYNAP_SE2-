@@ -56,21 +56,21 @@ class CtxcctlConnector(object):
 
             #chip_id = int(neuron_id / 1024)
             #core_id = int((neuron_id - chip_id * 1024) / 256)
-            dpi_id = neuron_id % 256
+#            dpi_id = neuron_id % 256
             unique_connections = np.trim_zeros(self.get_cams(neuron_id))
 
             for unique_id in unique_connections:
-                possible_cam_clashes = [unique_id, unique_id + 1024, unique_id + 1024 * 2, unique_id + 1024 * 3]
-                if (dpi_id in possible_cam_clashes):
-                    print(self.__class__.__name__ + ' : There could be a clash involving post neuron: {}!'.format(neuron_id))
-                    print(self.__class__.__name__ + ' : Two neurons with the same number but on different chips are connected to each other ')
-                    check = True
+                possible_cam_clashes = [unique_id, unique_id + NUM_NEURONS_PER_CHIP, unique_id + NUM_NEURONS_PER_CHIP * 2, unique_id + NUM_NEURONS_PER_CHIP * 3]
+#                if (dpi_id in possible_cam_clashes):
+#                    print(self.__class__.__name__ + ' : There could be a clash involving post neuron: {}!'.format(neuron_id))
+#                    print(self.__class__.__name__ + ' : Two neurons with the same number but on different chips are connected to each other ')
+#                    check = True
                 neurons = []
                 target_cores = []
                 for neu in possible_cam_clashes:
                     target_chip, core_mask = self.get_srams(neu)
                     for pos, mask in enumerate((core_mask[1:4])):
-                        if mask != 0:
+                        if mask != 0: #one hot: not targeting any core
                             target_cores.append(list(core_mask_to_core_number(mask) +\
                              (NUM_CORES_PER_CHIP*target_chip[pos+1]))[0])
                             neurons.append(unique_id)
@@ -80,6 +80,7 @@ class CtxcctlConnector(object):
                     print(self.__class__.__name__ + " : There could be a clash involving post neuron: {}" .format(neuron_id))
                     print(self.__class__.__name__ + ' : Two neurons with the same number but on different chips are connected to the same neuron')
                     check = True
+                    print(compressed)
 
         return check
         
@@ -252,7 +253,7 @@ class CtxcctlConnector(object):
                 print(self.__class__.__name__ + ' : Offchip connection created!')
             else:
                 raise ValueError
-
+        
         # Apply connections to the model:
         self.model.apply_diff_state()
 
@@ -364,9 +365,9 @@ def update_connections_lookup(action_type, dict_weights, dict_synapse, pre, post
             dict_synapse[synapse_name]=(pre, post)
         else:
             # append indices to existing synapse type:
-            pre = dict_synapse[synapse_name][0].extend(pre)
-            post = dict_synapse[synapse_name][0].extend(post)
-            dict_synapse[synapse_name] = (pre, post)
+            pre_ = dict_synapse[synapse_name][0].extend(pre)
+            post_ = dict_synapse[synapse_name][0].extend(post)
+            dict_synapse[synapse_name] = (pre_, post_)
             
         # Update dictionary of weights
         for pre_, post_ in zip(pre, post):
