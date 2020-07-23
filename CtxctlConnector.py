@@ -39,6 +39,9 @@ class CtxcctlConnector(object):
         self.offchip_cams_id = {neuron_id_post : [] for neuron_id_post in range(NUM_NEURONS_PER_BOARD)}
         self.weights_lookup = {}
         self.synapse_lookup = {}
+        # Array to keep track of neurons fan in and fan out
+        self.fan_in = np.zeros((NUM_NEURONS_PER_BOARD,))
+        self.fan_out = np.zeros((NUM_NEURONS_PER_BOARD,))
         
     def clash_checker(self, neuron_ids):
         """
@@ -99,12 +102,15 @@ class CtxcctlConnector(object):
 
         return weight_matrix
 
-    def write_sram(self, pre, sy, dy, sx, dx, sram_id=2):
+    def write_sram(self, pre, sy, dy, sx, dx, sram_id=2, source_chip=None):
         """ Write SRAM for a list of neurons.
         Args:
             pre (list): list of neuron ids (in the same chip!) that send out
             spikes [0:4096]
             sy, dy, sx, dx (int): see 6 bit header below
+            sram_id
+            source_chip (int): if specified the core_mask is used to encode the
+                                source chip.
         NOTE:
             SRAM is a 20 bit string with:
                 - 10-bit for the tag address
@@ -127,17 +133,31 @@ class CtxcctlConnector(object):
         chip = np.unique(np.array(pre) // NUM_NEURONS_PER_CHIP)
         assert len(chip)==1, "All pre neurons should be in one chip"
 
-        print(self.name+'Setting SRAMs of chip '+str(chip[0]))
-        self.CtxDynapse.dynapse.set_config_chip_id(chip[0])
+        print(self.__class__.__name__ +' : Setting SRAMs of chip '+str(chip[0]))
+#        self.CtxDynapse.dynapse.set_config_chip_id(chip[0])
 
         pre_core_id = np.unique(np.array(pre) // NUM_NEURONS_PER_CORE)
         assert len(pre_core_id)==1, "All pre neurons should be in one core"
 
         for idx_dyn in pre:
-            pre_neuron_addr = idx_dyn % NUM_NEURONS_PER_CORE
-            core_mask = 15
-            self.CtxDynapse.dynapse.write_sram(pre_neuron_addr, sram_id, pre_core_id, sx,
-                                          dx, sy, dy, core_mask)
+#            pre_neuron_addr = idx_dyn % NUM_NEURONS_PER_CORE
+            pre_srams = self.neurons[idx_dyn].get_srams()
+            pre_srams[sram_id].set_virtual_core_id(pre_core_id)
+            pre_srams[sram_id].set_sx(sx)
+            pre_srams[sram_id].set_dx(dx)
+            pre_srams[sram_id].set_sy(sy)
+            pre_srams[sram_id].set_dy(dy)
+            pre_srams[sram_id].set_used(True)
+            # If the source chip is specified, the core_mask is used to encode 
+            # the source chip
+            if not(source_chip==None):
+                # one hot encoding of source chip
+                pre_srams[sram_id].set_core_mask((1<<source_chip)-1) 
+            else:
+                print('None source chip')
+                pre_srams[sram_id].set_core_mask(15)
+        
+        self.model.apply_diff_state()
         print(self.__class__.__name__ + ' : done!')
         
     def connect(self, pre, post, syn_type, syn_weight=1, connection_type='onchip', name=None, verbose=False):
@@ -167,6 +187,19 @@ class CtxcctlConnector(object):
             num_syn_created=len(self.synapse_lookup.keys())
             name='Connection_'+str(num_syn_created)
             
+        # Update neurons fan-in and fan-out:
+        if connection_type=='onchip':
+            for nrn_pre, nrn_post in zip(pre, post):
+                # input on chip
+                self.fan_out[nrn_pre] += 1
+                # output on chip
+                self.fan_in[nrn_post] += 1
+        # If the input neurons are virtual, update only the neuron fan in        
+        if connection_type=='offchip' or connection_type=='virtual':
+            for nrn_pre, nrn_post in zip(pre, post):
+                # output on chip
+                self.fan_in[nrn_post] += 1
+                
         if 0 in pre:
             raise Warning('Avoid using neuron id 0 as neuron pre')
 
