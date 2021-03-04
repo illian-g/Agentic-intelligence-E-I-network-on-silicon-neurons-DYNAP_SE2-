@@ -339,7 +339,7 @@ if __name__ == "__main__":
     newConfig = dyn1.Dynapse1Configuration()
     newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].listen_neuron_id = preVneuron
     newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].listen_core_id = 0
-    newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].syn_type = dyn1.Dynapse1SynType.FAST_EXC
+    newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].syn_type = dyn1.Dynapse1SynType.AMPA
 
     model.apply_configuration(newConfig)
 
@@ -382,7 +382,7 @@ if __name__ == "__main__":
     # newConfig = dyn1.Dynapse1Configuration()
     # newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].listen_neuron_id = preVneuron
     # newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].listen_core_id = 0
-    # newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].syn_type = dyn1.Dynapse1SynType.SLOW_EXC
+    # newConfig.chips[0].cores[0].neurons[postNeuron].synapses[0].syn_type = dyn1.Dynapse1SynType.NMDA
 
     # -------------Set FPGA spikeGen------------
     print("Setting up FPGA spikeGen, 400 spikes in 2 second...")

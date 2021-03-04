@@ -174,14 +174,14 @@ def get_neuron_from_config(config, global_neuron_id):
 
 def gen_synapse_string(synapse):
     syn_type = synapse.syn_type
-    if syn_type == dyn1.Dynapse1SynType.SLOW_EXC:
-        syn_str = "SLOW_EXC"
-    elif syn_type == dyn1.Dynapse1SynType.FAST_EXC:
-        syn_str = "FAST_EXC"
-    elif syn_type == dyn1.Dynapse1SynType.SLOW_INH:
-        syn_str = "SLOW_INH"
-    elif syn_type == dyn1.Dynapse1SynType.FAST_INH:
-        syn_str = "FAST_INH"
+    if syn_type == dyn1.Dynapse1SynType.NMDA:
+        syn_str = "NMDA"
+    elif syn_type == dyn1.Dynapse1SynType.AMPA:
+        syn_str = "AMPA"
+    elif syn_type == dyn1.Dynapse1SynType.GABA_B:
+        syn_str = "GABA_B"
+    elif syn_type == dyn1.Dynapse1SynType.GABA_A:
+        syn_str = "GABA_A"
 
     return "c"+str(synapse.listen_core_id)+\
             "n"+str(synapse.listen_neuron_id)+\

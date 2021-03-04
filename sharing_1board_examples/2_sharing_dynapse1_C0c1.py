@@ -43,12 +43,12 @@ neurons = []
 for nid in neuron_ids:
     neurons.append(Neuron(nid[0],nid[1],nid[2]))
 
-net_gen.add_connection(spikegens[0], neurons[0], dyn1.Dynapse1SynType.FAST_EXC)
-net_gen.add_connection(neurons[0], neurons[1], dyn1.Dynapse1SynType.FAST_EXC)
-net_gen.add_connection(neurons[0], neurons[2], dyn1.Dynapse1SynType.SLOW_EXC)
-net_gen.add_connection(neurons[0], neurons[3], dyn1.Dynapse1SynType.FAST_INH)
-net_gen.add_connection(neurons[1], neurons[4], dyn1.Dynapse1SynType.SLOW_INH)
-net_gen.add_connection(neurons[2], neurons[5], dyn1.Dynapse1SynType.SLOW_INH)
+net_gen.add_connection(spikegens[0], neurons[0], dyn1.Dynapse1SynType.AMPA)
+net_gen.add_connection(neurons[0], neurons[1], dyn1.Dynapse1SynType.AMPA)
+net_gen.add_connection(neurons[0], neurons[2], dyn1.Dynapse1SynType.NMDA)
+net_gen.add_connection(neurons[0], neurons[3], dyn1.Dynapse1SynType.GABA_A)
+net_gen.add_connection(neurons[1], neurons[4], dyn1.Dynapse1SynType.GABA_B)
+net_gen.add_connection(neurons[2], neurons[5], dyn1.Dynapse1SynType.GABA_B)
 
 # print the network so you can double check (optional)
 net_gen.print_network()
