@@ -71,34 +71,44 @@ def open_device(device_name, sender_port, receiver_port):
 
     return samna.device_node, samna_info_dict
 
-def open_dynapse1(device_name):
+def open_dynapse1(device_name, gui=True):
     """
+    open DYNAP-SE1 board with or without GUI.
+
     Attribute:
         device_name: string, name the DYNAP-SE1 board you want to open.
+        gui: if to open the gui or not
+            True: will return store and gui_process
+            False: only return store
     """
     # ports = random.sample(range(10**4, 10**5), k=2)
     # has to be these 2 numbers if you want to run the GUI
     store, samna_info_dict = open_device(device_name, 33336, 33335)
-    visualizer_id = 3
+    
+    if gui:
+        visualizer_id = 3
 
-    # open the gui
-    gui_process, gui_receiving_port = open_gui(store, device_name, visualizer_id)
+        # open the gui
+        gui_process, gui_receiving_port = open_gui(store, device_name, visualizer_id)
 
-    samna_info_dict["gui_receiving_port"] = gui_receiving_port
-    samna_info_dict["gui_node_id"] = visualizer_id
+        samna_info_dict["gui_receiving_port"] = gui_receiving_port
+        samna_info_dict["gui_node_id"] = visualizer_id
+        print("GUI receiving port:", samna_info_dict["gui_receiving_port"])
+        print("GUI node ID:", samna_info_dict["gui_node_id"])
 
     print("Sender port:", samna_info_dict["sender_port"])
     print("Receiver port:", samna_info_dict["receiver_port"])
     print("Opened device name:", samna_info_dict["device_name"])
     print("SamnaNode ID:", samna_info_dict["samna_node_id"])
     print("PythonNode ID:", samna_info_dict["python_node_id"])
-    print("GUI receiving port:", samna_info_dict["gui_receiving_port"])
-    print("GUI node ID:", samna_info_dict["gui_node_id"])
-
+    
     with open('samna_info.json', 'w') as json_file:
         json.dump(samna_info_dict, json_file, indent=4)
 
-    return store, gui_process
+    if gui:
+        return store, gui_process
+    else:
+        return store
 
 def open_gui(store, device_name, visualizer_id=3):
     model = getattr(store, device_name)
@@ -155,8 +165,12 @@ def open_gui(store, device_name, visualizer_id=3):
 
     return gui_process, gui_receiving_port
 
-def close_dynapse1(store, device_name, gui_process):
-    gui_process.join()
+def close_dynapse1(store, device_name, gui_process=''):
+    '''
+    Close DYNAP-SE1 board with or without the GUI.
+    '''
+    if gui_process != '':
+        gui_process.join()
     store.DeviceController.close_device(device_name)
 
 def get_neuron_from_config(config, global_neuron_id):
