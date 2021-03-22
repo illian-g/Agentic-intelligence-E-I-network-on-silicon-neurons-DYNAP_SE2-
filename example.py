@@ -91,8 +91,13 @@ def gen_param_group_1core():
 
 # open DYNAP-SE1 board to get Dynapse1Model
 device_name = "dynapse1"
-# store, gui_process = ut.open_dynapse1(device_name, gui=True)
-store = ut.open_dynapse1(device_name, gui=False)
+
+# open with GUI
+# store, gui_process = ut.open_dynapse1(device_name)
+
+# open without GUI
+store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
+
 model = getattr(store, device_name)
 
 # get Dynapse1 api from the model
@@ -200,5 +205,9 @@ poisson_gen.stop()
 print("Example finished")
 
 # close Dynapse1
+
+# close with GUI
 # ut.close_dynapse1(store, device_name, gui_process)
+
+# close without GUI
 ut.close_dynapse1(store, device_name)

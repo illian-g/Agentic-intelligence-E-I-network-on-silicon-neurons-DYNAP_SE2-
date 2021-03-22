@@ -71,7 +71,7 @@ def open_device(device_name, sender_port, receiver_port):
 
     return samna.device_node, samna_info_dict
 
-def open_dynapse1(device_name, gui=True):
+def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335):
     """
     open DYNAP-SE1 board with or without GUI.
 
@@ -82,8 +82,13 @@ def open_dynapse1(device_name, gui=True):
             False: only return store
     """
     # ports = random.sample(range(10**4, 10**5), k=2)
-    # has to be these 2 numbers if you want to run the GUI
-    store, samna_info_dict = open_device(device_name, 33336, 33335)
+
+    if gui:
+        # has to be these 2 numbers if you want to run the GUI
+        sender_port=33336
+        receiver_port=33335
+    
+    store, samna_info_dict = open_device(device_name, sender_port, receiver_port)
     
     if gui:
         visualizer_id = 3
