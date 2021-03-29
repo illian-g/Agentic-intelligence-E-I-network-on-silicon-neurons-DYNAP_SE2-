@@ -440,7 +440,7 @@ def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_b
     assert len(fpga_isi) < MAX_FPGA_LEN , 'Input stimulus is too long!'
     
     # Set spikeGen:
-    fpga_spike_gen.set_variable_isi(True)
+    fpga_spike_gen.set_variable_isi_mode(True)
     fpga_spike_gen.preload_stimulus(fpga_events)
     fpga_spike_gen.set_isi_multiplier(isi_base)
     fpga_spike_gen.set_repeat_mode(repeat_mode)

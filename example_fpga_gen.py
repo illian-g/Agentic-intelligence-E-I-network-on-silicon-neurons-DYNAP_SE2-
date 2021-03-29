@@ -5,6 +5,7 @@ import Dynapse1Utils as ut
 import NetworkGenerator as n
 from NetworkGenerator import Neuron
 import time
+import numpy as np
 
 def gen_param_group_1core():
     paramGroup = dyn1.Dynapse1ParameterGroup()
@@ -93,10 +94,7 @@ def gen_param_group_1core():
 device_name = "dynapse1"
 
 # open with GUI
-# store, gui_process = ut.open_dynapse1(device_name)
-
-# open without GUI
-store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
+store, gui_process = ut.open_dynapse1(device_name)
 
 model = getattr(store, device_name)
 
@@ -146,12 +144,23 @@ new_config = net_gen.make_dynapse1_configuration()
 model.apply_configuration(new_config)
 # ------------------- build network -------------------
 
-# set up Poisson spike generators
-global_poisson_gen_ids = ut.get_global_id_list(spikegen_ids)
-rate = 200
-poisson_gen = model.get_poisson_gen()
-poisson_gen.set_chip_id(chip)
-poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[0], rate)
+# set up FPGA spike gens
+# only use 1 spikegen
+global_fpga_gen_ids = ut.get_global_id_list(spikegen_ids)
+spikegen_id = global_fpga_gen_ids[0]
+# 400 spikes in 2 second
+spike_times = np.linspace(0, 2, 400)
+# spikegen id list corresponding to spike_times
+indices = [spikegen_id]*len(spike_times)
+
+# the chips where the post neurons are
+target_chips = [chip]*len(indices)
+isi_base = 900
+repeat_mode=True
+
+# set up the fpga_spike_gen
+fpga_spike_gen = model.get_fpga_spike_gen()
+ut.set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_base, repeat_mode)
 
 # check the configuration...
 global_ids = ut.get_global_id_list(neuron_ids)
@@ -171,10 +180,7 @@ for chip in range(4):
     for core in range(4):
         model.update_parameter_group(paramGroup, chip, core)
 
-# start the poisson gen
-# poisson_gen.start()
-
-# remember to start the spikegen
+# start the spikegen
 fpga_spike_gen.start()
 
 # how to get events of selected neurons
@@ -203,14 +209,10 @@ for i in range(3):
 
 graph.stop()
 
-poisson_gen.stop()
+fpga_spike_gen.stop()
 
 print("Example finished")
 
 # close Dynapse1
-
 # close with GUI
-# ut.close_dynapse1(store, device_name, gui_process)
-
-# close without GUI
-ut.close_dynapse1(store, device_name)
+ut.close_dynapse1(store, device_name, gui_process)
