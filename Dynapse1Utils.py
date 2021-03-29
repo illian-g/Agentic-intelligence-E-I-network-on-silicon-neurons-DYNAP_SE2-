@@ -7,6 +7,7 @@ import random
 import time
 import json
 from multiprocessing import Process
+import numpy as np
 
 def free_port():
     """
@@ -374,3 +375,72 @@ def get_time_wrap_events(model):
     graph.add_destination(filter_node_id, sink_node.get_input_channel())
 
     return graph, sink_node
+
+
+def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_base, repeat_mode=False):
+    """
+    Author: Nicoletta Risi. Adapted by Jingyue Zhao.
+
+    This sets the FpgaSpikeGen object.
+    Args:
+        spike_times    (list): list of input spike times, in sec
+        indices     (list): list of FPGA spike generator ids sorted according to 
+                            time of spike
+        target_chip    (list): list of target chip to which each event will be
+                            sent.
+        isi_base        (int): 90 or 900 (See below)
+        repeat_mode    (bool): If repeat is True, the spike generator will 
+                            loop from the beginning when it reaches the end 
+                            of the stimulus.                    
+    This function sets the SpikeGenerator object given a list of spike times, 
+    in sec, correspondent input neuron ids and the target chips, i.e. the
+    chip destination of each input event. 
+    
+    About  **** isi_base ****:
+    Given a list of spike times (in sec) a list of isi (Inter Stimulus Interval) 
+    is generated. Given a list of isi, the resulting list of isi set from the 
+    FPGA will be:
+        isi*unit_fpga
+    with             
+        unit_fpga = isi_base/90 * us    
+        
+    Thus, given a list of spike_times in sec:
+        - first the spike times are converted in us
+        - then a list of isi (in us) is generated
+        - then the list of isi is divided by the unit_fpga (so that the
+            resulting list of isi set on FPGA will have the correct unit
+            given the input isi_base)        
+    E.g.: if isi_base=900 the list of generated isi will be multiplied on
+    FPGA by 900/90 us = 10 us
+    
+    """
+    assert all(np.sort(spike_times)==(spike_times)), 'Spike times must be sorted!'
+    assert(len(indices)==len(spike_times)==len(target_chips)), 'Spike times '+\
+        ' and neuron ids need to have the same length'
+    
+    unit_fpga = isi_base/90 #us
+    spike_times_us = np.array(spike_times)*1e6
+    spike_times_unit_fpga = (spike_times_us / unit_fpga).astype('int')
+    
+    fpga_isi = np.array([0]+list(np.diff(spike_times_unit_fpga)), dtype=int)
+    fpga_nrn_ids = np.array(indices)
+    fpga_target_chips = np.array(target_chips)
+    
+    fpga_events = []
+    for idx_isi, isi in enumerate(fpga_isi):
+        fpga_event = dyn1.FpgaSpikeEvent()
+        fpga_event.core_mask = 15
+        fpga_event.target_chip = fpga_target_chips[idx_isi]
+        fpga_event.neuron_id = fpga_nrn_ids[idx_isi]
+        fpga_event.isi = isi
+        fpga_events.append(fpga_event)
+        
+    assert all(np.asarray(fpga_isi) < MAX_ISI), 'isi is too large for'+\
+            'the specified isi_base!'
+    assert len(fpga_isi) < MAX_FPGA_LEN , 'Input stimulus is too long!'
+    
+    # Set spikeGen:
+    fpga_spike_gen.set_variable_isi(True)
+    fpga_spike_gen.preload_stimulus(fpga_events)
+    fpga_spike_gen.set_isi_multiplier(isi_base)
+    fpga_spike_gen.set_repeat_mode(repeat_mode)
