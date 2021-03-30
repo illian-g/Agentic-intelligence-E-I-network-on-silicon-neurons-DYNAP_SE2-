@@ -1,9 +1,0 @@
-{
-    "sender_port": "tcp://0.0.0.0:33336",
-    "receiver_port": "tcp://0.0.0.0:33335",
-    "samna_node_id": 1,
-    "device_name": "dynapse1",
-    "python_node_id": 2,
-    "gui_receiving_port": "tcp://0.0.0.0:76919",
-    "gui_node_id": 3
-}

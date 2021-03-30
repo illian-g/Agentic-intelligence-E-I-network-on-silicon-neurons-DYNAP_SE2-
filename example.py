@@ -172,10 +172,7 @@ for chip in range(4):
         model.update_parameter_group(paramGroup, chip, core)
 
 # start the poisson gen
-# poisson_gen.start()
-
-# remember to start the spikegen
-fpga_spike_gen.start()
+poisson_gen.start()
 
 # how to get events of selected neurons
 monitored_neurons = global_ids[:1]
