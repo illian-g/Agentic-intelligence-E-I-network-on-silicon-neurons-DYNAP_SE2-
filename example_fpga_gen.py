@@ -205,7 +205,7 @@ for i in range(3):
     print(len(events),"events.")
     # for evt in events:
     #     ut.print_dynapse1_spike(evt)
-    # print("")
+    print("")
 
 graph.stop()
 
