@@ -55,7 +55,7 @@ def open_device(device_name, sender_port, receiver_port):
 
     # let user select a device to open
     for i in range(len(devices)):
-        print("["+str(i)+"]: ", devices[i], " serial number", devices[i].serial_number)
+        print("["+str(i)+"]: ", devices[i], "serial_number", devices[i].serial_number)
 
     idx = input("Select the device you want to open by index: ")
 
