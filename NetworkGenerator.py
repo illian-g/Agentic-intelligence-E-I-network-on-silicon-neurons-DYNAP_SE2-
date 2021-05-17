@@ -56,6 +56,12 @@ class Network:
             right_chips = [1,3]
             if pre.chip_id in left_chips and post.chip_id in right_chips:
                 raise Exception("connections from left chips [0,2] to right chips [1,3] are forbidden!")
+        
+        # Neuron 0 warning. Please avoid neuron 0 of each chip
+        if pre.core_id == 0 and pre.neuron_id == 0:
+            print("WARNING: you are using neuron 0 of chip %i as a pre neuron!" % (pre.chip_id))
+        if post.core_id == 0 and post.neuron_id == 0:
+            print("WARNING: you are using neuron 0 of chip %i as a post neuron!" % (post.chip_id))
 
         post_key = (post.chip_id, post.core_id)
         # check if post neuron already in the dict
