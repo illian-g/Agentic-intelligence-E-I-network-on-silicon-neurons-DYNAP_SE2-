@@ -297,14 +297,23 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
                         if pre_tag_1 in pre_dict_2:
                             # pre neuron info (chip_id, spike_gen) list with the same cam should be exact the same
                             # neurons in the same chip, should same neurons/spikegens! otherwise aliasing!
+                            # check each pre_chip_item of post1, it should be also in that of post2.
+
                             pre_chips_1 = sorted(pre_dict_1[pre_tag_1])
                             pre_chips_2 = sorted(pre_dict_2[pre_tag_1])
-                            if pre_chips_1 != pre_chips_2:
-                                raise Exception("ERROR: aliasing pre neurons exist! Post neurons " \
-                                                +gen_neuron_string(post_neurons[nid_1])+" and " \
-                                                +gen_neuron_string(post_neurons[nid_2]) \
-                                                +" have different pre neurons in different chips but with same (core_id, neuron_id, synapse_type) " \
-                                                +str(pre_tag_1)+".")
+                            for pre_chip in pre_chips_1:
+                                if pre_chip not in pre_chips_2: 
+
+                            # if pre_chips_1 != pre_chips_2:
+                            #     # print('pre_chips_1 %i, pre_chips_2 %i' % (pre_chips_1, pre_chips_2))
+                            #     print('pre_chips_1', pre_chips_1)
+                            #     print('pre_chips_2', pre_chips_2)
+
+                                    raise Exception("ERROR: aliasing pre neurons exist! Post neurons " \
+                                                    +gen_neuron_string(post_neurons[nid_1])+" and " \
+                                                    +gen_neuron_string(post_neurons[nid_2]) \
+                                                    +" have different pre neurons in different chips but with same (core_id, neuron_id, synapse_type) " \
+                                                    +str(pre_tag_1)+".")
         # ----------------------- check aliasing -----------------------
 
     print("Validation complete: the network is good to go!")
