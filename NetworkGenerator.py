@@ -319,7 +319,7 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
                                                     +gen_neuron_string(post_neurons[nid_1])+" and " \
                                                     +gen_neuron_string(post_neurons[nid_2]) \
                                                     +" have different pre neurons in different chips but with same (core_id, neuron_id, synapse_type) " \
-                                                    +str(pre_tag_1)+".")
+                                                    +str(pre_tag_1)+"."+" Possible solution: use different pre neuron ids.")
         # ----------------------- check aliasing -----------------------
 
     print("Validation complete: the network is good to go!")
