@@ -231,6 +231,8 @@ def print_neuron_destinations(neuron, destination_id_list=range(4)):
         print(gen_destination_string(destinations[i]), end = end)
 
 def get_global_id(chip, core, neuron):
+    if (isinstance(chip, int) and isinstance(core, int) and isinstance(neuron, int)) == False:
+        raise Exception("Chip core and neuron IDs should be integer!")
     return neuron+core*NEURONS_PER_CORE+chip*NEURONS_PER_CHIP
 
 def get_global_id_list(tuple_list):
