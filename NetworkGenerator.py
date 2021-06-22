@@ -55,7 +55,8 @@ class Network:
             left_chips = [0,2]
             right_chips = [1,3]
             if pre.chip_id in left_chips and post.chip_id in right_chips:
-                raise Exception("connections from left chips [0,2] to right chips [1,3] are forbidden!")
+                # raise Exception("connections from left chips [0,2] to right chips [1,3] are forbidden!")
+                print("WARNING: you are building connections from left chips [0,2] to right chips [1,3]!")
         
         # Neuron 0 warning. Please avoid neuron 0 of each chip
         if pre.core_id == 0 and pre.neuron_id == 0:
