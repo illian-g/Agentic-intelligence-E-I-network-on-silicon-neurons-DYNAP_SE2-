@@ -131,7 +131,7 @@ class Network:
                             if len(self.post_neuron_dict.keys()) == 0:
                                 print("Network cleared!")
     
-    def add_connections_from_list(self, pre_group, post_group, pre_ids, post_ids, synapse_type):
+    def add_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
         '''
         add multiple connections between 2 neuron groups.
         '''
@@ -141,7 +141,7 @@ class Network:
         for (i, j) in zip(pre_ids, post_ids):
             self.add_connection(pre_group[i], post_group[j], synapse_type)
     
-    def remove_connections_from_list(self, pre_group, post_group, pre_ids, post_ids, synapse_type):
+    def remove_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
         '''
         remove multiple connections between 2 neuron groups.
         '''
@@ -153,7 +153,7 @@ class Network:
 
     def add_connections_from_type(self, pre_group, post_group, synapse_type, conn_type, p=1, rand_seed=None):
         '''
-        add multiple connections between 2 neuron groups.
+        add multiple connections between 2 neuron groups given connectivity type: 'one2one' or 'all2all'.
         '''
         if conn_type == 'one2one':
             assert(len(pre_group)==len(post_group)), 'Pre neuron group '+\
@@ -195,11 +195,11 @@ class NetworkGenerator:
     def remove_connection(self, pre, post, synapse_type):
         self.network.remove_connection(pre, post, synapse_type)
     
-    def add_connections_from_list(self, pre_group, post_group, pre_ids, post_ids, synapse_type):
-        self.network.add_connections_from_list(pre_group, post_group, pre_ids, post_ids, synapse_type)
+    def add_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
+        self.network.add_connections_from_list(pre_group, post_group, synapse_type, pre_ids, post_ids)
     
-    def remove_connections_from_list(self, pre_group, post_group, pre_ids, post_ids, synapse_type):
-        self.network.remove_connections_from_list(pre_group, post_group, pre_ids, post_ids, synapse_type)
+    def remove_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
+        self.network.remove_connections_from_list(pre_group, post_group, synapse_type, pre_ids, post_ids)
     
     def add_connections_from_type(self, pre_group, post_group, synapse_type, conn_type, p=1, rand_seed=None):
         self.network.add_connections_from_type(pre_group, post_group, synapse_type, conn_type, p, rand_seed)
