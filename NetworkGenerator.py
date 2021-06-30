@@ -33,6 +33,55 @@ class Neuron:
         self.is_spike_gen = is_spike_gen
         # (pre.core_id,pre.neuron_id,synapse_type): [(pre.chip_id, pre.is_spike_gen), (pre.chip_id, pre.is_spike_gen),...]
         self.incoming_connections = collections.defaultdict(list)
+    
+    def __repr__(self):
+        if self.is_spike_gen:
+            neur_str = 's'
+        else:
+            neur_str = 'n'
+
+        return f"C{self.chip_id}c{self.core_id}{neur_str}{self.neuron_id}"
+
+class NeuronGroup:
+    """
+    Attributes
+    ------------
+    chip_id : int
+        chip id
+    core_id : int
+        core id 
+    neuron_ids: list[int]
+        list of neuron ids
+    is_spike_gen: bool 
+        if this neuron group is a group of spike generators on the FPGA or silicon neurons on chip.
+    """
+    def __init__(self, chip_id=0, core_id=0, neuron_ids=None, is_spike_gen=False):
+        if is_spike_gen:
+            num_chips = 1
+        else:
+            num_chips = NUM_CHIPS
+
+        # TODO: use try/exception instead of if/else
+        if chip_id >= num_chips or chip_id < 0:
+            raise Exception("chip id invalid!")
+        if core_id >= CORES_PER_CHIP or core_id < 0:
+            raise Exception("core id invalid!")
+        for neuron_id in neuron_ids:
+            if neuron_id == None or neuron_id >= NEURONS_PER_CORE or neuron_id < 0:
+                raise Exception("neuron ids invalid!")
+
+        self.chip_id = chip_id
+        self.core_id = core_id
+        self.neuron_ids = neuron_ids
+        self.is_spike_gen = is_spike_gen
+
+    @property
+    def neurons(self):
+        """neurons getter: return a list of neurons given the current chip/core/neuron ids"""
+        neurons = []
+        for nid in self.neuron_ids:
+            neurons.append(Neuron(self.chip_id,self.core_id,nid,self.is_spike_gen))
+        return neurons
 
 class Network:
     """
@@ -131,7 +180,7 @@ class Network:
                             if len(self.post_neuron_dict.keys()) == 0:
                                 print("Network cleared!")
     
-    def add_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
+    def add_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
         '''
         add multiple connections between 2 neuron groups.
         '''
@@ -139,9 +188,9 @@ class Network:
             ' and post neuron ids need to have the same length'
         
         for (i, j) in zip(pre_ids, post_ids):
-            self.add_connection(pre_group[i], post_group[j], synapse_type)
+            self.add_connection(pre_neurons[i], post_neurons[j], synapse_type)
     
-    def remove_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
+    def remove_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
         '''
         remove multiple connections between 2 neuron groups.
         '''
@@ -149,31 +198,30 @@ class Network:
             ' and post neuron ids need to have the same length'
         
         for (i, j) in zip(pre_ids, post_ids):
-            self.remove_connection(pre_group[i], post_group[j], synapse_type)
+            self.remove_connection(pre_neurons[i], post_neurons[j], synapse_type)
 
-    def add_connections_from_type(self, pre_group, post_group, synapse_type, conn_type, p=1, rand_seed=None):
+    def add_connections_from_type(self, pre_neurons, post_neurons, synapse_type, conn_type, p=1, rand_seed=None):
         '''
         add multiple connections between 2 neuron groups given connectivity type: 'one2one' or 'all2all'.
         '''
         if conn_type == 'one2one':
-            assert(len(pre_group)==len(post_group)), 'Pre neuron group '+\
+            assert(len(pre_neurons)==len(post_neurons)), 'Pre neuron group '+\
             ' and post neuron group need to have the same length for one2one connections'
-            for i in range(len(pre_group)):
-                self.add_connection(pre_group[i], post_group[i], synapse_type)
+            for i in range(len(pre_neurons)):
+                self.add_connection(pre_neurons[i], post_neurons[i], synapse_type)
         elif conn_type == 'all2all':
             random.seed(rand_seed)
 
             all2all_conns = []
-            for pre in range(len(pre_group)):
-                for post in range(len(post_group)):
+            for pre in range(len(pre_neurons)):
+                for post in range(len(post_neurons)):
                     all2all_conns.append((pre, post))
             num_conns = round(len(all2all_conns)*p)
-            print(len(all2all_conns)*p, num_conns)
             random_conns = random.sample(all2all_conns, num_conns)
             for pair in random_conns:
                 pre_id = pair[0]
                 post_id = pair[1]
-                self.add_connection(pre_group[pre_id], post_group[post_id], synapse_type)
+                self.add_connection(pre_neurons[pre_id], post_neurons[post_id], synapse_type)
             
             random.seed(None)
 
@@ -195,14 +243,14 @@ class NetworkGenerator:
     def remove_connection(self, pre, post, synapse_type):
         self.network.remove_connection(pre, post, synapse_type)
     
-    def add_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
-        self.network.add_connections_from_list(pre_group, post_group, synapse_type, pre_ids, post_ids)
+    def add_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
+        self.network.add_connections_from_list(pre_neurons, post_neurons, synapse_type, pre_ids, post_ids)
     
-    def remove_connections_from_list(self, pre_group, post_group, synapse_type, pre_ids, post_ids):
-        self.network.remove_connections_from_list(pre_group, post_group, synapse_type, pre_ids, post_ids)
+    def remove_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
+        self.network.remove_connections_from_list(pre_neurons, post_neurons, synapse_type, pre_ids, post_ids)
     
-    def add_connections_from_type(self, pre_group, post_group, synapse_type, conn_type, p=1, rand_seed=None):
-        self.network.add_connections_from_type(pre_group, post_group, synapse_type, conn_type, p, rand_seed)
+    def add_connections_from_type(self, pre_neurons, post_neurons, synapse_type, conn_type, p=1, rand_seed=None):
+        self.network.add_connections_from_type(pre_neurons, post_neurons, synapse_type, conn_type, p, rand_seed)
 
     def clear_network(self):
         self.network.post_neuron_dict.clear()
