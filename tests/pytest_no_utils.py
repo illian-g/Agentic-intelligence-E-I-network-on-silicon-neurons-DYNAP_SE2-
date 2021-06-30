@@ -11,10 +11,10 @@ import random
 
 def get_filtered_events(filteredSinkNode, selectedNeuronIds):
     t_start = datetime.datetime.now()
-    events = filteredSinkNode.get_buf()
+    events = filteredSinkNode.get_events()
     t_end = datetime.datetime.now()
     elapsed_time_ms = (t_end-t_start).microseconds / 1000
-    # print("--------Filtered sink get_buf takes ", elapsed_time_ms, "ms--------")
+    # print("--------Filtered sink get_events takes ", elapsed_time_ms, "ms--------")
     print("--------Filtered eventVec size: ", len(events),"--------")
 
     if len(events) != 0:
@@ -37,10 +37,10 @@ def get_filtered_events(filteredSinkNode, selectedNeuronIds):
 
 def get_full_events(full_readout_node):
     t_start = datetime.datetime.now()
-    events = full_readout_node.get_buf()
+    events = full_readout_node.get_events()
     t_end = datetime.datetime.now()
     elapsed_time_ms = (t_end-t_start).microseconds / 1000
-    # print("Full sink get_buf takes ", elapsed_time_ms, "ms")
+    # print("Full sink get_events takes ", elapsed_time_ms, "ms")
     print("Full eventVec size: ", len(events))
 
     if len(events) != 0:
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     # start the graph
     dynapse1_graph.start()
 
-    events = full_readout_node.get_buf()
+    events = full_readout_node.get_events()
     print("Full event size: ", len(events))
 
     get_filtered_events(neuron_select_readout_node, [postNeuron])
@@ -317,7 +317,7 @@ if __name__ == "__main__":
 
     print("*****Sleeping*****")
     time.sleep(2)
-    events = full_readout_node.get_buf()
+    events = full_readout_node.get_events()
     print("Full event size: ", len(events))
 
     # set neuron again to test if this works
@@ -350,7 +350,7 @@ if __name__ == "__main__":
     "dest0: ", config.chips[0].cores[0].neurons[postNeuron].destinations[0].target_chip_id,
     config.chips[0].cores[0].neurons[postNeuron].destinations[0].in_use)
 
-    # get_buf again after start poissonGen, should have more spikes.
+    # get_events again after start poissonGen, should have more spikes.
     # print("Before start PoissonGen")
     get_full_events(full_readout_node)
     get_filtered_events(neuron_select_readout_node, [postNeuron])
@@ -497,7 +497,7 @@ if __name__ == "__main__":
     # ---------------------Test stop graph---------------------
     print("Stop filter graph, and clear sinkNode buffer")
     dynapse1_graph.stop()
-    # neuron_select_readout_node.get_buf()
+    # neuron_select_readout_node.get_events()
     get_filtered_events(neuron_select_readout_node, [postNeuron])
     print("******Sleeping for 2 sec*****")
     time.sleep(2)
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     # ---------------------Test stop graph---------------------
     print("Stop filter graph, and clear sinkNode buffer")
     dynapse1_graph.stop()
-    # neuron_select_readout_node.get_buf()
+    # neuron_select_readout_node.get_events()
     get_filtered_events(neuron_select_readout_node, None)
     print("******Sleeping for 2 sec*****")
     time.sleep(2)
@@ -536,7 +536,7 @@ if __name__ == "__main__":
     # ---------------------Test stop graph---------------------
     print("Stop filter graph, and clear sinkNode buffer")
     dynapse1_graph.stop()
-    # neuron_select_readout_node.get_buf()
+    # neuron_select_readout_node.get_events()
     get_filtered_events(neuron_select_readout_node, None)
     print("******Sleeping for 2 sec*****")
     time.sleep(2)

@@ -185,12 +185,12 @@ print("monitored neurons:", monitored_neurons)
 filter_node.set_neurons(monitored_neurons)
 
 # clear the buffer
-sink_node.get_buf()
+sink_node.get_events()
 
 # get spikes every 2 seconds
 for i in range(3):
     time.sleep(2)
-    events = sink_node.get_buf()
+    events = sink_node.get_events()
 
     # process the events
     print(len(events),"events.")

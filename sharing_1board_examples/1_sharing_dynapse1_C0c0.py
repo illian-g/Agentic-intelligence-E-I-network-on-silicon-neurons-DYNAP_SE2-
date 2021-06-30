@@ -94,9 +94,9 @@ poisson_gen.start()
 graph, filter_node, sink_node = ut.create_neuron_select_graph(model, global_ids)
 graph.start()
 while True:
-    sink_node.get_buf()
+    sink_node.get_events()
     time.sleep(2)
-    events = sink_node.get_buf()
+    events = sink_node.get_events()
     print(len(events),"events.")
 graph.stop()
 

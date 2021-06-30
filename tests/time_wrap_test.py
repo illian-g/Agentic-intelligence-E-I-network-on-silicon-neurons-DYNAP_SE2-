@@ -194,13 +194,13 @@ graph_wrap, sink_node_wrap = ut.get_time_wrap_events(model)
 graph_wrap.start()
 
 t0 = time.time()
-sink_node.get_buf() # clear the buffer
+sink_node.get_events() # clear the buffer
 while True:
-    time_wrap_events = sink_node_wrap.get_buf()
+    time_wrap_events = sink_node_wrap.get_events()
     for evt in time_wrap_events:
         print(evt.timestamp)
 
-    spikes = sink_node.get_buf()
+    spikes = sink_node.get_events()
     if len(spikes):
         print("systime sec",int(time.time()-t0), len(spikes),"spikes. Last spike ts:",spikes[-1].timestamp)
     del spikes

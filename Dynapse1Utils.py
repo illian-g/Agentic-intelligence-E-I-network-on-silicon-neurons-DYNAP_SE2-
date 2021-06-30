@@ -327,11 +327,11 @@ def create_neuron_select_graph(model, global_neuron_ids):
         To get events, sink_node.get_events().
         If you graph.stop(), for now the graph actually won't stop, all events are still
         streamed into the buffer of sink_node. This is work in progess.
-        Thus to get events for 1 second, you need to first clear the buffer of sink_node using get_buf().
+        Thus to get events for 1 second, you need to first clear the buffer of sink_node using get_events().
         i.e.,
-        sink_node.get_buf()
+        sink_node.get_events()
         sleep(1)
-        events = sink_node.get_buf()
+        events = sink_node.get_events()
     """
     # create a graph. A graph is a thread.
     graph = samna.graph.EventFilterGraph()
