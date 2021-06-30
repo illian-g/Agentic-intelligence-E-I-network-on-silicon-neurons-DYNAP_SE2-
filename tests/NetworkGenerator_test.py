@@ -43,6 +43,12 @@ class NetworkGeneratorTest(unittest.TestCase):
         print(str(expected_neurons), str(result_neurons))
         self.assertEqual(str(expected_neurons), str(result_neurons))
     
+    def test_add_connections_from_list(self):
+        pass
+
+    def test_add_connections_from_type(self):
+        pass
+    
 if __name__ == "__main__":
     """ execute all tests in module """
     unittest.main()
