@@ -5,7 +5,8 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 from NetworkGenerator import Neuron, NeuronGroup, NetworkGenerator
 
 if __name__ == "__main__":
-    """This is an example of how to use NeuronGroup and add_connections* functions to create network and the corresponding Dynapse1Configuration using NetworkGenerator."""
+    """This is an example of how to use NeuronGroup and add_connections* functions 
+    to create network and the corresponding Dynapse1Configuration using NetworkGenerator."""
     # define 2 neuron groups
     chip1 = 0
     core1 = 0
