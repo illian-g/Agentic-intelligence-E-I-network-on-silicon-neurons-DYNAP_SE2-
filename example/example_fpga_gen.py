@@ -1,11 +1,14 @@
-import samna
-import samna.dynapse1 as dyn1
-from Dynapse1Constants import *
-import Dynapse1Utils as ut
-import NetworkGenerator as n
-from NetworkGenerator import Neuron
 import time
 import numpy as np
+
+import samna
+import samna.dynapse1 as dyn1
+
+import sys
+# Note: change the path to where your lib files are
+sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
+import Dynapse1Utils as ut
+from NetworkGenerator import Neuron, NetworkGenerator
 
 def gen_param_group_1core():
     paramGroup = dyn1.Dynapse1ParameterGroup()
@@ -109,7 +112,7 @@ print("Monitor neuron 123 in chip 1")
 api.monitor_neuron(1, 123)
 
 # ------------------- build network -------------------
-net_gen = n.NetworkGenerator()
+net_gen = NetworkGenerator()
 
 spikegen_ids = [(0,2,50)]
 spikegens = []
@@ -135,7 +138,7 @@ net_gen.add_connection(neurons[1], neurons[4], dyn1.Dynapse1SynType.GABA_B)
 net_gen.add_connection(neurons[2], neurons[5], dyn1.Dynapse1SynType.GABA_B)
 
 # print the network so you can double check (optional)
-net_gen.print_network()
+print(net_gen.network)
 
 # make a dynapse1config using the network
 new_config = net_gen.make_dynapse1_configuration()
