@@ -20,6 +20,9 @@ class NetworkGeneratorTest(unittest.TestCase):
 
         # then
         print(str(expected_neurons), str(result_neurons))
+
+        # assert(expected_neurons == result_neurons)
+        self.assertEqual(repr(expected_neurons), repr(result_neurons))
         self.assertEqual(str(expected_neurons), str(result_neurons))
 
         # TODO: how to add self-defined == for a class? then assertEqual can be used?..  not only through __repr__(), right?

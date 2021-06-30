@@ -95,6 +95,28 @@ class Network:
         # only track onchip post neurons
         # all connection info already stored in post_neuron.incoming_connections
         self.post_neuron_dict = collections.defaultdict(list)
+    
+    def __repr__(self):
+        """Create offical string for class Network. print(Network), str(Network) can be used."""
+        
+        if len(self.post_neuron_dict.keys()) == 0:
+            return f"The network is empty!"
+        else:
+            line0 = "Post neuron (ChipId,coreId,neuronId): incoming connections [(preNeuron,synapseType), ...]\n"
+
+            result_str = line0            
+
+            dictionary_items = self.post_neuron_dict.items()
+            sorted_items = sorted(dictionary_items)
+            for item in sorted_items:
+                post_neurons = item[1]
+                for post in post_neurons:
+                    incoming_connections_list, incoming_connections_str_list = \
+                        convert_incoming_conns_dict2list(post.incoming_connections)
+                    result_str += str(post) +': ' + str(incoming_connections_str_list) + '\n'
+            
+            return f"{result_str}"
+
 
     def add_connection(self, pre, post, synapse_type):
         if post.is_spike_gen:
@@ -256,7 +278,10 @@ class NetworkGenerator:
         self.network.post_neuron_dict.clear()
 
     def print_network(self):
-        print_post_neuron_dict(self.network.post_neuron_dict)
+        print("Warning: print_network is deprecated and will be removed in a future release, use print(NetworkGenerator.network). Note: str(NetworkGenerator.network) gives you the string format of a network.")
+
+        # print_post_neuron_dict(self.network.post_neuron_dict)
+        print(self.network)
 
     def make_dynapse1_configuration(self):
         '''
@@ -370,13 +395,13 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
                 all_pre_same_weight = all(elem == weight_list[0] for elem in weight_list)
 
                 if not all_pre_same_weight:
-                    raise Exception("ERROR: aliasing pre neurons exist! Post neuron "+gen_neuron_string(post)+ \
+                    raise Exception("ERROR: aliasing pre neurons exist! Post neuron "+repr(post)+ \
                                     " has pre neurons with same (core_id, neuron_id, synapse_type) " \
                                     +str(pre_tag)+" in different chips. The (pre, post) connections have different weights, which cannot be implemented on chip!")
                 weight = weight_list[0]
                 # pre neurons with same (core_id, neuron_id, synapse_type) will reuse the same cam of the post neuron
                 if len(pre_weight_dict.keys()) > 1:
-                    print("WARNING: post neuron "+gen_neuron_string(post)+ \
+                    print("WARNING: post neuron "+repr(post)+ \
                         " may have aliasing pre neurons or spike generators with same (core_id, neuron_id, synapse_type) " \
                         +str(pre_tag)+" but in different chips! The (pre, post) connections share weight = "+str(weight)+".")
 
@@ -387,7 +412,7 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
                     large_conn_weight_dict[(pre_tag, post)] = weight
 
             if num_cams > max_num_cams:
-                raise Exception("ERROR: post neuron "+gen_neuron_string(post)+" has too many pre neurons or spike generators!")
+                raise Exception("ERROR: post neuron "+repr(post)+" has too many pre neurons or spike generators!")
         # ----------------------- check cams of all post neurons -----------------------
 
         # ----------------------- check aliasing -----------------------
@@ -421,8 +446,8 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
                             #     print('pre_chips_2', pre_chips_2)
 
                                     raise Exception("ERROR: aliasing pre neurons exist! Post neurons " \
-                                                    +gen_neuron_string(post_neurons[nid_1])+" and " \
-                                                    +gen_neuron_string(post_neurons[nid_2]) \
+                                                    +repr(post_neurons[nid_1])+" and " \
+                                                    +repr(post_neurons[nid_2]) \
                                                     +" have different pre neurons in different chips but with same (core_id, neuron_id, synapse_type) " \
                                                     +str(pre_tag_1)+"."+" Possible solution: use different pre neuron ids.")
         # ----------------------- check aliasing -----------------------
@@ -508,7 +533,7 @@ def print_post_neuron_dict(post_neuron_dict):
             for post in post_neurons:
                 incoming_connections_list, incoming_connections_str_list = \
                     convert_incoming_conns_dict2list(post.incoming_connections)
-                print(gen_neuron_string(post)+":", incoming_connections_str_list)
+                print(post+":", incoming_connections_str_list)
 
 def convert_incoming_conns_dict2list(incoming_connections_dict):
     """
@@ -539,19 +564,23 @@ def convert_incoming_conns_dict2list(incoming_connections_dict):
             is_spike_gen = pre_neuron[1]
             pre_neuron = Neuron(chip,core,neuron,is_spike_gen)
             incoming_connections_list.append((pre_neuron,syn_type))
-            incoming_connections_str_list.append((gen_neuron_string(pre_neuron),syn_str))
+            incoming_connections_str_list.append((repr(pre_neuron),syn_str))
 
     return incoming_connections_list, incoming_connections_str_list
 
 def gen_neuron_string(neuron):
-    if neuron.is_spike_gen:
-        return ("C"+str(neuron.chip_id)
-            +"c"+str(neuron.core_id)
-            +"s"+str(neuron.neuron_id))
-    else:
-        return ("C"+str(neuron.chip_id)
-                +"c"+str(neuron.core_id)
-                +"n"+str(neuron.neuron_id))
+    print("Warning: gen_neuron_string is deprecated and will be removed in a future release, use str(Neuron) instead.")
+
+    # if neuron.is_spike_gen:
+    #     return ("C"+str(neuron.chip_id)
+    #         +"c"+str(neuron.core_id)
+    #         +"s"+str(neuron.neuron_id))
+    # else:
+    #     return ("C"+str(neuron.chip_id)
+    #             +"c"+str(neuron.core_id)
+    #             +"n"+str(neuron.neuron_id))
+
+    return str(neuron)
 
 def is_same_neuron(neuron1, neuron2):
     if neuron1.chip_id == neuron2.chip_id and\
