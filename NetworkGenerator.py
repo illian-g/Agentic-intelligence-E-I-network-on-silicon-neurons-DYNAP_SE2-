@@ -69,6 +69,12 @@ class NeuronGroup:
         for neuron_id in neuron_ids:
             if neuron_id == None or neuron_id >= NEURONS_PER_CORE or neuron_id < 0:
                 raise Exception("neuron ids invalid!")
+        
+        # check if you use neuron0 of a chip
+        if core_id == 0:
+            for nid in neuron_ids:
+                if nid == 0:
+                    print("WARNING: be careful, you are using neuron 0 from a chip to construct a neuron group!")
 
         self.chip_id = chip_id
         self.core_id = core_id
