@@ -1,6 +1,6 @@
 import samna.dynapse1 as dyn1
 import Dynapse1Utils as ut
-from Dynapse1Constants import *
+from Dynapse1Constants import NUM_CHIPS, CORES_PER_CHIP, NEURONS_PER_CORE, MAX_NUM_CAMS, NEURONS_PER_CHIP
 import collections
 from collections import Counter
 import random
