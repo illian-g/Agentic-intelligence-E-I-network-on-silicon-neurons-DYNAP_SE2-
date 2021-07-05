@@ -10,7 +10,7 @@ class Neuron:
     Attribute:
         chip_id, core_id, neuron_id: int
         is_spike_gen: bool, if this neuron is a spike generator on the FPGA or a physical neuron on chip.
-        incoming_connections: a dictionarty which stores the incoming_connections.
+        incoming_connections: a dictionarty which stores the incoming_connections. Only starts to play a role after add_connection(pre, neuron).
             key: tuple, (pre.core_id,pre.neuron_id,synapse_type).
                 Corresponds to cam. Divide the connections by its cam value for cam reuse.
             value: list, [(pre.chip_id, pre.is_spike_gen), (pre.chip_id, pre.is_spike_gen),...].
@@ -41,6 +41,33 @@ class Neuron:
             neur_str = 'n'
 
         return f"C{self.chip_id}c{self.core_id}{neur_str}{self.neuron_id}"
+    
+    def __eq__(self, other):
+        """Only compares the ids. Consider a neuron as an individual neuron without any external connections (i.e. not in a Network)"""
+        eq_flag1 = self.chip_id == other.chip_id and \
+            self.core_id == other.core_id and \
+            self.neuron_id == other.neuron_id and \
+            self.is_spike_gen == other.is_spike_gen
+        
+        eq_flag2 = True
+        for key in self.incoming_connections:
+            eq_flag2 = eq_flag2 and (sorted(self.incoming_connections[key]) == sorted(other.incoming_connections[key]))
+
+        return eq_flag1 and eq_flag2
+    
+    def __lt__(self, other):
+        """	To get called on comparison using < operator. For sorting."""
+        flag = False
+        if self.chip_id < other.chip_id:
+            flag = True
+        elif self.chip_id == other.chip_id:
+            if self.core_id < other.core_id:
+                flag = True
+            elif self.core_id == other.core_id:
+                if self.neuron_id < other.neuron_id:
+                    flag = True
+        
+        return flag
 
 class NeuronGroup:
     """
@@ -61,7 +88,6 @@ class NeuronGroup:
         else:
             num_chips = NUM_CHIPS
 
-        # TODO: use try/exception instead of if/else
         if chip_id >= num_chips or chip_id < 0:
             raise Exception("chip id invalid!")
         if core_id >= CORES_PER_CHIP or core_id < 0:
@@ -88,6 +114,79 @@ class NeuronGroup:
         for nid in self.neuron_ids:
             neurons.append(Neuron(self.chip_id,self.core_id,nid,self.is_spike_gen))
         return neurons
+    
+    def __eq__(self, other):
+        """Only compares the ids. Consider a neuron group as an individual group without any external connections (i.e. not in a Network)"""
+        return self.chip_id == other.chip_id and \
+            self.core_id == other.core_id and \
+            self.neuron_ids == other.neuron_ids and \
+            self.is_spike_gen == other.is_spike_gen
+        
+
+class Synapses:
+    """
+    Connections from a pre NeuronGroup to a post NeuronGroup. Stores the information of the connectivity.
+    """
+    def __init__(self, pre_group, post_group, synapse_type, pre_list=None, post_list=None, conn_type=None, p=None, rand_seed=None):
+        self.pre = pre_group
+        self.post = post_group
+        self.synapse_type = synapse_type
+        
+        # if specify the conn_type, check 
+        # 1) if the type is valid 2) if pre_list and post_list are None
+        if conn_type != None:
+            if conn_type not in ['one2one', 'all2all']:
+                raise Exception('Invalid connection type!')
+            if (pre_list == None and post_list == None) == False:
+                raise Exception('pre_list and post_list cannot be specified given connection type {conn_type}!')
+            
+            if conn_type == 'all2all':
+                if p == None:
+                    p = 1
+                    print('all2all connections with propability p=1 will be created!')
+
+            self.conn_type = conn_type
+            self.p = p
+            self.rand_seed = rand_seed
+            self.pre_list = None
+            self.post_list = None
+        
+        else:
+            if pre_list == None or post_list == None:
+                raise Exception('pre_list and post_list must be given!')
+
+            self.pre_list = pre_list
+            self.post_list = post_list
+            self.conn_type = None
+            self.p = None
+            self.rand_seed = None
+
+class WTA_connections:
+    """Define WTA EE EI IE connections of for an EXC and an INH population"""
+    def __init__(self, exc_group, inh_group, syn_type_ei, syn_type_ie, syn_type_ee=None, p_ei=1, p_ie=1, ee_pres=None, ee_posts=None, rand_seed=None):
+        self.ei = Synapses(exc_group, inh_group, syn_type_ei, conn_type='all2all', p=p_ei, rand_seed=rand_seed)
+        self.ie = Synapses(inh_group, exc_group, syn_type_ie, conn_type='all2all', p=p_ie, rand_seed=rand_seed)
+
+        if syn_type_ee != None:
+            if ee_pres == None or ee_posts == None:
+                raise Exception('ee_pres and ee_posts must be given to create EE connections')
+            self.ee = Synapses(exc_group, exc_group, syn_type_ee, pre_list=ee_pres, post_list=ee_posts)
+        else:
+            self.ee = None
+
+def add_synapses(netgen, synapse):
+    """Add a synapse group into a network generator"""
+    if synapse.conn_type != None:
+        netgen.add_connections_from_type(synapse.pre, synapse.post, synapse.synapse_type, conn_type=synapse.conn_type, p=synapse.p, rand_seed=synapse.rand_seed)
+    else:
+        netgen.add_connections_from_list(synapse.pre, synapse.post, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
+
+def add_wta_conns(netgen, wta_conns):
+    """Add WTA connections for a WTA into a network generator"""
+    add_synapses(netgen, wta_conns.ei)
+    add_synapses(netgen, wta_conns.ie)
+    if wta_conns.ee !=None:
+        add_synapses(netgen, wta_conns.ee)
 
 class Network:
     """
@@ -103,7 +202,7 @@ class Network:
         self.post_neuron_dict = collections.defaultdict(list)
     
     def __repr__(self):
-        """Create offical string for class Network. print(Network), str(Network) can be used."""
+        """Create official string for class Network. print(Network), str(Network) can be used."""
         
         if len(self.post_neuron_dict.keys()) == 0:
             return f"The network is empty!"
@@ -122,7 +221,14 @@ class Network:
                     result_str += str(post) +': ' + str(incoming_connections_str_list) + '\n'
             
             return f"{result_str}"
+    
+    def __eq__(self, other):
+        """Compare 2 networks."""
+        eq_flag = True
+        for key in self.post_neuron_dict:
+            eq_flag = eq_flag and (sorted(self.post_neuron_dict[key]) == sorted(other.post_neuron_dict[key]))
 
+        return eq_flag
 
     def add_connection(self, pre, post, synapse_type):
         if post.is_spike_gen:
