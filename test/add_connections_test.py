@@ -4,19 +4,19 @@ import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 from io import StringIO
 import samna.dynapse1 as dyn1
-from NetworkGenerator import Neuron, Synapses, Network, WTA_connections, NetworkGenerator, add_synapses, add_wta_conns 
+from NetworkGenerator import Neuron, NeuronGroup, Synapses, Network, WTA_connections, NetworkGenerator, add_synapses, add_wta_conns 
 
 class AddConnectionsTest(unittest.TestCase):
     """Assume that the neuron-level things work, test the neuron group, synapses, wta, add_connections."""
     
-    pre_group = [Neuron(1,0,36), Neuron(3,2,60)]
-    post_group = [Neuron(1,1,60), Neuron(1,1,107)]
+    pre_group = NeuronGroup(1, 0, [36, 60])
+    post_group = NeuronGroup(3, 1, [153, 78])
 
     def test_add_synapses_one2one(self):
         # given
         expected_netgen = NetworkGenerator()
-        expected_netgen.add_connection(self.pre_group[0], self.post_group[0], dyn1.Dynapse1SynType.AMPA)
-        expected_netgen.add_connection(self.pre_group[1], self.post_group[1], dyn1.Dynapse1SynType.AMPA)
+        expected_netgen.add_connection(self.pre_group.neurons[0], self.post_group.neurons[0], dyn1.Dynapse1SynType.AMPA)
+        expected_netgen.add_connection(self.pre_group.neurons[1], self.post_group.neurons[1], dyn1.Dynapse1SynType.AMPA)
 
         # when
         result_netgen = NetworkGenerator()
@@ -29,13 +29,13 @@ class AddConnectionsTest(unittest.TestCase):
     def test_add_synapses_all2all(self):
         # given
         expected_netgen = NetworkGenerator()
-        for pre in self.pre_group:
-            for post in self.post_group:
+        for pre in self.pre_group.neurons:
+            for post in self.post_group.neurons:
                 expected_netgen.add_connection(pre, post, dyn1.Dynapse1SynType.NMDA)
 
         # when
         result_netgen = NetworkGenerator()
-        syn = Synapses(self.pre_group, self.post_group, dyn1.Dynapse1SynType.AMPA, conn_type='all2all')
+        syn = Synapses(self.pre_group, self.post_group, dyn1.Dynapse1SynType.NMDA, conn_type='all2all')
         add_synapses(result_netgen, syn)
 
         # then
@@ -45,18 +45,18 @@ class AddConnectionsTest(unittest.TestCase):
         # given
         expected_netgen = NetworkGenerator()
         # EI AMPA
-        for exc in self.pre_group:
-            for inh in self.post_group:
+        for exc in self.pre_group.neurons:
+            for inh in self.post_group.neurons:
                 expected_netgen.add_connection(exc, inh, dyn1.Dynapse1SynType.AMPA)
 
         # IE GABA_B
-        for inh in self.post_group:
-            for exc in self.pre_group:
+        for inh in self.post_group.neurons:
+            for exc in self.pre_group.neurons:
                 expected_netgen.add_connection(inh, exc, dyn1.Dynapse1SynType.GABA_B)
 
         # EE NMDA
-        expected_netgen.add_connection(self.pre_group[0], self.post_group[0], dyn1.Dynapse1SynType.NMDA)
-        expected_netgen.add_connection(self.pre_group[1], self.post_group[1], dyn1.Dynapse1SynType.NMDA)
+        expected_netgen.add_connection(self.pre_group.neurons[0], self.pre_group.neurons[0], dyn1.Dynapse1SynType.NMDA)
+        expected_netgen.add_connection(self.pre_group.neurons[1], self.pre_group.neurons[1], dyn1.Dynapse1SynType.NMDA)
 
         # when
         result_netgen = NetworkGenerator()
@@ -64,6 +64,7 @@ class AddConnectionsTest(unittest.TestCase):
         add_wta_conns(result_netgen, wta)
 
         # then
+        print(expected_netgen.network, result_netgen.network)
         self.assertEqual(expected_netgen.network, result_netgen.network)
     
         

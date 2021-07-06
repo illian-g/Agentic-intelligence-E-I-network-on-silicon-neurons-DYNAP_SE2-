@@ -177,9 +177,9 @@ class WTA_connections:
 def add_synapses(netgen, synapse):
     """Add a synapse group into a network generator"""
     if synapse.conn_type != None:
-        netgen.add_connections_from_type(synapse.pre, synapse.post, synapse.synapse_type, conn_type=synapse.conn_type, p=synapse.p, rand_seed=synapse.rand_seed)
+        netgen.add_connections_from_type(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, conn_type=synapse.conn_type, p=synapse.p, rand_seed=synapse.rand_seed)
     else:
-        netgen.add_connections_from_list(synapse.pre, synapse.post, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
+        netgen.add_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
 def add_wta_conns(netgen, wta_conns):
     """Add WTA connections for a WTA into a network generator"""
