@@ -68,6 +68,14 @@ class Neuron:
                     flag = True
         
         return flag
+    
+    def __hash__(self):
+
+        h = hash("{}.{}.{}.{}.{}".format(self.chip_id,self.chip_id,
+                                        self.neuron_id,self.is_spike_gen,
+                                        self.incoming_connections))
+
+        return h
 
 class NeuronGroup:
     """
