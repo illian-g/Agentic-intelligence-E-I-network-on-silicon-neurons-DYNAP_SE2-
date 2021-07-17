@@ -67,6 +67,46 @@ class AddConnectionsTest(unittest.TestCase):
         print(expected_netgen.network, result_netgen.network)
         self.assertEqual(expected_netgen.network, result_netgen.network)
     
+    def test_converted_config(self):
+        # given
+        expected_config = dyn1.Dynapse1Configuration()
+        # write cams
+        for i in range(len(self.post_group.neuron_ids)):
+            nid = self.post_group.neuron_ids[i]
+            expected_config.chips[self.post_group.chip_id].cores[self.post_group.core_id].neurons[nid].synapses[0].listen_neuron_id = self.pre_group.neuron_ids[i]
+            expected_config.chips[self.post_group.chip_id].cores[self.post_group.core_id].neurons[nid].synapses[0].listen_core_id = self.pre_group.core_id
+            expected_config.chips[self.post_group.chip_id].cores[self.post_group.core_id].neurons[nid].synapses[0].syn_type = dyn1.Dynapse1SynType.AMPA
+        # write srams. srams[0] is left for FPGA events routing
+        for i in range(len(self.pre_group.neuron_ids)):
+            nid = self.pre_group.neuron_ids[i]
+            expected_config.chips[self.pre_group.chip_id].cores[self.pre_group.core_id].neurons[nid].destinations[1].target_chip_id = self.post_group.chip_id
+            expected_config.chips[self.pre_group.chip_id].cores[self.pre_group.core_id].neurons[nid].destinations[1].in_use = True
+
+        # when
+        result_netgen = NetworkGenerator()
+        syn = Synapses(self.pre_group, self.post_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one')
+        add_synapses(result_netgen, syn)
+        result_config = result_netgen.make_dynapse1_configuration()
+
+        # then
+        # compare each neuron in two config
+        for chip in range(0,4):
+            print('chip',chip)
+            for core in range(0,4):
+                print('core',core)
+                for neuron in range(0,256):
+                    # assert(expected_config.chips[chip].cores[core].neurons[neuron] == result_config.chips[chip].cores[core].neurons[neuron])
+
+                    for syn in range(64):
+                        if not (expected_config.chips[chip].cores[core].neurons[neuron].synapses[syn].listen_neuron_id == result_config.chips[chip].cores[core].neurons[neuron].synapses[syn].listen_neuron_id and expected_config.chips[chip].cores[core].neurons[neuron].synapses[syn].listen_core_id == result_config.chips[chip].cores[core].neurons[neuron].synapses[syn].listen_core_id and expected_config.chips[chip].cores[core].neurons[neuron].synapses[syn].syn_type == result_config.chips[chip].cores[core].neurons[neuron].synapses[syn].syn_type):
+                            print('neuron {neuron} syn {syn}')
+                            return False
+                    
+                    for dest in range(4):
+                        if not (expected_config.chips[chip].cores[core].neurons[neuron].destinations[dest].target_chip_id == result_config.chips[chip].cores[core].neurons[neuron].destinations[dest].target_chip_id and expected_config.chips[chip].cores[core].neurons[neuron].destinations[dest].in_use == result_config.chips[chip].cores[core].neurons[neuron].destinations[dest].in_use):
+                            print('neuron %i, exp tar_chip=%i, rst tar_chip=%i, exp in_use=%i, rst in_use=%i' % (neuron, expected_config.chips[chip].cores[core].neurons[neuron].destinations[dest].target_chip_id, result_config.chips[chip].cores[core].neurons[neuron].destinations[dest].target_chip_id, expected_config.chips[chip].cores[core].neurons[neuron].destinations[dest].in_use, result_config.chips[chip].cores[core].neurons[neuron].destinations[dest].in_use))
+                            return False
+    
         
     
 if __name__ == "__main__":
