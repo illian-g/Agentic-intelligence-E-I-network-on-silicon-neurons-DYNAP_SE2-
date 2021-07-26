@@ -7,3 +7,5 @@
     ```--upgrade``` is needed if you already installed Samna.
 
     Please note that we do not release on pypi anymore.
+
+- We added some new features to the Python libs (mainly in NetworkGenerator.py), e.g. NeuronGroup, several add_connections* functions to create connections between 2 neuron groups, more convenient printing for Neuron and Network, etc. Specifically, this example (https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_neuronGroup.py) shows you a more convenient way of creating a network.
