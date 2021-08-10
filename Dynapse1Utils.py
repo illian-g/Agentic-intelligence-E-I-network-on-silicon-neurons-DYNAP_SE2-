@@ -20,7 +20,7 @@ def free_port():
     free_socket.close()
     return port
 
-def open_device(device_name, sender_port, receiver_port):
+def open_device(device_name, sender_port, receiver_port, select_device=False):
     """
     Get unopened devices detected by samna.
     Attribute:
@@ -57,7 +57,10 @@ def open_device(device_name, sender_port, receiver_port):
     for i in range(len(devices)):
         print("["+str(i)+"]: ", devices[i], "serial_number", devices[i].serial_number)
 
-    idx = input("Select the device you want to open by index: ")
+    if select_device:
+        idx = input("Select the device you want to open by index: ")
+    else:
+        idx = 0
 
     # open the device
     samna.device_node.DeviceController.open_device(devices[int(idx)], device_name)
@@ -72,7 +75,7 @@ def open_device(device_name, sender_port, receiver_port):
 
     return samna.device_node, samna_info_dict
 
-def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335):
+def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335, select_device=False):
     """
     open DYNAP-SE1 board with or without GUI.
 
@@ -89,7 +92,7 @@ def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335)
         sender_port=33336
         receiver_port=33335
     
-    store, samna_info_dict = open_device(device_name, sender_port, receiver_port)
+    store, samna_info_dict = open_device(device_name, sender_port, receiver_port, select_device)
     
     if gui:
         visualizer_id = 3
