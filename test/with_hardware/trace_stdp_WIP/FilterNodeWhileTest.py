@@ -33,7 +33,7 @@ def gen_param_group_1core():
     paramGroup.param_map["IF_TAU2_N"].coarse_value = 7
     paramGroup.param_map["IF_TAU2_N"].fine_value = 255
 
-    paramGroup.param_map["IF_DC_P"].coarse_value = 3
+    paramGroup.param_map["IF_DC_P"].coarse_value = 2
     paramGroup.param_map["IF_DC_P"].fine_value = 150
 
     paramGroup.param_map["NPDPIE_TAU_F_P"].coarse_value = 4
