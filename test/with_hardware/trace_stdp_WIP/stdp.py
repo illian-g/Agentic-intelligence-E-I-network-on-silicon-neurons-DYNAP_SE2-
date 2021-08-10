@@ -15,7 +15,10 @@ def get_trace_value(traces, timestamp):
         if trace.timestamp == timestamp:
             return trace
     
-    # print("Dynapse1Trace with timestamp not found in the trace list.")
+    if timestamp < traces[0].timestamp:
+        print("Timestamp%i not found, < list start %i." % (timestamp, traces[0].timestamp))
+    if timestamp > traces[-1].timestamp:
+        print("Timestamp %i not found, > list end %i." % (timestamp, traces[-1].timestamp))
     return None
 
 def plot_w(w_plast, figpath="./w"):
@@ -54,60 +57,56 @@ def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
     spike_filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
     spike_filter_node = graph.get_node(spike_filter_node_id)
 
-    # pre trace
-    pre_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    pre_trace_node = graph.get_node(pre_trace_node_id)
+    onpost_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
+    onpost_trace_node = graph.get_node(onpost_trace_node_id)
 
-    # post1 trace
-    post1_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    post1_trace_node = graph.get_node(post1_trace_node_id)
-
-    # post2 trace
-    post2_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    post2_trace_node = graph.get_node(post2_trace_node_id)
+    onpre_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
+    onpre_trace_node = graph.get_node(onpre_trace_node_id)
 
     # create sink nodes
-    pre_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
-    post1_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
-    post2_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
+    onpost_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
+    onpre_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
 
     # connect source node to spike filter node
     model.get_source_node().add_destination(graph.get_node_input(spike_filter_node_id))
 
-    # connect spike filter to 3 trace nodes
-    graph.add_destination(spike_filter_node_id, graph.get_node_input(pre_trace_node_id))
-    graph.add_destination(spike_filter_node_id, graph.get_node_input(post1_trace_node_id))
-    graph.add_destination(spike_filter_node_id, graph.get_node_input(post2_trace_node_id))
+    # connect spike filter to 2 trace nodes
+    graph.add_destination(spike_filter_node_id, graph.get_node_input(onpost_trace_node_id))
+    graph.add_destination(spike_filter_node_id, graph.get_node_input(onpre_trace_node_id))
 
-    # connect 3 trace nodes to 3 sink nodes
-    graph.add_destination(pre_trace_node_id, pre_trace_sink.get_input_channel())
-    graph.add_destination(post1_trace_node_id, post1_trace_sink.get_input_channel())
-    graph.add_destination(post2_trace_node_id, post2_trace_sink.get_input_channel())
+    # connect 3 trace nodes to 2 sink nodes
+    graph.add_destination(onpost_trace_node_id, onpost_trace_sink.get_input_channel())
+    graph.add_destination(onpre_trace_node_id, onpre_trace_sink.get_input_channel())
 
     # configure filter nodes: which neurons to filter?
     spike_filter_node.set_neurons(pre_neuron_ids+post_neuron_ids)
 
-    pre_trace_node.set_neurons(pre_neuron_ids, post_neuron_ids)
-    post1_trace_node.set_neurons(post_neuron_ids, pre_neuron_ids)
-    post2_trace_node.set_neurons(post_neuron_ids, post_neuron_ids)
+    # on post: pre and post2 traces
+    onpost_tau_list = [pre_tau for pre in pre_neuron_ids] + [post2_tau for post in post_neuron_ids]
+    onpost_trace_node.set_neurons(pre_neuron_ids+post_neuron_ids, post_neuron_ids, pre_tau)
+    onpost_trace_node.set_tau_list(onpost_tau_list)
 
-    pre_trace_node.set_trace_parameters(pre_tau, method, trace_max)
-    post1_trace_node.set_trace_parameters(post1_tau, method, trace_max)
-    post2_trace_node.set_trace_parameters(post2_tau, method, trace_max)
+    # on pre: post1 trace
+    onpre_trace_node.set_neurons(post_neuron_ids, pre_neuron_ids, post1_tau)
+
+    onpost_trace_node.set_trace_parameters(method, trace_max)
+    onpre_trace_node.set_trace_parameters(method, trace_max)
+
+    print("get_value_only_at_trigger ", onpost_trace_node.get_value_only_at_trigger())
 
     # ---------------- create a graph ----------------
 
     # start the graph
     graph.start()
     
-    with open("./w/times.txt", mode='w', encoding='utf-8') as file_obj:
+    with open("./times.txt", mode='w', encoding='utf-8') as file_obj:
         file_obj.write('\n')
 
     t1 = int(round(time.time() * 1000)) # in ms
+    num = 0
     while(True):
-        post1_traces = post1_trace_sink.get_events()
-        post2_traces = post2_trace_sink.get_events()
-        pre_traces = pre_trace_sink.get_events()
+        onpre_traces = onpre_trace_sink.get_events()
+        onpost_traces = onpost_trace_sink.get_events()
 
         """
         On pre: neuron select node of pre -> pre timestamps
@@ -128,48 +127,45 @@ def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
             post2 = 1.0
         """  
 
-        # on pre, use post1 trace
-        for post1_trace in post1_traces:
-            # for each pre
-            pre_neuron = post1_trace.trigger_neuron
+        # on pre, contains post1 trace
+        for onpre_trace in onpre_traces:
+            # for each pre spike timestamp
+            pre_neuron = onpre_trace.trigger_neuron
             i = pre_neuron_ids.index(pre_neuron)
 
             # check all its posts, update w_plast[i][j]
             for j in range(len(post_neuron_ids)):
                 post_neuron = post_neuron_ids[j]
-                post1 = post1_trace.trace_map[post_neuron]
+                post1 = onpre_trace.trace_map[post_neuron]
 
                 delta_w = nuEEpre * post1 * w_plast[i][j]**expEEpre
                 w_plast[i][j] -= delta_w
         
-        # on post, use pre and post2 trace
-        for pre_trace in pre_traces:
-            # for each post
-            post_neuron = pre_trace.trigger_neuron
+        # on post, contains pre and post2 trace
+        for onpost_trace in onpost_traces:
+            # for each post spike timestamp
+            post_neuron = onpost_trace.trigger_neuron
             j = post_neuron_ids.index(post_neuron)
-            timestamp = pre_trace.timestamp
 
-            # get post2 trace
-            post2_trace = get_trace_value(post2_traces, timestamp)
-            if post2_trace == None:
-                # print("post2_trace is None, use a random value")
-                post2 = random.random()
-            else:
-                post2 = post2_trace.trace_map[post_neuron]
+            # get post2 trace of this post neuron
+            post2 = onpost_trace.trace_map[post_neuron]
 
             # check all its pre traces, update w_plast[i][j]
             for i in range(len(pre_neuron_ids)):
                 pre_neuron = pre_neuron_ids[i]
-                pre = pre_trace.trace_map[pre_neuron]
+                pre = onpost_trace.trace_map[pre_neuron]
 
                 delta_w = nuEEpost * pre * post2 * (wmaxEE - w_plast[i][j])**expEEpost
                 w_plast[i][j] += delta_w
         
-        t2 = int(round(time.time() * 1000)) # in ms
-        with open("./w/times.txt", mode='a', encoding='utf-8') as file_obj:
-            file_obj.write(str(t2-t1)+'\n')
-        t1 = t2
-        
-        # time.sleep(1) # sleep 100 ms
         # plot_w(w_plast)
+
+        t2 = int(round(time.time() * 1000)) # in ms
+        if t2-t1 >= 10:
+            with open("./times.txt", mode='a', encoding='utf-8') as file_obj:
+                file_obj.write(str(num)+':'+str(t2-t1)+'\n')
+        
+        t1 = t2
+        num += 1
+
     print("done")
