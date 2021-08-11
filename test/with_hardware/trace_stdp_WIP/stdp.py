@@ -34,22 +34,10 @@ def plot_w(w_plast, figpath="./w"):
     fig.savefig(figpath+"/w"+str(int(round(time.time() * 1000))))
     del fig
 
-def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
-    
-    method = "increase_to" # increase_by increase_to
-    trace_max = 1
-
-    pre_tau = int(20*1e3) # in microsec
-    post1_tau = int(40*1e3) # in microsec
-    post2_tau = int(40*1e3) # in microsec
-    nuEEpre = 0.005
-    nuEEpost = 0.025
-    wmaxEE = 1
-    expEEpre = 0.2 # presynaptic weight dependence
-    expEEpost = 0.2
-
-    # ---------------- create a graph ----------------
-    # create a graph: source node to 2 filter nodes, one neuron select, one neuron trace.
+def create_stdp_graph(model):
+    """
+    Create on pre and on post traces in which pre and post are the trigger neurons, respectively.
+    """  
     graph = samna.graph.EventFilterGraph()
 
     # create and add filter nodes to graph
@@ -74,35 +62,83 @@ def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
     graph.add_destination(spike_filter_node_id, graph.get_node_input(onpost_trace_node_id))
     graph.add_destination(spike_filter_node_id, graph.get_node_input(onpre_trace_node_id))
 
-    # connect 3 trace nodes to 2 sink nodes
+    # connect 2 trace nodes to 2 sink nodes
     graph.add_destination(onpost_trace_node_id, onpost_trace_sink.get_input_channel())
     graph.add_destination(onpre_trace_node_id, onpre_trace_sink.get_input_channel())
+
+    return graph, spike_filter_node, onpre_trace_node, onpost_trace_node, onpre_trace_sink, onpost_trace_sink
+
+def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
+    
+    method = "increase_to" # increase_by increase_to
+    trace_max = 1
+
+    pre_tau = int(20*1e3) # in microsec
+    post1_tau = int(40*1e3) # in microsec
+    post2_tau = int(40*1e3) # in microsec
+    nuEEpre = 0.005
+    nuEEpost = 0.025
+    wmaxEE = 1
+    expEEpre = 0.2 # presynaptic weight dependence
+    expEEpost = 0.2
+
+    # # ---------------- create a graph ----------------
+    # # create a graph: source node to 2 filter nodes, one neuron select, one neuron trace.
+    # graph = samna.graph.EventFilterGraph()
+
+    # # create and add filter nodes to graph
+    # # pre+post spike filter
+    # spike_filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
+    # spike_filter_node = graph.get_node(spike_filter_node_id)
+
+    # onpost_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
+    # onpost_trace_node = graph.get_node(onpost_trace_node_id)
+
+    # onpre_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
+    # onpre_trace_node = graph.get_node(onpre_trace_node_id)
+
+    # # create sink nodes
+    # onpost_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
+    # onpre_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
+
+    # # connect source node to spike filter node
+    # model.get_source_node().add_destination(graph.get_node_input(spike_filter_node_id))
+
+    # # connect spike filter to 2 trace nodes
+    # graph.add_destination(spike_filter_node_id, graph.get_node_input(onpost_trace_node_id))
+    # graph.add_destination(spike_filter_node_id, graph.get_node_input(onpre_trace_node_id))
+
+    # # connect 3 trace nodes to 2 sink nodes
+    # graph.add_destination(onpost_trace_node_id, onpost_trace_sink.get_input_channel())
+    # graph.add_destination(onpre_trace_node_id, onpre_trace_sink.get_input_channel())
+
+    graph, spike_filter_node, \
+    onpre_trace_node, onpost_trace_node, \
+    onpre_trace_sink, onpost_trace_sink = create_stdp_graph(model)
 
     # configure filter nodes: which neurons to filter?
     spike_filter_node.set_neurons(pre_neuron_ids+post_neuron_ids)
 
     # on post: pre and post2 traces
     onpost_tau_list = [pre_tau for pre in pre_neuron_ids] + [post2_tau for post in post_neuron_ids]
-    onpost_trace_node.set_neurons(pre_neuron_ids+post_neuron_ids, post_neuron_ids, pre_tau)
-    onpost_trace_node.set_tau_list(onpost_tau_list)
+    onpost_trace_node.set_neurons(pre_neuron_ids+post_neuron_ids, post_neuron_ids, onpost_tau_list)
 
     # on pre: post1 trace
-    onpre_trace_node.set_neurons(post_neuron_ids, pre_neuron_ids, post1_tau)
+    onpost_tau_list = [post1_tau for post in post_neuron_ids]
+    onpre_trace_node.set_neurons(post_neuron_ids, pre_neuron_ids, onpost_tau_list)
 
     onpost_trace_node.set_trace_parameters(method, trace_max)
     onpre_trace_node.set_trace_parameters(method, trace_max)
 
     print("get_value_only_at_trigger ", onpost_trace_node.get_value_only_at_trigger())
 
-    # ---------------- create a graph ----------------
-
     # start the graph
     graph.start()
     
+    t0 = int(round(time.time() * 1e6)) # in microsec
+    t1 = t0
     with open("./times.txt", mode='w', encoding='utf-8') as file_obj:
-        file_obj.write('\n')
-
-    t1 = int(round(time.time() * 1000)) # in ms
+        file_obj.write(str(t1)+'\n')
     num = 0
     while(True):
         onpre_traces = onpre_trace_sink.get_events()
@@ -160,12 +196,14 @@ def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
         
         # plot_w(w_plast)
 
-        t2 = int(round(time.time() * 1000)) # in ms
-        if t2-t1 >= 10:
+        t2 = int(round(time.time() * 1e6)) # in us
+        if t2-t1 >= 10*1e3:
             with open("./times.txt", mode='a', encoding='utf-8') as file_obj:
-                file_obj.write(str(num)+':'+str(t2-t1)+'\n')
-        
+                file_obj.write(str(t2-t0)+','+str(num)+':'+str(t2-t1)+','+str((t2-t0)/num)+'\n')
         t1 = t2
         num += 1
+
+        # convert w_plast to connections
+
 
     print("done")

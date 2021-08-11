@@ -11,7 +11,7 @@ import Dynapse1Utils as ut
 from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 
 """
-Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow spike (from trigger neuron 1 (1,0,17)), and increases at each blue spike (from the trace neuron itself).
+Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow spike (from trigger neuron 1 (1,0,17)), and increases at each blue spike (from the trace neuron itself). The increase at the blue spikes may not obvious because it's the value that's first decayed, then increased.
 """
 
 def gen_param_group_1core():
@@ -320,12 +320,10 @@ if __name__ == "__main__":
     # configure filter node: which neurons to filter?
     tau = int(40*1e3) # 50*1e3 in microsec
     spike_filter_node.set_neurons(neuron_ids)
-    trace_filter_node.set_neurons([neuron_ids[0]], [neuron_ids[1]], tau)
+    trace_filter_node.set_neurons([neuron_ids[0]], [neuron_ids[1]], [tau])
     method = "increase_by" # increase_by increase_to
     delta = 3
     trace_filter_node.set_trace_parameters(method, delta)
-    # trace_filter_node.set_value_only_at_trigger(True)
-    # trace_filter_node.set_value_before_spike(True)
 
     trace_filter_node.set_value_only_at_trigger(False)
     trace_filter_node.set_value_before_spike(False)
@@ -336,7 +334,7 @@ if __name__ == "__main__":
     # start the graph
     graph.start()
 
-    print(trace_filter_node.get_tau_list(), trace_filter_node.get_method())
+    print(trace_filter_node.get_tau_list([neuron_ids[0]]), trace_filter_node.get_method())
 
     api.reset_timestamp()
 
