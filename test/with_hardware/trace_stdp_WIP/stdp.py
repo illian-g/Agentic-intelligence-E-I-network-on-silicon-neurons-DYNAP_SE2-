@@ -69,6 +69,24 @@ def create_stdp_graph(model):
     return graph, spike_filter_node, onpre_trace_node, onpost_trace_node, onpre_trace_sink, onpost_trace_sink
 
 def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
+    """
+    On pre: neuron select node of pre -> pre timestamps
+        update post_trace1: post_trace1 values at pre timestamps
+
+        pre = 1.0
+        delta_w = nuEEpre * post1 * w_plast**expEEpre
+        w_plast = clip(w_plast - delta_w, 0, wmaxEE)
+
+    On post: neuron select node of post -> post timestamps
+        update pre_trace: pre_trace values at post timestamps
+        update post_trace2: post_trace2 values at post timestamps.
+
+        post2before = post2
+        delta_w = nuEEpost * pre * post2before * (wmaxEE - w_plast)**expEEpost
+        w_plast = clip(w_plast + delta_w, 0, wmaxEE)
+        post1 = 1.0
+        post2 = 1.0
+    """  
     
     method = "increase_to" # increase_by increase_to
     trace_max = 1
@@ -81,36 +99,6 @@ def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
     wmaxEE = 1
     expEEpre = 0.2 # presynaptic weight dependence
     expEEpost = 0.2
-
-    # # ---------------- create a graph ----------------
-    # # create a graph: source node to 2 filter nodes, one neuron select, one neuron trace.
-    # graph = samna.graph.EventFilterGraph()
-
-    # # create and add filter nodes to graph
-    # # pre+post spike filter
-    # spike_filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
-    # spike_filter_node = graph.get_node(spike_filter_node_id)
-
-    # onpost_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    # onpost_trace_node = graph.get_node(onpost_trace_node_id)
-
-    # onpre_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    # onpre_trace_node = graph.get_node(onpre_trace_node_id)
-
-    # # create sink nodes
-    # onpost_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
-    # onpre_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
-
-    # # connect source node to spike filter node
-    # model.get_source_node().add_destination(graph.get_node_input(spike_filter_node_id))
-
-    # # connect spike filter to 2 trace nodes
-    # graph.add_destination(spike_filter_node_id, graph.get_node_input(onpost_trace_node_id))
-    # graph.add_destination(spike_filter_node_id, graph.get_node_input(onpre_trace_node_id))
-
-    # # connect 3 trace nodes to 2 sink nodes
-    # graph.add_destination(onpost_trace_node_id, onpost_trace_sink.get_input_channel())
-    # graph.add_destination(onpre_trace_node_id, onpre_trace_sink.get_input_channel())
 
     graph, spike_filter_node, \
     onpre_trace_node, onpost_trace_node, \
@@ -143,25 +131,6 @@ def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
     while(True):
         onpre_traces = onpre_trace_sink.get_events()
         onpost_traces = onpost_trace_sink.get_events()
-
-        """
-        On pre: neuron select node of pre -> pre timestamps
-            update post_trace1: post_trace1 values at pre timestamps
-
-            pre = 1.0
-            delta_w = nuEEpre * post1 * w_plast**expEEpre
-            w_plast = clip(w_plast - delta_w, 0, wmaxEE)
-
-        On post: neuron select node of post -> post timestamps
-            update pre_trace: pre_trace values at post timestamps
-            update post_trace2: post_trace2 values at post timestamps.
-
-            post2before = post2
-            delta_w = nuEEpost * pre * post2before * (wmaxEE - w_plast)**expEEpost
-            w_plast = clip(w_plast + delta_w, 0, wmaxEE)
-            post1 = 1.0
-            post2 = 1.0
-        """  
 
         # on pre, contains post1 trace
         for onpre_trace in onpre_traces:
