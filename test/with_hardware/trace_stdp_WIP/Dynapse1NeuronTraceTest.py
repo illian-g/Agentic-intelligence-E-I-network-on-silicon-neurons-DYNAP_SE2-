@@ -14,7 +14,7 @@ from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, Networ
 Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow spike (from trigger neuron 1 (1,0,17)), and increases at each blue spike (from the trace neuron itself). The increase at the blue spikes may not obvious because it's the value that's first decayed, then increased.
 """
 
-from params import gen_param_group_1core
+from params import gen_param_group
 
 # get the timestamps of some specific neurons
 def get_selected_timestamps(spikes, neuron_ids):
@@ -151,8 +151,8 @@ if __name__ == "__main__":
     device_name = "dynapse1"
 
     # open with GUI
-    store, gui_process = ut.open_dynapse1(device_name)
-    # store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
+    # store, gui_process = ut.open_dynapse1(device_name)
+    store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
 
     model = getattr(store, device_name)
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         ut.print_neuron_destinations(neuron)
 
     # set parameters
-    paramGroup = gen_param_group_1core()
+    paramGroup = gen_param_group()
     for chip in range(4):
         for core in range(4):
             model.update_parameter_group(paramGroup, chip, core)
@@ -280,4 +280,5 @@ if __name__ == "__main__":
     # close Dynapse1
 
     # close with GUI
-    ut.close_dynapse1(store, device_name, gui_process)
+    # ut.close_dynapse1(store, device_name, gui_process)
+    ut.close_dynapse1(store, device_name)

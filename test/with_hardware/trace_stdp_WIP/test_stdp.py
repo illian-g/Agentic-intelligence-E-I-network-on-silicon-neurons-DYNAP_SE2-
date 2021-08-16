@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 
 from stdp import Stdp
-from stdp_params import gen_param_group_1core
 
 import sys
 # Note: change the path to where your lib files are
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import Dynapse1Utils as ut
 from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
+
+from params import gen_param_group
 
 def get_selected_timestamps(spikes, neuron_ids):
     """
@@ -153,7 +154,9 @@ store, gui_process = ut.open_dynapse1(device_name)
 model = getattr(store, device_name)
 
 # set parameters
-paramGroup = gen_param_group_1core()
+paramGroup = gen_param_group()
+paramGroup.param_map["PS_WEIGHT_EXC_S_N"].coarse_value = 0
+paramGroup.param_map["PS_WEIGHT_EXC_S_N"].fine_value = 0
 for chip in range(4):
     for core in range(4):
         model.update_parameter_group(paramGroup, chip, core)

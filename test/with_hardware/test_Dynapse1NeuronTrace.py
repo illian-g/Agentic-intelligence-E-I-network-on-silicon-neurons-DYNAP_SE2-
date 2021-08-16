@@ -11,7 +11,7 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import Dynapse1Utils as ut
 from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 
-from params import gen_param_group_1core
+from params import gen_param_group
 
 # get the timestamps of some specific neurons
 def get_selected_timestamps(spikes, neuron_ids):
@@ -199,7 +199,7 @@ for nid in neuron_ids:
     ut.print_neuron_destinations(neuron)
 
 # set parameters
-paramGroup = gen_param_group_1core()
+paramGroup = gen_param_group()
 for chip in range(4):
     for core in range(4):
         model.update_parameter_group(paramGroup, chip, core)

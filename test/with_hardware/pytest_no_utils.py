@@ -55,7 +55,7 @@ def print_dynapse1_event(event):
     elif isinstance(event, dyn1.TimestampWrapEvent):
         print((event.timestamp))
 
-def gen_param_group_1core():
+def gen_param_group():
     paramGroup = dyn1.Dynapse1ParameterGroup()
     # THR
     # ok
@@ -282,8 +282,8 @@ if __name__ == "__main__":
     config.chips[0].cores[0].parameter_group.param_map["IF_THR_N"].fine_value)
 
     # set parameters
-    paramGroup = gen_param_group_1core()
-    print("gen_param_group_1core, IF_THR_N: ",
+    paramGroup = gen_param_group()
+    print("gen_param_group, IF_THR_N: ",
     paramGroup.param_map["IF_THR_N"].coarse_value,
     paramGroup.param_map["IF_THR_N"].fine_value)
     for chip in range(4):
