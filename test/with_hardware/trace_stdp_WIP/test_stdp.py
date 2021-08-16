@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 
 from stdp import Stdp
-from params import gen_param_group_1core
+from stdp_params import gen_param_group_1core
 
 import sys
 # Note: change the path to where your lib files are

@@ -10,7 +10,7 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import Dynapse1Utils as ut
 from NetworkGenerator import Neuron, NetworkGenerator
 
-from example.params import gen_param_group_1core
+from params import gen_param_group_1core
 
 # open DYNAP-SE1 board to get Dynapse1Model
 device_name = "dynapse1"
