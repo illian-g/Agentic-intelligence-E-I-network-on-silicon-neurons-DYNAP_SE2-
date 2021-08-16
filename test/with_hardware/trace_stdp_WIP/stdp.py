@@ -71,6 +71,15 @@ def create_stdp_graph(model):
 
     return graph, spike_filter_node, onpre_trace_node, onpost_trace_node, onpre_trace_sink, onpost_trace_sink
 
+def bad_traces(onpre_traces, onpost_traces):
+    """
+    To handle the abnormal traces after restart of stdp.
+    Bad traces should be dropped, not processed anymore.
+    Traces are bad if
+        1) not synchronized: time difference between the traces are too large.
+        2) too many traces received which will take too long to process.
+    """
+
 class Stdp:
     """
     A class which implements "realtime, onchip" STDP learning algorithm between a pre and a post neuron population.
@@ -109,7 +118,7 @@ class Stdp:
         # terminate the stdp thread while loop
         self.stdp_on = False
 
-        self.graph.stop()
+        # self.graph.stop()
         
     def __run_stdp(self):
         # empty the buffer
@@ -118,7 +127,7 @@ class Stdp:
 
         t0 = int(round(time.time() * 1e6)) # in microsec
         t1 = t0
-        filename = './start_graph_times.txt'
+        filename = './results/start_graph_times.txt'
         with open(filename, mode='w', encoding='utf-8') as file_obj:
             file_obj.write('Unit: micsec. List all rounds that take longer than 10 millisec.\n'+\
                 'No.: num_traces, single_duration, average_single_duration\n')
@@ -127,6 +136,8 @@ class Stdp:
         while(self.stdp_on):
             onpre_traces = self.onpre_trace_sink.get_events()
             onpost_traces = self.onpost_trace_sink.get_events()
+
+            # handle exception: the time difference between the min and max trace timestamp
 
             if self.algorithm == 'triplet_stdp':
                 self.w_plast = trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
@@ -137,16 +148,18 @@ class Stdp:
             num += 1
             num_pre_traces = len(onpre_traces)
             num_post_traces = len(onpost_traces)
-            if num_pre_traces>0:
-                with open(filename, mode='a', encoding='utf-8') as file_obj:
-                    file_obj.write('pre'+str(num_pre_traces)+','+str(onpre_traces[0].timestamp)+','+str(onpre_traces[-1].timestamp)+'|')
-                with open(filename, mode='a', encoding='utf-8') as file_obj:
-                    file_obj.write(str(t2-t1)+','+str(int((t2-t0)/num))+'\n')
-            if num_post_traces>0:
-                with open(filename, mode='a', encoding='utf-8') as file_obj:
-                    file_obj.write('post'+str(num_post_traces)+','+str(onpost_traces[0].timestamp)+','+str(onpost_traces[-1].timestamp)+'|')
-                with open(filename, mode='a', encoding='utf-8') as file_obj:
+            if num_pre_traces:
+                if num_pre_traces>10 or (onpre_traces[-1].timestamp-onpre_traces[0].timestamp) > 3*1e5:
+                    with open(filename, mode='a', encoding='utf-8') as file_obj:
+                        file_obj.write('pre'+str(num_pre_traces)+','+str(onpre_traces[0].timestamp)+','+str(onpre_traces[-1].timestamp)+','+str(onpre_traces[-1].timestamp-onpre_traces[0].timestamp)+'|')
+                    with open(filename, mode='a', encoding='utf-8') as file_obj:
                         file_obj.write(str(t2-t1)+','+str(int((t2-t0)/num))+'\n')
+            if num_post_traces:
+                if num_post_traces>10 or (onpost_traces[-1].timestamp-onpost_traces[0].timestamp) > 3*1e5:
+                    with open(filename, mode='a', encoding='utf-8') as file_obj:
+                        file_obj.write('post'+str(num_post_traces)+','+str(onpost_traces[0].timestamp)+','+str(onpost_traces[-1].timestamp)+','+str(onpost_traces[-1].timestamp-onpost_traces[0].timestamp)+'|')
+                    with open(filename, mode='a', encoding='utf-8') as file_obj:
+                            file_obj.write(str(t2-t1)+','+str(int((t2-t0)/num))+'\n')
 
             # if (t2-t1)/1e3 >= 10: # > 10ms
             #     with open(filename, mode='a', encoding='utf-8') as file_obj:
