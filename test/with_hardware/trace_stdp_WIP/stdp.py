@@ -1,11 +1,14 @@
 import time
 import random
 import os
+import _thread
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 
 import samna
+
+import triplet_stdp_details as trip
 
 def get_trace_value(traces, timestamp):
     """
@@ -68,111 +71,70 @@ def create_stdp_graph(model):
 
     return graph, spike_filter_node, onpre_trace_node, onpost_trace_node, onpre_trace_sink, onpost_trace_sink
 
-def stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast):
+class Stdp:
     """
-    On pre: neuron select node of pre -> pre timestamps
-        update post_trace1: post_trace1 values at pre timestamps
+    A class which implements "realtime, onchip" STDP learning algorithm between a pre and a post neuron population.
+    """
+    def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp'):
+        self.model = model
+        self.net_gen = net_gen
+        self.pre_neuron_ids = pre_neuron_ids
+        self.post_neuron_ids = post_neuron_ids
+        self.w_plast = w_plast
 
-        pre = 1.0
-        delta_w = nuEEpre * post1 * w_plast**expEEpre
-        w_plast = clip(w_plast - delta_w, 0, wmaxEE)
+        # create trace graph
+        self.graph, self.spike_filter_node, \
+        self.onpre_trace_node, self.onpost_trace_node, \
+        self.onpre_trace_sink, self.onpost_trace_sink = create_stdp_graph(model)
 
-    On post: neuron select node of post -> post timestamps
-        update pre_trace: pre_trace values at post timestamps
-        update post_trace2: post_trace2 values at post timestamps.
+        self.algorithm = algorithm
 
-        post2before = post2
-        delta_w = nuEEpost * pre * post2before * (wmaxEE - w_plast)**expEEpost
-        w_plast = clip(w_plast + delta_w, 0, wmaxEE)
-        post1 = 1.0
-        post2 = 1.0
-    """  
+        # set trace graph for the required traces
+        if self.algorithm == 'triplet_stdp':
+            trip.set_triplet_stdp_graph(self.spike_filter_node, self.onpre_trace_node, self.onpost_trace_node, self.pre_neuron_ids, self.post_neuron_ids)
+        else:
+            print("Wrong algorithm name. Learning setup failed.")
+
+        self.stdp_on = False
     
-    method = "increase_to" # increase_by increase_to
-    trace_max = 1
+    def start_stdp(self):
+        if not self.stdp_on:
+            self.graph.start()
+            
+            self.stdp_on = True
 
-    pre_tau = int(20*1e3) # in microsec
-    post1_tau = int(40*1e3) # in microsec
-    post2_tau = int(40*1e3) # in microsec
-    nuEEpre = 0.005
-    nuEEpost = 0.025
-    wmaxEE = 1
-    expEEpre = 0.2 # presynaptic weight dependence
-    expEEpost = 0.2
+            _thread.start_new_thread(self.__run_stdp, ())
 
-    graph, spike_filter_node, \
-    onpre_trace_node, onpost_trace_node, \
-    onpre_trace_sink, onpost_trace_sink = create_stdp_graph(model)
+    def stop_stdp(self):
+        # terminate the stdp thread while loop
+        self.stdp_on = False
 
-    # configure filter nodes: which neurons to filter?
-    spike_filter_node.set_neurons(pre_neuron_ids+post_neuron_ids)
-
-    # on post: pre and post2 traces
-    onpost_tau_list = [pre_tau for pre in pre_neuron_ids] + [post2_tau for post in post_neuron_ids]
-    onpost_trace_node.set_neurons(pre_neuron_ids+post_neuron_ids, post_neuron_ids, onpost_tau_list)
-
-    # on pre: post1 trace
-    onpost_tau_list = [post1_tau for post in post_neuron_ids]
-    onpre_trace_node.set_neurons(post_neuron_ids, pre_neuron_ids, onpost_tau_list)
-
-    onpost_trace_node.set_trace_parameters(method, trace_max)
-    onpre_trace_node.set_trace_parameters(method, trace_max)
-
-    print("get_value_only_at_trigger ", onpost_trace_node.get_value_only_at_trigger())
-
-    # start the graph
-    graph.start()
-    
-    t0 = int(round(time.time() * 1e6)) # in microsec
-    t1 = t0
-    with open("./times.txt", mode='w', encoding='utf-8') as file_obj:
-        file_obj.write(str(t1)+'\n')
-    num = 0
-    while(True):
-        onpre_traces = onpre_trace_sink.get_events()
-        onpost_traces = onpost_trace_sink.get_events()
-
-        # on pre, contains post1 trace
-        for onpre_trace in onpre_traces:
-            # for each pre spike timestamp
-            pre_neuron = onpre_trace.trigger_neuron
-            i = pre_neuron_ids.index(pre_neuron)
-
-            # check all its posts, update w_plast[i][j]
-            for j in range(len(post_neuron_ids)):
-                post_neuron = post_neuron_ids[j]
-                post1 = onpre_trace.trace_map[post_neuron]
-
-                delta_w = nuEEpre * post1 * w_plast[i][j]**expEEpre
-                w_plast[i][j] -= delta_w
+        self.graph.stop()
         
-        # on post, contains pre and post2 trace
-        for onpost_trace in onpost_traces:
-            # for each post spike timestamp
-            post_neuron = onpost_trace.trigger_neuron
-            j = post_neuron_ids.index(post_neuron)
+    def __run_stdp(self):
+        # empty the buffer
+        onpre_traces = self.onpre_trace_sink.get_events()
+        onpost_traces = self.onpost_trace_sink.get_events()
 
-            # get post2 trace of this post neuron
-            post2 = onpost_trace.trace_map[post_neuron]
-
-            # check all its pre traces, update w_plast[i][j]
-            for i in range(len(pre_neuron_ids)):
-                pre_neuron = pre_neuron_ids[i]
-                pre = onpost_trace.trace_map[pre_neuron]
-
-                delta_w = nuEEpost * pre * post2 * (wmaxEE - w_plast[i][j])**expEEpost
-                w_plast[i][j] += delta_w
+        t0 = int(round(time.time() * 1e6)) # in microsec
+        t1 = t0
+        with open("./times.txt", mode='w', encoding='utf-8') as file_obj:
+            file_obj.write('Unit: micsec. List all rounds that take longer than 10 millisec.\n'+\
+                'No.: single_duration, average_single_duration\n')
+        num = 0
         
-        # plot_w(w_plast)
+        while(self.stdp_on):
+            onpre_traces = self.onpre_trace_sink.get_events()
+            onpost_traces = self.onpost_trace_sink.get_events()
 
-        t2 = int(round(time.time() * 1e6)) # in us
-        if t2-t1 >= 10*1e3:
-            with open("./times.txt", mode='a', encoding='utf-8') as file_obj:
-                file_obj.write(str(t2-t0)+','+str(num)+':'+str(t2-t1)+','+str((t2-t0)/num)+'\n')
-        t1 = t2
-        num += 1
+            if self.algorithm == 'triplet_stdp':
+                self.w_plast = trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
+            else:
+                print("Wrong algorithm name. Learning setup failed.")
 
-        # convert w_plast to connections
-
-
-    print("done")
+            t2 = int(round(time.time() * 1e6)) # in us
+            num += 1
+            if (t2-t1)/1e3 >= 10: # > 10ms
+                with open("./times.txt", mode='a', encoding='utf-8') as file_obj:
+                    file_obj.write(str(num)+':'+str(t2-t1)+','+str((t2-t0)/num)+'\n')
+            t1 = t2

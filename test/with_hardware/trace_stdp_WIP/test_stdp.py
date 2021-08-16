@@ -2,12 +2,11 @@ import samna
 import samna.dynapse1 as dyn1
 
 import time
-import _thread
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 
-from stdp import stdp
+from stdp import Stdp
 
 import sys
 # Note: change the path to where your lib files are
@@ -295,21 +294,12 @@ poisson_gen.start()
 low_init_w = 0.1
 w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w
 
+stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp')
 
-_thread.start_new_thread( stdp, (model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast) )
+stdp.start_stdp()
 
-# fig = plt.figure()
-# plot_raster(spikes, neuron_ids) # [neuron_ids[1]]
-# plot_trace(timed_traces, neuron_ids) # [neuron_ids[1]]
-# plt.xlabel('Time (us)')
-# plt.ylabel('Trace')
-# plt.show()
+time.sleep(60*20) # learn 20 min
 
-# poisson_gen.stop()
+stdp.stop_stdp()
 
-# print("Example finished")
-
-# # close Dynapse1
-
-# # close with GUI
-# ut.close_dynapse1(store, device_name, gui_process)
+ut.close_dynapse1(store, device_name, gui_process)
