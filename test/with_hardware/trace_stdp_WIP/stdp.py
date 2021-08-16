@@ -118,9 +118,10 @@ class Stdp:
 
         t0 = int(round(time.time() * 1e6)) # in microsec
         t1 = t0
-        with open("./times.txt", mode='w', encoding='utf-8') as file_obj:
+        filename = './start_graph_times.txt'
+        with open(filename, mode='w', encoding='utf-8') as file_obj:
             file_obj.write('Unit: micsec. List all rounds that take longer than 10 millisec.\n'+\
-                'No.: single_duration, average_single_duration\n')
+                'No.: num_traces, single_duration, average_single_duration\n')
         num = 0
         
         while(self.stdp_on):
@@ -134,7 +135,20 @@ class Stdp:
 
             t2 = int(round(time.time() * 1e6)) # in us
             num += 1
-            if (t2-t1)/1e3 >= 10: # > 10ms
-                with open("./times.txt", mode='a', encoding='utf-8') as file_obj:
-                    file_obj.write(str(num)+':'+str(t2-t1)+','+str((t2-t0)/num)+'\n')
+            num_pre_traces = len(onpre_traces)
+            num_post_traces = len(onpost_traces)
+            if num_pre_traces>0:
+                with open(filename, mode='a', encoding='utf-8') as file_obj:
+                    file_obj.write('pre'+str(num_pre_traces)+','+str(onpre_traces[0].timestamp)+','+str(onpre_traces[-1].timestamp)+'|')
+                with open(filename, mode='a', encoding='utf-8') as file_obj:
+                    file_obj.write(str(t2-t1)+','+str(int((t2-t0)/num))+'\n')
+            if num_post_traces>0:
+                with open(filename, mode='a', encoding='utf-8') as file_obj:
+                    file_obj.write('post'+str(num_post_traces)+','+str(onpost_traces[0].timestamp)+','+str(onpost_traces[-1].timestamp)+'|')
+                with open(filename, mode='a', encoding='utf-8') as file_obj:
+                        file_obj.write(str(t2-t1)+','+str(int((t2-t0)/num))+'\n')
+
+            # if (t2-t1)/1e3 >= 10: # > 10ms
+            #     with open(filename, mode='a', encoding='utf-8') as file_obj:
+            #         file_obj.write(str(num)+':'+str(num_traces)+','+str(t2-t1)+','+str(int((t2-t0)/num))+'\n')
             t1 = t2
