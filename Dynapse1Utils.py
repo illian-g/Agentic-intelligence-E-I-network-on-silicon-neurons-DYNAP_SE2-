@@ -182,17 +182,15 @@ def close_dynapse1(store, device_name, gui_process=''):
         gui_process.join()
     store.DeviceController.close_device(device_name)
 
-def get_neuron_from_config(config, global_neuron_id):
+def get_neuron_from_config(config, chip, core, neuron):
     """
-    Get a neuron by its global_neuron_id from a configuration
+    Get a neuron by its neuron id from a configuration
     Attributes:
         config: Dynapse1Configuration
-        global_neuron_id: int, global neuron id
+        chip: int
+        core: int
+        neuron: int
     """
-    chip = int(global_neuron_id / NEURONS_PER_CHIP)
-    core = int(global_neuron_id%NEURONS_PER_CHIP / NEURONS_PER_CORE)
-    neuron = global_neuron_id%NEURONS_PER_CORE
-
     return config.chips[chip].cores[core].neurons[neuron]
 
 def gen_synapse_string(synapse):
@@ -318,11 +316,11 @@ def print_dynapse1_spike(event):
             event.core_id*NEURONS_PER_CORE+
             event.chip_id*NEURONS_PER_CHIP), end=',')
 
-def create_neuron_select_graph(model, global_neuron_ids):
+def create_neuron_select_graph(model, neuron_ids):
     """
     Attribute:
         model: Dynapse1Model, returned by getattr(store, device_name)
-        global_neuron_ids: list of int, global neuron ids of the neurons you want to monitor.
+        neuron_ids: list of tuple(int, int, int) in the order of (chip, core, neuron), neuron ids of the neurons you want to monitor.
     Process and usage of the graph:
         Create a graph: source_node in model -> filter_node in graph -> sink_node to get events.
         Only filter_node is in the graph. Source and sink nodes are outside graph.
@@ -343,9 +341,9 @@ def create_neuron_select_graph(model, global_neuron_ids):
 
     # NeuronSelectFilterNode. Node 2. Initialized inside graph, by add_filter_node.
     filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
-    # Get this filterNode from the created graph and set selected global neuron IDs.
+    # Get this filterNode from the created graph and set selected neuron IDs.
     filter_node = graph.get_node(filter_node_id)
-    filter_node.set_neurons(global_neuron_ids)
+    filter_node.set_neurons(neuron_ids)
 
     # dk.get_source_node() is Node 1. Initialized outside graph, not by add_filter_node.
     # Connect Node 1 to Node 2, using add_destination because Node 1 not inside graph.

@@ -148,12 +148,10 @@ poisson_gen.set_chip_id(chip)
 poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[0], rate)
 
 # check the configuration...
-global_ids = ut.get_global_id_list(neuron_ids)
 config = model.get_configuration()
-for i in range(len(global_ids)):
-    nid = global_ids[i]
-    neuron = ut.get_neuron_from_config(config, nid)
-    print("------------Neuron", neuron_ids[i],"------------")
+for nid in neuron_ids:
+    neuron = ut.get_neuron_from_config(config, nid[0], nid[1], nid[2])
+    print("------------Neuron", nid,"------------")
     print("Cams:")
     ut.print_neuron_synapses(neuron, range(12))
     print("Srams:")
@@ -186,7 +184,7 @@ poisson_gen.stop()
 
 poisson_gen.start()
 
-monitored_neurons = global_ids[:1]
+monitored_neurons = neuron_ids[:1]
 graph, filter_node, sink_node = ut.create_neuron_select_graph(model, monitored_neurons)
 graph.start()
 

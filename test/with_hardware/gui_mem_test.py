@@ -189,9 +189,6 @@ api.monitor_neuron(1, 123)
 chip = 1
 neuron_ids = [(chip,0,20), (0,0,36), (0,2,60), (1,1,60), (2,1,107), (2,3,152)]
 
-# check the configuration...
-global_ids = ut.get_global_id_list(neuron_ids)
-
 paramGroup = gen_param_group_1core()
 for chip in range(4):
     for core in range(4):
@@ -203,7 +200,7 @@ for chip in range(4):
 # start the poisson gen
 # poisson_gen.start()
 
-monitored_neurons = global_ids[:1]
+monitored_neurons = neuron_ids[:1]
 graph, filter_node, sink_node = ut.create_neuron_select_graph(model, monitored_neurons)
 graph.start()
 

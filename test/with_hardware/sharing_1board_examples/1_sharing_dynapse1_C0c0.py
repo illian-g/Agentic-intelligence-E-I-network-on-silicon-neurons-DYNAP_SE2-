@@ -61,14 +61,12 @@ model.apply_configuration_by_core(new_config, chip, core)
 # ------------------- build network -------------------
 
 # check the configuration...
-global_ids = ut.get_global_id_list(neuron_ids)
 config = model.get_configuration()
-for i in range(len(global_ids)):
-    nid = global_ids[i]
-    neuron = ut.get_neuron_from_config(config, nid)
-    print("------------Neuron", neuron_ids[i],"------------")
+for nid in neuron_ids:
+    neuron = ut.get_neuron_from_config(config, nid[0], nid[1], nid[2])
+    print("------------Neuron", nid,"------------")
     print("Cams:")
-    ut.print_neuron_synapses(neuron, range(2))
+    ut.print_neuron_synapses(neuron, range(12))
     print("Srams:")
     ut.print_neuron_destinations(neuron)
 
@@ -91,7 +89,7 @@ ut.save_parameters2txt_file(model.get_configuration(), './current_parameters_sha
 poisson_gen.start()
 
 # graph does not work now! Nothing can be received...
-graph, filter_node, sink_node = ut.create_neuron_select_graph(model, global_ids)
+graph, filter_node, sink_node = ut.create_neuron_select_graph(model, neuron_ids)
 graph.start()
 while True:
     sink_node.get_events()

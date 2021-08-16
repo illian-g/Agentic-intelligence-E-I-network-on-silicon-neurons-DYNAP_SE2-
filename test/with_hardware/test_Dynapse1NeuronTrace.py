@@ -270,12 +270,10 @@ poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[0], rate)
 
 # check the configuration...
 neuron_ids = [(chip,core,x) for x in nids]
-global_ids = ut.get_global_id_list(neuron_ids)
 config = model.get_configuration()
-for i in range(len(global_ids)):
-    nid = global_ids[i]
-    neuron = ut.get_neuron_from_config(config, nid)
-    print("------------Neuron", neuron_ids[i],"------------")
+for nid in neuron_ids:
+    neuron = ut.get_neuron_from_config(config, nid[0], nid[1], nid[2])
+    print("------------Neuron", nid,"------------")
     print("Cams:")
     ut.print_neuron_synapses(neuron, range(12))
     print("Srams:")
@@ -310,7 +308,7 @@ graph.add_destination(spike_filter_node_id, spike_sink_node.get_input_channel())
 graph.add_destination(trace_filter_node_id, trace_sink_node.get_input_channel())
 
 # configure filter node: which neurons to filter?
-spike_filter_node.set_neurons(global_ids) # TODO: use (chip,core,neuron) instead of global
+spike_filter_node.set_neurons(neuron_ids)
 trace_filter_node.set_neurons(neuron_ids)
 tau = int(200*1e3) # 50*1e3 in microsec
 method = "increase_by_1" # increase_by_1 increase_to_1

@@ -278,12 +278,10 @@ if __name__ == "__main__":
 
     # check the configuration...
     neuron_ids = [(chip,core,x) for x in nids]
-    global_ids = ut.get_global_id_list(neuron_ids)
     config = model.get_configuration()
-    for i in range(len(global_ids)):
-        nid = global_ids[i]
-        neuron = ut.get_neuron_from_config(config, nid)
-        print("------------Neuron", neuron_ids[i],"------------")
+    for nid in neuron_ids:
+        neuron = ut.get_neuron_from_config(config, nid[0], nid[1], nid[2])
+        print("------------Neuron", nid,"------------")
         print("Cams:")
         ut.print_neuron_synapses(neuron, range(12))
         print("Srams:")

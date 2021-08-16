@@ -596,9 +596,9 @@ def convert_validated_network2dynapse1_configuration(network, large_conn_weight_
         post_neurons = network.post_neuron_dict[loc]
         for post_neuron in post_neurons:
             post_in_config = ut.get_neuron_from_config(config,
-                                        post_neuron.neuron_id+
-                                        post_core_id*NEURONS_PER_CORE+
-                                        post_chip_id*NEURONS_PER_CHIP)
+                                        post_chip_id,
+                                        post_core_id,
+                                        post_neuron.neuron_id)
 
             for pre_tag in post_neuron.incoming_connections:
                 # pre_tag = (pre_neuron.core_id, pre_neuron.neuron_id, synapse_type)
@@ -633,9 +633,9 @@ def convert_validated_network2dynapse1_configuration(network, large_conn_weight_
                     else:
                         # get the real pre neuron in the configuration
                         pre_in_config = ut.get_neuron_from_config(config,
-                                            pre_neuron_id+
-                                            pre_core_id*NEURONS_PER_CORE+
-                                            pre_chip_virtual[0]*NEURONS_PER_CHIP)
+                                            pre_chip_virtual[0],
+                                            pre_core_id,
+                                            pre_neuron_id)
                         # write the sram of the pre
                         check_and_write_pre_sram(pre_in_config, post_chip_id, post_core_id)
 
@@ -998,9 +998,6 @@ if __name__ == "__main__":
     net_gen.clear_network()
 
     neuron_ids = [(0,0,10), (0,0,30), (0,2,60), (1,1,60), (3,1,107), (2,1,107), (2,3,152)]
-    global_ids = ut.get_global_id_list(neuron_ids)
-    # global_ids = [nid[2]+nid[1]*NEURONS_PER_CORE+nid[0]*NEURONS_PER_CHIP\
-    #                 for nid in neuron_ids]
 
     net_gen.add_connection(Neuron(0,1,66,is_spikegen), Neuron(0,0,10), dyn1.Dynapse1SynType.AMPA)
     # check sram of Neuron(0,0,10)
@@ -1020,10 +1017,9 @@ if __name__ == "__main__":
     new_config = net_gen.make_dynapse1_configuration()
 
     # print cam and sram of the above neurons
-    for i in range(len(global_ids)):
-        nid = global_ids[i]
-        neuron = ut.get_neuron_from_config(new_config, nid)
-        print("------------Neuron", neuron_ids[i],"------------")
+    for nid in neuron_ids:
+        neuron = ut.get_neuron_from_config(new_config, nid[0], nid[1], nid[2])
+        print("------------Neuron", nid, "------------")
         print("Cams:")
         ut.print_neuron_synapses(neuron, range(4))
         print("Srams:")
@@ -1048,10 +1044,9 @@ if __name__ == "__main__":
     config = model.get_configuration()
 
     # print cam and sram of the above neurons
-    for i in range(len(global_ids)):
-        nid = global_ids[i]
-        neuron = ut.get_neuron_from_config(config, nid)
-        print("------------Neuron", neuron_ids[i],"------------")
+    for nid in neuron_ids:
+        neuron = ut.get_neuron_from_config(config, nid[0], nid[1], nid[2])
+        print("------------Neuron", nid,"------------")
         print("Cams:")
         ut.print_neuron_synapses(neuron, range(4))
         print("Srams:")

@@ -61,16 +61,14 @@ model.apply_configuration_by_core(new_config, chip, core)
 # ------------------- build network -------------------
 
 # check the configuration...
-global_ids = ut.get_global_id_list(neuron_ids)
 config = model.get_configuration()
-for i in range(len(global_ids)):
-        nid = global_ids[i]
-        neuron = ut.get_neuron_from_config(config, nid)
-        print("------------Neuron", neuron_ids[i],"------------")
-        print("Cams:")
-        ut.print_neuron_synapses(neuron, range(2))
-        print("Srams:")
-        ut.print_neuron_destinations(neuron)
+for nid in neuron_ids:
+    neuron = ut.get_neuron_from_config(config, nid[0], nid[1], nid[2])
+    print("------------Neuron", nid,"------------")
+    print("Cams:")
+    ut.print_neuron_synapses(neuron, range(12))
+    print("Srams:")
+    ut.print_neuron_destinations(neuron)
 
 # set spike generators (0,1,66)
 poisson_gen_id = ut.get_global_id(0,1,66)
