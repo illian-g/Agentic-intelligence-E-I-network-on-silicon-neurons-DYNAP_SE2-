@@ -2,7 +2,6 @@ import samna
 import samna.dynapse1 as dyn1
 
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import sys
 # Note: change the path to where your lib files are
@@ -10,140 +9,11 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import Dynapse1Utils as ut
 from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 from params import gen_param_group
+from plotter import plot_raster, plot_trace
 
 """
 Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow spike (from trigger neuron 1 (1,0,17)), and increases at each blue spike (from the trace neuron itself). The increase at the blue spikes may not obvious because it's the value that's first decayed, then increased.
 """
-
-# get the timestamps of some specific neurons
-def get_selected_timestamps(spikes, neuron_ids):
-    """
-    Filter out timestamps of selected neuron_ids.
-
-    Parameters
-    -----------
-    spikes : list[Dynapse1Spike]
-        result of sink_node.get_events()
-    neuron_ids : list[(int,int,int)]
-        neuron_ids
-    
-    Returns
-    ---------
-    timestamps : list[list[int]]
-        spike timestamps of selected neurons. The list indexing is the same as
-        the neuron indexing in the list neuron_ids.
-    """
-    if len(set(neuron_ids)) != len(neuron_ids):
-        raise Exception("Duplicate neuron ids exist!")
-
-    num_neurons = len(neuron_ids)
-    timestamps = []
-    for i in range(num_neurons):
-        timestamps.append([])
-    
-    for spike in spikes:
-        spike_neuron = (spike.chip_id, spike.core_id, spike.neuron_id)
-        try:
-            # if spike_neuron in neuron_ids, add timestamp to corresponding timestamp list
-            id_in_list = neuron_ids.index(spike_neuron)
-            timestamps[id_in_list].append(spike.timestamp)
-        except ValueError:
-            # if not, do nothing
-            pass
-    
-    return timestamps
-
-# get the timestamps of some specific neurons
-def get_selected_traces(timed_traces, neuron_ids):
-    """
-    Filter out traces of selected neuron_ids.
-
-    Parameters
-    -----------
-    timed_traces : list[Dynapse1Trace]
-        result of sink_node.get_events()
-    neuron_ids : list[(int,int,int)]
-        neuron_ids
-    
-    Returns
-    ---------
-    timestamps : list[list[int]]
-        spike timestamps of selected neurons. The list indexing is the same as
-        the neuron indexing in the list neuron_ids.
-    trace_values : list[list[float]]
-        trace values at spike times. The list indexing is the same as
-        the neuron indexing in the list neuron_ids.
-    """
-    if len(set(neuron_ids)) != len(neuron_ids):
-        raise Exception("Duplicate neuron ids exist!")
-
-    num_neurons = len(neuron_ids)
-    timestamps = []
-    for i in range(num_neurons):
-        timestamps.append([])
-    trace_values = []
-    for i in range(num_neurons):
-        trace_values.append([])
-    
-    # tracemap over time
-    for trace in timed_traces:
-        trace_map = trace.trace_map
-        timestamp = trace.timestamp
-
-        for i in range(num_neurons):
-            neuron_id = neuron_ids[i]
-            trace_value = trace_map.get(neuron_id)
-            if trace_value != None:
-                trace_values[i].append(trace_value)
-                timestamps[i].append(timestamp)
-    
-    return timestamps, trace_values
-
-# plot and compare the spikes and traces
-
-# plot the raster
-def plot_raster(spikes, neuron_ids, t_start=None, t_end=None):
-    """
-    plot the raster of neuron_ids from collected spikes.
-    spikes: spike
-    """
-    if len(set(neuron_ids)) != len(neuron_ids):
-        raise Exception("Duplicate neuron ids exist!")
-    
-    timestamps = get_selected_timestamps(spikes, neuron_ids)
-
-    ax = plt.subplot()
-    for i in range(len(neuron_ids)):
-        print(i, timestamps[i])
-        ax.plot(timestamps[i], np.ones(len(timestamps[i]))*i, '.', label=str(i)+': '+str(neuron_ids[i]))
-        for time in timestamps[i]:
-            plt.axvline(time)
-    
-    if t_start != None and t_end != None:
-        ax.set_xlim(t_start, t_end)
-    
-    ax.legend()
-
-# plot traces
-def plot_trace(timed_traces, neuron_ids, t_start=None, t_end=None):
-    """
-    plot the raster of neuron_ids from collected spikes.
-    spikes: spike
-    """
-    if len(set(neuron_ids)) != len(neuron_ids):
-        raise Exception("Duplicate neuron ids exist!")
-    
-    timestamps, trace_values = get_selected_traces(timed_traces, neuron_ids)
-
-    ax = plt.subplot()
-    for i in range(len(neuron_ids)):
-        print(timestamps[i], trace_values[i])
-        ax.plot(timestamps[i], trace_values[i], '.-', label=str(i)+': '+str(neuron_ids[i]))
-    
-    if t_start != None and t_end != None:
-        ax.set_xlim(t_start, t_end)
-    
-    ax.legend()
 
 if __name__ == "__main__":
     # open DYNAP-SE1 board to get Dynapse1Model

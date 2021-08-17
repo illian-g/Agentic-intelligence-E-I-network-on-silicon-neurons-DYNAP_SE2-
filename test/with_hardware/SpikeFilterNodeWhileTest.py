@@ -4,8 +4,6 @@ import samna.dynapse1 as dyn1
 import time
 import _thread
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns; sns.set()
 
 import sys
 # Note: change the path to where your lib files are
