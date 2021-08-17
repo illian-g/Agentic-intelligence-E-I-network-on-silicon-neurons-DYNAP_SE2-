@@ -1,3 +1,4 @@
+from numpy.core.defchararray import add
 import samna
 import samna.dynapse1 as dyn1
 
@@ -7,6 +8,7 @@ import numpy as np
 import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import Dynapse1Utils as ut
+from Dynapse1Constants import MAX_NUM_CAMS
 from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator, weight_matrix2lists, remove_synapses
 from params import gen_param_group
 
@@ -17,7 +19,7 @@ if __name__ == "__main__":
     schip=0
     score=0
     sids = [1, 2, 3]
-    rates = [50, 100, 50]
+    rates = [0, 100, 0]
 
     chip=1
     core=0
@@ -29,7 +31,8 @@ if __name__ == "__main__":
 
     low_init_w = 0.1
     w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w
-    int_w_plast = floatW2intW(w_plast)
+    max_pre_count = MAX_NUM_CAMS - 1
+    int_w_plast = floatW2intW(w_plast, max_pre_count)
 
     num_samples = 10
     duration_per_sample = 500 # millisec
@@ -77,10 +80,7 @@ if __name__ == "__main__":
     # print the network so you can double check (optional)
     print(net_gen.network)
 
-    # make a dynapse1config using the network
     new_config = net_gen.make_dynapse1_configuration()
-
-    # apply the configuration
     model.apply_configuration(new_config)
     # ------------------- build network -------------------
 
@@ -101,21 +101,26 @@ if __name__ == "__main__":
         poisson_gen.start()
 
         # learn: w_plast being updated in another thread
-        time.sleep(duration_per_sample/1e3)
+        time.sleep(float(duration_per_sample/1e3))
 
-        # DOING: change the connections on chip using w_plast
         # remove the current pre post connections
-        # weight_matrix2lists(int_w_plast, )
-        # net_gen.remove_connections_from_list(pre_neuron_group.neurons, post_neuron_group.neurons, dyn1.Dynapse1SynType.NMDA, )
-        remove_synapses(net_gen, )
+        remove_synapses(net_gen, connectivity['pre2post'])
 
+        # add new pre-post connections using the latest w_plast
+        int_w_plast = floatW2intW(stdp.w_plast, max_pre_count)
+        connectivity['pre2post'] = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
+        add_synapses(net_gen, connectivity['pre2post'])
 
-        int_w_plast = floatW2intW(w_plast)
-        syn = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
+        # print(stdp.w_plast)
+        # print(int_w_plast)
+        # print(net_gen.network)
+
+        new_config = net_gen.make_dynapse1_configuration()
+        model.apply_configuration(new_config)
 
         poisson_gen.stop()
 
-        time.sleep(duration_cool_down/1e3)
+        time.sleep(float(duration_cool_down/1e3))
 
     stdp.stop_stdp()
 

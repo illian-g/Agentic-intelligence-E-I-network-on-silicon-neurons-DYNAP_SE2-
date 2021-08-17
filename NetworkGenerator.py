@@ -141,8 +141,8 @@ def weight_matrix2lists(weight_matrix, pre_group, post_group):
             for j in range(weight_matrix.shape[1]):
                 w = weight_matrix[i][j]
                 for num_conn in range(int(w)):
-                    pre_list.append[i]
-                    post_list.append[j]
+                    pre_list.append(i)
+                    post_list.append(j)
         return pre_list, post_list
     else:
         raise Exception('Row count of weight_matrix should equals pre_group neuron count, and column count of weight_matrix should equals post_group neuron count!')
@@ -209,7 +209,7 @@ class Synapses:
                 assert(len(pre_list)==len(post_list)), 'pre_list '+\
                 ' and pre_list need to have the same length'
                 self.pre_list, self.post_list = pre_list, post_list
-            elif pre_list == None and post_list == None and weight_matrix != None:
+            elif pre_list == None and post_list == None and weight_matrix.any() != None:
                 # convert w to pre_list and post_list
                 if weight_matrix.shape[0] == len(pre_group.neurons) and weight_matrix.shape[1] == len(post_group.neurons):
                     self.pre_list, self.post_list = weight_matrix2lists(weight_matrix, pre_group, post_group)

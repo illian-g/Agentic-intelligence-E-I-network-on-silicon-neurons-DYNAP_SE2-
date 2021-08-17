@@ -68,6 +68,7 @@ class Stdp:
             
             # update w_plast using a specific learning algorithm
             if self.algorithm == 'triplet_stdp':
-                self.w_plast = trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
+                trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
+                print('s', self.w_plast)
             else:
                 print("Wrong algorithm name. Learning setup failed.")

@@ -1,3 +1,5 @@
+import numpy as np
+
 """
 All to all plastic connections between pre and post population.
 
@@ -27,8 +29,8 @@ trace_max = 1
 pre_tau = int(20*1e3) # in microsec
 post1_tau = int(40*1e3) # in microsec
 post2_tau = int(40*1e3) # in microsec
-nuEEpre = 0.005
-nuEEpost = 0.025
+nuEEpre = 0.0005
+nuEEpost = 0.0025
 wmaxEE = 1
 expEEpre = 0.2 # presynaptic weight dependence
 expEEpost = 0.2
@@ -65,7 +67,7 @@ def triplet_stdp_algorithm(w_plast, onpre_traces, onpost_traces, pre_neuron_ids,
             post1 = onpre_trace.trace_map[post_neuron]
 
             delta_w = nuEEpre * post1 * w_plast[i][j]**expEEpre
-            w_plast[i][j] -= delta_w
+            w_plast[i][j] = np.clip(w_plast[i][j]-delta_w, 0, wmaxEE)
     
     # on post, contains pre and post2 trace
     for onpost_trace in onpost_traces:
@@ -82,7 +84,7 @@ def triplet_stdp_algorithm(w_plast, onpre_traces, onpost_traces, pre_neuron_ids,
             pre = onpost_trace.trace_map[pre_neuron]
 
             delta_w = nuEEpost * pre * post2 * (wmaxEE - w_plast[i][j])**expEEpost
-            w_plast[i][j] += delta_w
+            w_plast[i][j] = np.clip(w_plast[i][j]+delta_w, 0, wmaxEE)
 
     return w_plast
     
