@@ -64,13 +64,15 @@ if __name__ == "__main__":
     post_neuron_group = NeuronGroup(chip,core,post_nids)
 
     # connect spikegen_group to pre_neuron_group
-    connectivity = {}
-    syn = Synapses(spikegen_group, pre_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one')
-    add_synapses(net_gen, syn)
-    syn = Synapses(spikegen_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one')
-    add_synapses(net_gen, syn)
-    syn = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
-    add_synapses(net_gen, syn)
+    connectivity = {
+        'pre_gen2pre': Synapses(spikegen_group, pre_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one'),
+        'post_gen2post': Synapses(spikegen_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one'),
+        'pre2post': Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
+    }
+
+    for conn in connectivity:
+        print(conn)
+        add_synapses(net_gen, connectivity[conn])
 
     # print the network so you can double check (optional)
     print(net_gen.network)

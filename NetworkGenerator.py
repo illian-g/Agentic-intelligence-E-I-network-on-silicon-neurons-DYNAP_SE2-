@@ -5,6 +5,7 @@ from Dynapse1Constants import NUM_CHIPS, CORES_PER_CHIP, NEURONS_PER_CORE, MAX_N
 import collections
 from collections import Counter
 import random
+import numpy as np
 
 class Neuron:
     """
@@ -146,6 +147,32 @@ def weight_matrix2lists(weight_matrix, pre_group, post_group):
     else:
         raise Exception('Row count of weight_matrix should equals pre_group neuron count, and column count of weight_matrix should equals post_group neuron count!')
 
+def gen_one2one_lists(pre_neurons, post_neurons):
+    assert(len(pre_neurons)==len(post_neurons)), 'Pre neuron group '+\
+    ' and post neuron group need to have the same length for one2one connections'
+    pre_list = np.arange(len(pre_neurons))
+    post_list = pre_list
+    return pre_list, post_list
+
+def gen_all2all_lists(pre_neurons, post_neurons, p, rand_seed):
+    random.seed(rand_seed)
+
+    all2all_conns = []
+    for pre in range(len(pre_neurons)):
+        for post in range(len(post_neurons)):
+            all2all_conns.append((pre, post))
+    num_conns = round(len(all2all_conns)*p)
+    random_conns = random.sample(all2all_conns, num_conns)
+
+    pre_list = []
+    post_list = []
+    for pair in random_conns:
+        pre_list.append(pair[0])
+        post_list.append(pair[1])
+    
+    random.seed(None)
+    return pre_list, post_list
+
 class Synapses:
     """
     Connections from a pre NeuronGroup to a post NeuronGroup. Stores the information of the connectivity.
@@ -158,35 +185,37 @@ class Synapses:
         # if specify the conn_type, check 
         # 1) if the type is valid 2) if pre_list and post_list are None
         if conn_type != None:
-            if conn_type not in ['one2one', 'all2all']:
-                raise Exception('Invalid connection type!')
             if (pre_list == None and post_list == None and weight_matrix==None) == False:
                 raise Exception('pre_list, post_list or weight_matrix cannot be specified given connection type {conn_type}!')
             
-            if conn_type == 'all2all':
+            # generate the pre_list and post_list here, so that user can check which connections are created
+            pre_neurons = pre_group.neurons
+            post_neurons = post_group.neurons
+            if conn_type == 'one2one':
+                self.pre_list, self.post_list = gen_one2one_lists(pre_neurons, post_neurons)
+            elif conn_type == 'all2all':
                 if p == None:
                     p = 1
-                    # print('all2all connections with propability p=1 will be created!')
-
+                self.pre_list, self.post_list = gen_all2all_lists(pre_neurons, post_neurons, p, rand_seed)
+            else:
+                raise Exception('Connection type not supported!')
+            
             self.conn_type = conn_type
             self.p = p
             self.rand_seed = rand_seed
-            self.pre_list = None
-            self.post_list = None
         
         else:
             if pre_list != None and post_list != None and weight_matrix == None:
                 assert(len(pre_list)==len(post_list)), 'pre_list '+\
                 ' and pre_list need to have the same length'
-            if pre_list == None and post_list == None and weight_matrix != None:
+                self.pre_list, self.post_list = pre_list, post_list
+            elif pre_list == None and post_list == None and weight_matrix != None:
                 # convert w to pre_list and post_list
                 if weight_matrix.shape[0] == len(pre_group.neurons) and weight_matrix.shape[1] == len(post_group.neurons):
-                    pre_list, post_list = weight_matrix2lists(weight_matrix, pre_group, post_group)
+                    self.pre_list, self.post_list = weight_matrix2lists(weight_matrix, pre_group, post_group)
             else:
                 raise Exception('Please give either (pre_list and post_list) or (weight_matrix)!')
 
-            self.pre_list = pre_list
-            self.post_list = post_list
             self.conn_type = None
             self.p = None
             self.rand_seed = None
@@ -206,10 +235,7 @@ class WTA_connections:
 
 def add_synapses(netgen, synapse):
     """Add a synapse group into a network generator"""
-    if synapse.conn_type != None:
-        netgen.add_connections_from_type(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, conn_type=synapse.conn_type, p=synapse.p, rand_seed=synapse.rand_seed)
-    else:
-        netgen.add_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
+    netgen.add_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
 def add_wta_conns(netgen, wta_conns):
     """Add WTA connections for a WTA into a network generator"""
@@ -219,8 +245,8 @@ def add_wta_conns(netgen, wta_conns):
         add_synapses(netgen, wta_conns.ee)
 
 def remove_synapses(netgen, synapse):
-    # TODO
-    pass
+    """Remove a synapse group into a network generator"""
+    netgen.remove_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
 class Network:
     """
@@ -372,6 +398,8 @@ class Network:
         '''
         add multiple connections between 2 neuron groups given connectivity type: 'one2one' or 'all2all'.
         '''
+        print("Warning: this is an old way of creating connections which will not save pre_list and post_list as the connections. The preferable way is to create a Synapses object syn, then use add_synapses(net_gen, syn).")
+
         if conn_type == 'one2one':
             assert(len(pre_neurons)==len(post_neurons)), 'Pre neuron group '+\
             ' and post neuron group need to have the same length for one2one connections'
