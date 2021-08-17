@@ -18,4 +18,4 @@
 
 - We added some new features to the Python libs (mainly in NetworkGenerator.py), e.g. NeuronGroup, several add_connections* functions to create connections between 2 neuron groups, more convenient printing for Neuron and Network, etc. Specifically, this example (https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_neuronGroup.py) shows you a more convenient way of creating a network.
 
-- Dynapse1TraceNode goes into version 0.8.22.0 which can be used to do STDP-like learning.
+- Dynapse1TraceNode goes into version 0.8.22.0 which can be used to do STDP-like learning. Still under test.

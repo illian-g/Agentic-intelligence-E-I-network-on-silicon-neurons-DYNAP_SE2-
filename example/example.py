@@ -15,10 +15,10 @@ from params import gen_param_group
 device_name = "dynapse1"
 
 # open with GUI
-# store, gui_process = ut.open_dynapse1(device_name)
+store, gui_process = ut.open_dynapse1(device_name)
 
 # open without GUI
-store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
+# store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
 
 model = getattr(store, device_name)
 
@@ -127,7 +127,7 @@ print("Example finished")
 # close Dynapse1
 
 # close with GUI
-# ut.close_dynapse1(store, device_name, gui_process)
+ut.close_dynapse1(store, device_name, gui_process)
 
 # close without GUI
-ut.close_dynapse1(store, device_name)
+# ut.close_dynapse1(store, device_name)

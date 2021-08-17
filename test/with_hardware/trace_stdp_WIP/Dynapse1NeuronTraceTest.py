@@ -9,12 +9,11 @@ import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import Dynapse1Utils as ut
 from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
+from params import gen_param_group
 
 """
 Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow spike (from trigger neuron 1 (1,0,17)), and increases at each blue spike (from the trace neuron itself). The increase at the blue spikes may not obvious because it's the value that's first decayed, then increased.
 """
-
-from params import gen_param_group
 
 # get the timestamps of some specific neurons
 def get_selected_timestamps(spikes, neuron_ids):
