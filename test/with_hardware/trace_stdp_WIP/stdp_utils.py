@@ -130,7 +130,7 @@ def create_stdp_graph(model):
 
     return graph, spike_filter_node, onpre_trace_node, onpost_trace_node, onpre_trace_sink, onpost_trace_sink
 
-def bad_traces(onpre_traces, onpost_traces, max_num, max_time_interval):
+def bad_traces(onpre_traces, onpost_traces, max_num=10, max_time_interval=3*1e5):
     """
     To handle the abnormal traces after restart of stdp.
     Bad traces should be dropped, not processed anymore.
@@ -160,3 +160,6 @@ def bad_traces(onpre_traces, onpost_traces, max_num, max_time_interval):
                 return True
 
     return False
+
+def convert_floatW2conns(w_plast):
+    return

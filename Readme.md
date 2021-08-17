@@ -20,7 +20,7 @@
 
 - Dynapse1TraceNode goes into version 0.8.22.0 which can be used to do STDP-like learning.
 
-- Issue: the GUI and matplotlib.pyplot may not work depending on your system.
+- Issue: the GUI and `matplotlib.pyplot` may not work depending on your system.
   - If you get the error below, please `open_dynapse1` without GUI.
     > samna.open_remote_node(visualizer_id, viz_name)
     RuntimeError: Store with ID: 3 timed out on content request

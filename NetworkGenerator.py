@@ -151,7 +151,7 @@ class Synapses:
             if conn_type == 'all2all':
                 if p == None:
                     p = 1
-                    print('all2all connections with propability p=1 will be created!')
+                    # print('all2all connections with propability p=1 will be created!')
 
             self.conn_type = conn_type
             self.p = p
@@ -400,7 +400,6 @@ class NetworkGenerator:
     def print_network(self):
         print("Warning: print_network is deprecated and will be removed in a future release, use print(NetworkGenerator.network). Note: str(NetworkGenerator.network) gives you the string format of a network.")
 
-        # print_post_neuron_dict(self.network.post_neuron_dict)
         print(self.network)
 
     def make_dynapse1_configuration(self):
@@ -409,11 +408,10 @@ class NetworkGenerator:
         If valid: convert it to a configuration
         If not: raise exception
         '''
-        print("Checking if the given network is valid to be deployed on DYNAP-SE1 chips...")
         is_valid, large_conn_weight_dict = validate(self.network, MAX_NUM_CAMS)
 
         self.config = convert_validated_network2dynapse1_configuration(self.network, large_conn_weight_dict)
-        print("Converted the validated network to a Dynapse1 configuration!")
+        # print("Converted the validated network to a Dynapse1 configuration!")
 
         return self.config
 
@@ -560,11 +558,6 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
                             for pre_chip in pre_chips_1:
                                 if pre_chip not in pre_chips_2: 
 
-                            # if pre_chips_1 != pre_chips_2:
-                            #     # print('pre_chips_1 %i, pre_chips_2 %i' % (pre_chips_1, pre_chips_2))
-                            #     print('pre_chips_1', pre_chips_1)
-                            #     print('pre_chips_2', pre_chips_2)
-
                                     raise Exception("ERROR: aliasing pre neurons exist! Post neurons " \
                                                     +repr(post_neurons[nid_1])+" and " \
                                                     +repr(post_neurons[nid_2]) \
@@ -572,7 +565,7 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
                                                     +str(pre_tag_1)+"."+" Possible solution: use different pre neuron ids.")
         # ----------------------- check aliasing -----------------------
 
-    print("Validation complete: the network is good to go!")
+    # print("Validation complete: the network is good to go!")
     valid = True
     return valid, large_conn_weight_dict
 
@@ -690,15 +683,6 @@ def convert_incoming_conns_dict2list(incoming_connections_dict):
 
 def gen_neuron_string(neuron):
     print("Warning: gen_neuron_string is deprecated and will be removed in a future release, use str(Neuron) instead.")
-
-    # if neuron.is_spike_gen:
-    #     return ("C"+str(neuron.chip_id)
-    #         +"c"+str(neuron.core_id)
-    #         +"s"+str(neuron.neuron_id))
-    # else:
-    #     return ("C"+str(neuron.chip_id)
-    #             +"c"+str(neuron.core_id)
-    #             +"n"+str(neuron.neuron_id))
 
     return str(neuron)
 
