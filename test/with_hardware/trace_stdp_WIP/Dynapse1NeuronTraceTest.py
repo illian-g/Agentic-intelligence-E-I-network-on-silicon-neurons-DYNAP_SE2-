@@ -263,12 +263,19 @@ if __name__ == "__main__":
     spikes = spike_sink_node.get_events()
     timed_traces = trace_sink_node.get_events()
 
-    fig = plt.figure()
-    plot_raster(spikes, neuron_ids) # [neuron_ids[1]]
-    plot_trace(timed_traces, [neuron_ids[0]]) # [neuron_ids[1]]
-    plt.xlabel('Time (us)')
-    plt.ylabel('Trace')
-    plt.show()
+    for spike in spikes:
+        ut.print_dynapse1_spike(spike)
+    print('')
+    for trace in timed_traces:
+        print(trace.timestamp, trace.trace_map, end=',')
+    print('')
+
+    # fig = plt.figure()
+    # plot_raster(spikes, neuron_ids) # [neuron_ids[1]]
+    # plot_trace(timed_traces, [neuron_ids[0]]) # [neuron_ids[1]]
+    # plt.xlabel('Time (us)')
+    # plt.ylabel('Trace')
+    # plt.show()
 
 
     graph.stop()
