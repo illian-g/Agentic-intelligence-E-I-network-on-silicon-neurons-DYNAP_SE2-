@@ -1,4 +1,7 @@
+import numpy as np
 import samna
+sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
+from Dynapse1Constants import MAX_NUM_CAMS
 
 def get_selected_timestamps(spikes, neuron_ids):
     """
@@ -161,5 +164,21 @@ def bad_traces(onpre_traces, onpost_traces, max_num=10, max_time_interval=3*1e5)
 
     return False
 
-def convert_floatW2conns(w_plast):
-    return
+def floatW2intW(float_w_plast, unit=0.1):
+    """
+    Convert a float w_plast into a network.
+    0.1 -> 1 connection
+    """
+    float_w_plast *= 1/unit
+    int_w_plast = float_w_plast.astype(int)
+    post_cam_counts = np.sum(int_w_plast, axis=0)
+
+    for post in range(len(post_cam_counts)):
+        if post_cam_counts[post] > MAX_NUM_CAMS:
+            pre_post_weights = int_w_plast[:,post]
+            max_pre = np.argmax(pre_post_weights)
+
+            # punish the largest weight pre,post connection
+            int_w_plast[max_pre][post] -= 1 
+
+    return int_w_plast

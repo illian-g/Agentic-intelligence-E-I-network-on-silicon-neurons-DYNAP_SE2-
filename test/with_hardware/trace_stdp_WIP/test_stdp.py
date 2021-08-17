@@ -5,15 +5,35 @@ import time
 import numpy as np
 
 import sys
-# Note: change the path to where your lib files are
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import Dynapse1Utils as ut
-from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
+from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator, weight_matrix2lists, remove_synapses
 from params import gen_param_group
 
 from stdp import Stdp
+from stdp_utils import floatW2intW
 
 if __name__ == "__main__":
+    schip=0
+    score=0
+    sids = [1, 2, 3]
+    rates = [50, 100, 50]
+
+    chip=1
+    core=0
+    pre_nids = [16, 17, 18]
+    post_nids = [32, 33, 34]
+
+    pre_neuron_ids = [(chip,core,x) for x in pre_nids]
+    post_neuron_ids = [(chip,core,x) for x in post_nids]
+
+    low_init_w = 0.1
+    w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w
+    int_w_plast = floatW2intW(w_plast)
+
+    num_samples = 10
+    duration_per_sample = 500 # millisec
+    duration_cool_down = 500 # millisec
 
     # open DYNAP-SE1 board to get Dynapse1Model
     device_name = "dynapse1"
@@ -38,22 +58,18 @@ if __name__ == "__main__":
     # ------------------- build network -------------------
     net_gen = NetworkGenerator()
 
-    schip=0
-    score=0
-    sids = [1, 2, 3]
     spikegen_group = NeuronGroup(schip,score,sids,True)
 
-    chip=1
-    core=0
-    pre_nids = [16, 17, 18]
-    post_nids = [32, 33, 34]
     pre_neuron_group = NeuronGroup(chip,core,pre_nids)
     post_neuron_group = NeuronGroup(chip,core,post_nids)
 
     # connect spikegen_group to pre_neuron_group
+    connectivity = {}
     syn = Synapses(spikegen_group, pre_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one')
     add_synapses(net_gen, syn)
     syn = Synapses(spikegen_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one')
+    add_synapses(net_gen, syn)
+    syn = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
     add_synapses(net_gen, syn)
 
     # print the network so you can double check (optional)
@@ -71,23 +87,33 @@ if __name__ == "__main__":
     global_poisson_gen_ids = ut.get_global_id_list(spikegen_ids)
     poisson_gen = model.get_poisson_gen()
     poisson_gen.set_chip_id(chip)
-    poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[0], 50)
-    poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[1], 200)
-    poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[2], 50)
-
-    pre_neuron_ids = [(chip,core,x) for x in pre_nids]
-    post_neuron_ids = [(chip,core,x) for x in post_nids]
-
-    poisson_gen.start()
-
-    low_init_w = 0.1
-    w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w
 
     stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp')
 
     stdp.start_stdp()
 
-    time.sleep(60*20) # learn 20 min
+    for i in range(num_samples):
+        # give new stimulation
+        for i in range(len(global_poisson_gen_ids)):
+            poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], rates[i])
+        poisson_gen.start()
+
+        # learn: w_plast being updated in another thread
+        time.sleep(duration_per_sample/1e3)
+
+        # DOING: change the connections on chip using w_plast
+        # remove the current pre post connections
+        # weight_matrix2lists(int_w_plast, )
+        # net_gen.remove_connections_from_list(pre_neuron_group.neurons, post_neuron_group.neurons, dyn1.Dynapse1SynType.NMDA, )
+        remove_synapses(net_gen, )
+
+
+        int_w_plast = floatW2intW(w_plast)
+        syn = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
+
+        poisson_gen.stop()
+
+        time.sleep(duration_cool_down/1e3)
 
     stdp.stop_stdp()
 

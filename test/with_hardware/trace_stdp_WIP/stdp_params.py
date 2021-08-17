@@ -7,7 +7,12 @@ def gen_param_group():
 
     paramGroup = gen()
 
-    paramGroup.param_map["PS_WEIGHT_EXC_S_N"].coarse_value = 0
-    paramGroup.param_map["PS_WEIGHT_EXC_S_N"].fine_value = 0
+    # AMPA, spikegen to neurons
+    paramGroup.param_map["PS_WEIGHT_EXC_F_N"].coarse_value = 7
+    paramGroup.param_map["PS_WEIGHT_EXC_F_N"].fine_value = 80
+
+    # NMDA, pre to post neurons
+    paramGroup.param_map["PS_WEIGHT_EXC_S_N"].coarse_value = 6
+    paramGroup.param_map["PS_WEIGHT_EXC_S_N"].fine_value = 80
 
     return paramGroup

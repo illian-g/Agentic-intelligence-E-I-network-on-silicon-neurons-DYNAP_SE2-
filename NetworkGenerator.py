@@ -1,3 +1,4 @@
+from os import fdatasync
 import samna.dynapse1 as dyn1
 import Dynapse1Utils as ut
 from Dynapse1Constants import NUM_CHIPS, CORES_PER_CHIP, NEURONS_PER_CORE, MAX_NUM_CAMS, NEURONS_PER_CHIP
@@ -129,13 +130,27 @@ class NeuronGroup:
             self.core_id == other.core_id and \
             self.neuron_ids == other.neuron_ids and \
             self.is_spike_gen == other.is_spike_gen
-        
+
+def weight_matrix2lists(weight_matrix, pre_group, post_group):
+    # convert w to pre_list and post_list
+    if weight_matrix.shape[0] == len(pre_group.neurons) and weight_matrix.shape[1] == len(post_group.neurons):
+        pre_list = []
+        post_list = []
+        for i in range(weight_matrix.shape[0]):
+            for j in range(weight_matrix.shape[1]):
+                w = weight_matrix[i][j]
+                for num_conn in range(int(w)):
+                    pre_list.append[i]
+                    post_list.append[j]
+        return pre_list, post_list
+    else:
+        raise Exception('Row count of weight_matrix should equals pre_group neuron count, and column count of weight_matrix should equals post_group neuron count!')
 
 class Synapses:
     """
     Connections from a pre NeuronGroup to a post NeuronGroup. Stores the information of the connectivity.
     """
-    def __init__(self, pre_group, post_group, synapse_type, pre_list=None, post_list=None, conn_type=None, p=None, rand_seed=None):
+    def __init__(self, pre_group, post_group, synapse_type, pre_list=None, post_list=None, conn_type=None, p=None, rand_seed=None, weight_matrix=None):
         self.pre = pre_group
         self.post = post_group
         self.synapse_type = synapse_type
@@ -145,8 +160,8 @@ class Synapses:
         if conn_type != None:
             if conn_type not in ['one2one', 'all2all']:
                 raise Exception('Invalid connection type!')
-            if (pre_list == None and post_list == None) == False:
-                raise Exception('pre_list and post_list cannot be specified given connection type {conn_type}!')
+            if (pre_list == None and post_list == None and weight_matrix==None) == False:
+                raise Exception('pre_list, post_list or weight_matrix cannot be specified given connection type {conn_type}!')
             
             if conn_type == 'all2all':
                 if p == None:
@@ -160,8 +175,15 @@ class Synapses:
             self.post_list = None
         
         else:
-            if pre_list == None or post_list == None:
-                raise Exception('pre_list and post_list must be given!')
+            if pre_list != None and post_list != None and weight_matrix == None:
+                assert(len(pre_list)==len(post_list)), 'pre_list '+\
+                ' and pre_list need to have the same length'
+            if pre_list == None and post_list == None and weight_matrix != None:
+                # convert w to pre_list and post_list
+                if weight_matrix.shape[0] == len(pre_group.neurons) and weight_matrix.shape[1] == len(post_group.neurons):
+                    pre_list, post_list = weight_matrix2lists(weight_matrix, pre_group, post_group)
+            else:
+                raise Exception('Please give either (pre_list and post_list) or (weight_matrix)!')
 
             self.pre_list = pre_list
             self.post_list = post_list
@@ -195,6 +217,10 @@ def add_wta_conns(netgen, wta_conns):
     add_synapses(netgen, wta_conns.ie)
     if wta_conns.ee !=None:
         add_synapses(netgen, wta_conns.ee)
+
+def remove_synapses(netgen, synapse):
+    # TODO
+    pass
 
 class Network:
     """

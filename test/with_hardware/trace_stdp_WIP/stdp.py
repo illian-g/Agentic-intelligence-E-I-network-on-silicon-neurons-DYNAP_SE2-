@@ -71,5 +71,3 @@ class Stdp:
                 self.w_plast = trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
             else:
                 print("Wrong algorithm name. Learning setup failed.")
-            
-            # TODO: change the connections on chip using w_plast
