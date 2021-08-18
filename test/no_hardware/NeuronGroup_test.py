@@ -3,7 +3,7 @@ import unittest
 import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 from io import StringIO
-from NetworkGenerator import Neuron, NeuronGroup 
+from netgen import Neuron, NeuronGroup 
 
 class NeuronGroupTest(unittest.TestCase):
     chip1 = 0

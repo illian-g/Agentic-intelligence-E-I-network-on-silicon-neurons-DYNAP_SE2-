@@ -7,9 +7,9 @@ import numpy as np
 
 import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
-import Dynapse1Utils as ut
-from Dynapse1Constants import MAX_NUM_CAMS
-from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator, weight_matrix2lists, remove_synapses
+import dynapse1utils as ut
+from dynapse1constants import MAX_NUM_CAMS
+from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator, weight_matrix2lists, remove_synapses
 from params import gen_param_group
 
 from stdp import Stdp

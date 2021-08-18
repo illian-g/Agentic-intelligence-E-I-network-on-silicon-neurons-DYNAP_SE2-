@@ -2,7 +2,7 @@ import numpy as np
 import samna
 import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
-from Dynapse1Constants import MAX_NUM_CAMS
+from dynapse1constants import MAX_NUM_CAMS
 
 def get_selected_timestamps(spikes, neuron_ids):
     """

@@ -1,9 +1,9 @@
 import samna
 import samna.dynapse1 as dyn1
-import Dynapse1Utils as ut
-import NetworkGenerator as n
-from NetworkGenerator import Neuron
-from Dynapse1Constants import *
+import dynapse1utils as ut
+import netgen as n
+from netgen import Neuron
+from dynapse1constants import *
 import time
 
 from params import gen_param_group

@@ -2,7 +2,7 @@ import samna
 import samnagui
 import samna.dynapse1 as dyn1
 import socket
-from Dynapse1Constants import *
+from dynapse1constants import *
 import random
 import time
 import json

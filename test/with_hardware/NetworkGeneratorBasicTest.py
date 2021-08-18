@@ -2,9 +2,9 @@ import samna.dynapse1 as dyn1
 import sys
 # Note: change the path to where your lib files are
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
-import Dynapse1Utils as ut
-from Dynapse1Constants import MAX_NUM_CAMS
-from NetworkGenerator import Neuron, NetworkGenerator
+import dynapse1utils as ut
+from dynapse1constants import MAX_NUM_CAMS
+from netgen import Neuron, NetworkGenerator
 
 if __name__ == "__main__":
     # create a network

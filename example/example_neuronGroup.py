@@ -2,7 +2,7 @@ import samna.dynapse1 as dyn1
 import sys
 # Note: change the path to where your lib files are
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
-from NetworkGenerator import Neuron, NeuronGroup, Synapses, WTA_connections, NetworkGenerator, add_synapses, add_wta_conns
+from netgen import Neuron, NeuronGroup, Synapses, WTA_connections, NetworkGenerator, add_synapses, add_wta_conns
 
 if __name__ == "__main__":
     """This is an example of how to use NeuronGroup and add_connections* functions 

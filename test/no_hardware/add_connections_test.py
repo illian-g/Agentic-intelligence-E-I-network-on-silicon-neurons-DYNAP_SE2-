@@ -4,7 +4,7 @@ import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 from io import StringIO
 import samna.dynapse1 as dyn1
-from NetworkGenerator import Neuron, NeuronGroup, Synapses, Network, WTA_connections, NetworkGenerator, add_synapses, add_wta_conns 
+from netgen import Neuron, NeuronGroup, Synapses, Network, WTA_connections, NetworkGenerator, add_synapses, add_wta_conns 
 
 class AddConnectionsTest(unittest.TestCase):
     """Assume that the neuron-level things work, test the neuron group, synapses, wta, add_connections."""

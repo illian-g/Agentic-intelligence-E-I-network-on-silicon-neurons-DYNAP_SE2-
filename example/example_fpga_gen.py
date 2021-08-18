@@ -7,8 +7,8 @@ import samna.dynapse1 as dyn1
 import sys
 # Note: change the path to where your lib files are
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
-import Dynapse1Utils as ut
-from NetworkGenerator import Neuron, NetworkGenerator
+import dynapse1utils as ut
+from netgen import Neuron, NetworkGenerator
 
 from params import gen_param_group
 

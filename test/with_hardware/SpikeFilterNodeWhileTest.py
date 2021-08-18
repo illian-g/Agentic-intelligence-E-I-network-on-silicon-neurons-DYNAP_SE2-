@@ -8,8 +8,8 @@ import numpy as np
 import sys
 # Note: change the path to where your lib files are
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
-import Dynapse1Utils as ut
-from NetworkGenerator import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
+import dynapse1utils as ut
+from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 
 from params import gen_dc_params
 

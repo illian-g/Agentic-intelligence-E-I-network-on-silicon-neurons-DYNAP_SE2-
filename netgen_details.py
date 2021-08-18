@@ -2,8 +2,8 @@ import random
 import numpy as np
 import samna.dynapse1 as dyn1
 from collections import Counter
-import Dynapse1Utils as ut
-from Dynapse1Constants import MAX_NUM_CAMS
+import dynapse1utils as ut
+from dynapse1constants import MAX_NUM_CAMS
 
 def weight_matrix2lists(weight_matrix, pre_group, post_group):
     # convert w to pre_list and post_list
