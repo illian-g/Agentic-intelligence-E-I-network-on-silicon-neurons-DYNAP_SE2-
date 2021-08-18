@@ -170,8 +170,8 @@ def floatW2intW(float_w_plast, max_pre_count, unit=0.1):
     Convert a float w_plast into a network.
     0.1 -> 1 connection
     """
-    float_w_plast *= 1/unit
-    int_w_plast = float_w_plast.astype(int)
+    int_w_plast = float_w_plast*(1/unit)
+    int_w_plast = int_w_plast.astype(int)
     post_cam_counts = np.sum(int_w_plast, axis=0)
 
     for post in range(len(post_cam_counts)):

@@ -29,6 +29,10 @@ if __name__ == "__main__":
     pre_neuron_ids = [(chip,core,x) for x in pre_nids]
     post_neuron_ids = [(chip,core,x) for x in post_nids]
 
+    algorithm='triplet_stdp'
+    stdp_new_thread = False # True False
+    remove_bad_traces = False
+
     low_init_w = 0.1
     w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w
     max_pre_count = MAX_NUM_CAMS - 1
@@ -90,11 +94,16 @@ if __name__ == "__main__":
     poisson_gen = model.get_poisson_gen()
     poisson_gen.set_chip_id(chip)
 
-    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp')
+    # set 1st sample
+    for i in range(len(global_poisson_gen_ids)):
+        poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], rates[i])
+    poisson_gen.start()
+
+    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm=algorithm, new_thread=stdp_new_thread, remove_bad_traces=remove_bad_traces)
 
     stdp.start_stdp()
 
-    for i in range(num_samples):
+    for sample in range(num_samples):
         # give new stimulation
         for i in range(len(global_poisson_gen_ids)):
             poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], rates[i])
@@ -111,7 +120,7 @@ if __name__ == "__main__":
         connectivity['pre2post'] = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
         add_synapses(net_gen, connectivity['pre2post'])
 
-        # print(stdp.w_plast)
+        print(stdp.w_plast)
         # print(int_w_plast)
         # print(net_gen.network)
 

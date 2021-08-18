@@ -29,8 +29,8 @@ trace_max = 1
 pre_tau = int(20*1e3) # in microsec
 post1_tau = int(40*1e3) # in microsec
 post2_tau = int(40*1e3) # in microsec
-nuEEpre = 0.0005
-nuEEpost = 0.0025
+nuEEpre = 0.005
+nuEEpost = 0.025
 wmaxEE = 1
 expEEpre = 0.2 # presynaptic weight dependence
 expEEpost = 0.2
@@ -53,8 +53,8 @@ def triplet_stdp_algorithm(w_plast, onpre_traces, onpost_traces, pre_neuron_ids,
         w_plast = clip(w_plast + delta_w, 0, wmaxEE)
         post1 = 1.0
         post2 = 1.0
-    """  
-
+    """ 
+    print(len(onpre_traces), len(onpost_traces))
     # on pre, contains post1 trace
     for onpre_trace in onpre_traces:
         # for each pre spike timestamp
