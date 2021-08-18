@@ -8,7 +8,8 @@ from netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_l
 
 def add_synapses(netgen, synapse):
     """Add a synapse group into a network generator"""
-    netgen.add_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
+    for i in range(synapse.mux_conn):
+        netgen.add_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
 def add_wta_conns(netgen, wta_conns):
     """Add WTA connections for a WTA into a network generator"""
@@ -19,7 +20,8 @@ def add_wta_conns(netgen, wta_conns):
 
 def remove_synapses(netgen, synapse):
     """Remove a synapse group into a network generator"""
-    netgen.remove_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
+    for i in range(synapse.mux_conn):
+        netgen.remove_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
 class Neuron:
     """
@@ -149,11 +151,23 @@ class NeuronGroup:
 class Synapses:
     """
     Connections from a pre NeuronGroup to a post NeuronGroup. Stores the information of the connectivity.
+    Parameters:
+        pre_group: NeuronGroup
+        post_group: NeuronGroup
+        synapse_type: samna.dynapse1.Dynapse1SynType
+        pre_list: list[int], the index of each neuron in the pre_group, not the (chip, core, neuron) id.
+        post_list: list[int], the index of each neuron in the post_group, not the (chip, core, neuron) id.
+        conn_type: string, in ['one2one', 'all2all'].
+        p: float, possibility of all2all random connections
+        rand_seed: int, random seed of all2all random connections
+        weight_matrix: weight matrix between pre_group and          post_group. Rows represent pre_ids, columns represent post_ids.
+        mux_conn: the multiplexer number of the connections. Each pre-post synapse will be mux_conn connections. 
     """
-    def __init__(self, pre_group, post_group, synapse_type, pre_list=None, post_list=None, conn_type=None, p=None, rand_seed=None, weight_matrix=None):
+    def __init__(self, pre_group, post_group, synapse_type, pre_list=None, post_list=None, conn_type=None, p=None, rand_seed=None, weight_matrix=None, mux_conn=1):
         self.pre = pre_group
         self.post = post_group
         self.synapse_type = synapse_type
+        self.mux_conn = mux_conn
         
         # if specify the conn_type, check 
         # 1) if the type is valid 2) if pre_list and post_list are None
@@ -194,15 +208,20 @@ class Synapses:
             self.rand_seed = None
 
 class WTA_connections:
-    """Define WTA EE EI IE connections of for an EXC and an INH population"""
-    def __init__(self, exc_group, inh_group, syn_type_ei, syn_type_ie, syn_type_ee=None, p_ei=1, p_ie=1, ee_pres=None, ee_posts=None, rand_seed=None):
-        self.ei = Synapses(exc_group, inh_group, syn_type_ei, conn_type='all2all', p=p_ei, rand_seed=rand_seed)
-        self.ie = Synapses(inh_group, exc_group, syn_type_ie, conn_type='all2all', p=p_ie, rand_seed=rand_seed)
+    """
+    Define WTA EE EI IE connections of for an EXC and an INH population.
+    Parameters:
+        ee_pres: list[int], pre_index_list of the EE connections.
+        ee_posts: list[int], post_index_list of the EE connections.
+    """
+    def __init__(self, exc_group, inh_group, syn_type_ei, syn_type_ie, syn_type_ee=None, p_ei=1, p_ie=1, ee_pres=None, ee_posts=None, rand_seed=None, mux_conn_ei=1, mux_conn_ie=1, mux_conn_ee=1):
+        self.ei = Synapses(exc_group, inh_group, syn_type_ei, conn_type='all2all', p=p_ei, rand_seed=rand_seed, mux_conn_ei=mux_conn_ei)
+        self.ie = Synapses(inh_group, exc_group, syn_type_ie, conn_type='all2all', p=p_ie, rand_seed=rand_seed, mux_conn_ie=mux_conn_ie)
 
         if syn_type_ee != None:
             if ee_pres == None or ee_posts == None:
                 raise Exception('ee_pres and ee_posts must be given to create EE connections')
-            self.ee = Synapses(exc_group, exc_group, syn_type_ee, pre_list=ee_pres, post_list=ee_posts)
+            self.ee = Synapses(exc_group, exc_group, syn_type_ee, pre_list=ee_pres, post_list=ee_posts, mux_conn_ee=mux_conn_ee)
         else:
             self.ee = None
 

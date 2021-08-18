@@ -10,21 +10,23 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import dynapse1utils as ut
 from dynapse1constants import MAX_NUM_CAMS
 from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator, weight_matrix2lists, remove_synapses
-from params import gen_param_group
 
 from stdp import Stdp
 from stdp_utils import floatW2intW
+from stdp_params import gen_param_group
 
 if __name__ == "__main__":
     schip=0
     score=0
     sids = [1, 2, 3]
-    rates = [0, 100, 0]
+    rates = [0, 500, 0]
 
     chip=1
     core=0
     pre_nids = [16, 17, 18]
     post_nids = [32, 33, 34]
+
+    mux_conn_spikegen = 5
 
     pre_neuron_ids = [(chip,core,x) for x in pre_nids]
     post_neuron_ids = [(chip,core,x) for x in post_nids]
@@ -32,6 +34,7 @@ if __name__ == "__main__":
     algorithm='triplet_stdp'
     stdp_new_thread = False # True False
     remove_bad_traces = False
+    spike_sink_debug = True
 
     low_init_w = 0.1
     w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w
@@ -72,9 +75,9 @@ if __name__ == "__main__":
 
     # connect spikegen_group to pre_neuron_group
     connectivity = {
-        'pre_gen2pre': Synapses(spikegen_group, pre_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one'),
-        'post_gen2post': Synapses(spikegen_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one'),
-        'pre2post': Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
+        'pre_gen2pre': Synapses(spikegen_group, pre_neuron_group, dyn1.Dynapse1SynType.NMDA, conn_type='one2one', mux_conn=mux_conn_spikegen),
+        'post_gen2post': Synapses(spikegen_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, conn_type='one2one', mux_conn=mux_conn_spikegen),
+        'pre2post': Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, weight_matrix=int_w_plast)
     }
 
     for conn in connectivity:
@@ -99,7 +102,7 @@ if __name__ == "__main__":
         poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], rates[i])
     poisson_gen.start()
 
-    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm=algorithm, new_thread=stdp_new_thread, remove_bad_traces=remove_bad_traces)
+    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm=algorithm, new_thread=stdp_new_thread, remove_bad_traces=remove_bad_traces, spike_sink_debug=spike_sink_debug)
 
     stdp.start_stdp()
 
@@ -117,7 +120,7 @@ if __name__ == "__main__":
 
         # add new pre-post connections using the latest w_plast
         int_w_plast = floatW2intW(stdp.w_plast, max_pre_count)
-        connectivity['pre2post'] = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, weight_matrix=int_w_plast)
+        connectivity['pre2post'] = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, weight_matrix=int_w_plast)
         add_synapses(net_gen, connectivity['pre2post'])
 
         print(stdp.w_plast)

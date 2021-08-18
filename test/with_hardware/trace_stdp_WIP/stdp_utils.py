@@ -100,12 +100,11 @@ def get_trace_value(traces, timestamp):
         print("Timestamp %i not found, > list end %i." % (timestamp, traces[-1].timestamp))
     return None
 
-def create_stdp_graph(model):
+def create_stdp_graph(model, spike_sink_debug=False):
     """
     Create on pre and on post traces in which pre and post are the trigger neurons, respectively.
     """  
     graph = samna.graph.EventFilterGraph()
-
     # create and add filter nodes to graph
     # pre+post spike filter
     spike_filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
@@ -132,7 +131,42 @@ def create_stdp_graph(model):
     graph.add_destination(onpost_trace_node_id, onpost_trace_sink.get_input_channel())
     graph.add_destination(onpre_trace_node_id, onpre_trace_sink.get_input_channel())
 
-    return graph, spike_filter_node, onpre_trace_node, onpost_trace_node, onpre_trace_sink, onpost_trace_sink
+    nodes = {
+        'spike_filter': spike_filter_node,
+        'onpre_trace_filter': onpre_trace_node,
+        'onpost_trace_filter': onpost_trace_node,
+        'onpre_trace_sink': onpre_trace_sink,
+        'onpost_trace_sink': onpost_trace_sink
+    }
+
+    if spike_sink_debug:
+        # pre and post spike filter
+        pre_spike_filter_id = graph.add_filter_node("Dynapse1NeuronSelect")
+        pre_spike_filter = graph.get_node(pre_spike_filter_id)
+        post_spike_filter_id = graph.add_filter_node("Dynapse1NeuronSelect")
+        post_spike_filter = graph.get_node(post_spike_filter_id)
+
+        # create sink nodes
+        pre_spike_sink = samna.BufferSinkNode_dynapse1_dynapse1_event()
+        post_spike_sink = samna.BufferSinkNode_dynapse1_dynapse1_event()
+        
+        # connect spike filter to 2 pre and post spike filters
+        graph.add_destination(spike_filter_node_id, graph.get_node_input(pre_spike_filter_id))
+        graph.add_destination(spike_filter_node_id, graph.get_node_input(post_spike_filter_id))
+
+        # connect filter to sink nodes
+        graph.add_destination(pre_spike_filter_id, pre_spike_sink.get_input_channel())
+        graph.add_destination(post_spike_filter_id, post_spike_sink.get_input_channel())
+
+        spike_nodes = {
+            'pre_spike_filter': pre_spike_filter,
+            'post_spike_filter': post_spike_filter,
+            'pre_spike_sink': pre_spike_sink,
+            'post_spike_sink': post_spike_sink
+        }
+        nodes.update(spike_nodes)
+
+    return graph, nodes
 
 def bad_traces(onpre_traces, onpost_traces, max_num=10, max_time_interval=3*1e5):
     """

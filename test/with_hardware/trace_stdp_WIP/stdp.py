@@ -16,26 +16,29 @@ class Stdp:
     """
     A class which implements "realtime, onchip" STDP learning algorithm between a pre and a post neuron population.
     """
-    def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False):
+    def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False, spike_sink_debug=False):
         self.model = model
         self.net_gen = net_gen
         self.pre_neuron_ids = pre_neuron_ids
         self.post_neuron_ids = post_neuron_ids
         self.w_plast = w_plast
+        self.algorithm = algorithm
+
         self.new_thread = new_thread
         self.stop_graph = stop_graph
         self.remove_bad_traces = remove_bad_traces
+        self.spike_sink_debug = spike_sink_debug
 
-        # create trace graph
-        self.graph, self.spike_filter_node, \
-        self.onpre_trace_node, self.onpost_trace_node, \
-        self.onpre_trace_sink, self.onpost_trace_sink = create_stdp_graph(model)
-
-        self.algorithm = algorithm
+        self.graph, self.nodes = create_stdp_graph(model, spike_sink_debug)
 
         # set trace graph for the required traces
         if self.algorithm == 'triplet_stdp':
-            trip.set_triplet_stdp_graph(self.spike_filter_node, self.onpre_trace_node, self.onpost_trace_node, self.pre_neuron_ids, self.post_neuron_ids)
+            trip.set_triplet_stdp_graph(self.nodes['spike_filter'], self.nodes['onpre_trace_filter'], self.nodes['onpost_trace_filter'], self.pre_neuron_ids, self.post_neuron_ids)
+
+            if self.spike_sink_debug:
+                self.nodes['pre_spike_filter'].set_neurons(pre_neuron_ids)
+                self.nodes['post_spike_filter'].set_neurons(post_neuron_ids)
+
         else:
             print("Wrong algorithm name. Learning setup failed.")
 
@@ -58,21 +61,36 @@ class Stdp:
 
         if self.stop_graph:
             self.graph.stop()
+    
+    def get_traces(self):
+        onpre_traces = self.nodes['onpre_trace_sink'].get_events()
+        onpost_traces = self.nodes['onpost_trace_sink'].get_events()
+        return onpre_traces, onpost_traces
+    
+    def get_spikes(self):
+        if self.spike_sink_debug:
+            pre_spikes = self.nodes['pre_spike_sink'].get_events()
+            post_spikes = self.nodes['post_spike_sink'].get_events()
+            return pre_spikes, post_spikes
+        else:
+            return False
         
     def __run_stdp(self):
         # empty the buffer
-        onpre_traces = self.onpre_trace_sink.get_events()
-        onpost_traces = self.onpost_trace_sink.get_events()
+        onpre_traces, onpost_traces = self.get_traces()
+        pre_spikes, post_spikes = self.get_spikes()
 
         while(self.stdp_on):
-            onpre_traces = self.onpre_trace_sink.get_events()
-            onpost_traces = self.onpost_trace_sink.get_events()
+            onpre_traces, onpost_traces = self.get_traces()
+            pre_spikes, post_spikes = self.get_spikes()
 
             # drop bad traces, do not touch w_plast using them
             if self.remove_bad_traces and bad_traces(onpre_traces, onpost_traces, max_trace_num, max_time_interval):
                 continue
             
-            if len(onpre_traces) or len(onpost_traces):
+            if len(onpre_traces) or len(onpost_traces) or len(pre_spikes) or len(post_spikes):
+                print(len(pre_spikes), len(onpre_traces), len(post_spikes), len(onpost_traces))
+
                 # update w_plast using a specific learning algorithm
                 if self.algorithm == 'triplet_stdp':
                     trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
