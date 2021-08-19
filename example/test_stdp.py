@@ -99,7 +99,7 @@ if __name__ == "__main__":
         poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], rates[i])
     poisson_gen.start()
 
-    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm=algorithm, new_thread=stdp_new_thread, remove_bad_traces=remove_bad_traces, spike_sink_debug=spike_sink_debug)
+    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm=algorithm, new_thread=stdp_new_thread)
 
     print(w_plast)
     print(int_w_plast)
