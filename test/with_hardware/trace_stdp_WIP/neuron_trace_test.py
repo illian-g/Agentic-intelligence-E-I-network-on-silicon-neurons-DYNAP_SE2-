@@ -8,7 +8,7 @@ import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import dynapse1utils as ut
 from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
-from params import gen_param_group
+from params import set_params
 from plotter import plot_raster, plot_trace
 
 """
@@ -76,10 +76,7 @@ if __name__ == "__main__":
         ut.print_neuron_destinations(neuron)
 
     # set parameters
-    paramGroup = gen_param_group()
-    for chip in range(4):
-        for core in range(4):
-            model.update_parameter_group(paramGroup, chip, core)
+    set_params(model)
 
     # ---------------- create a graph ----------------
     # create a graph: source node to 2 filter nodes, one neuron select, one neuron trace.

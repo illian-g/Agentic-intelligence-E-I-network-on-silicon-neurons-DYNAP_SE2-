@@ -11,7 +11,7 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import dynapse1utils as ut
 from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 
-from params import gen_dc_params
+from params import set_params
 
 if __name__ == "__main__":
     # open DYNAP-SE1 board to get Dynapse1Model
@@ -24,10 +24,7 @@ if __name__ == "__main__":
     model = getattr(store, device_name)
 
     # set parameters
-    paramGroup = gen_dc_params()
-    for chip in range(4):
-        for core in range(4):
-            model.update_parameter_group(paramGroup, chip, core)
+    set_params(model, dc=True)
 
     # get Dynapse1 api from the model
     api = model.get_dynapse1_api()

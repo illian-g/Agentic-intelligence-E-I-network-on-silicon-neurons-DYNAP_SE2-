@@ -10,7 +10,7 @@ from multiprocessing import Process
 import time
 import random
 
-from params import gen_param_group
+from params import set_params
 
 def open_dynapse1_no_plot(device_name):
     """
@@ -108,13 +108,7 @@ api.monitor_neuron(1, 123)
 chip = 1
 neuron_ids = [(chip,0,20), (0,0,36), (0,2,60), (1,1,60), (2,1,107), (2,3,152)]
 
-paramGroup = gen_param_group()
-for chip in range(4):
-    for core in range(4):
-        model.update_parameter_group(paramGroup, chip, core)
-
-        # make the neurons fire to get the timewrapEvent
-        model.update_single_parameter(dyn1.Dynapse1Parameter("IF_DC_P",2,30), chip, core)
+set_params(model, dc=True)
 
 # start the poisson gen
 # poisson_gen.start()

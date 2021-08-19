@@ -174,3 +174,13 @@ def gen_dc_params():
     paramGroup.param_map["IF_DC_P"].fine_value = 150
 
     return paramGroup
+
+def set_params(model, dc=False):
+    if dc:
+        paramGroup = gen_dc_params()
+    else:
+        paramGroup = gen_param_group()
+        
+    for chip in range(4):
+        for core in range(4):
+            model.update_parameter_group(paramGroup, chip, core)

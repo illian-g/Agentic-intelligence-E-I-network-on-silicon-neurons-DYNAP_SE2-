@@ -10,7 +10,7 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import dynapse1utils as ut
 from netgen import Neuron, NetworkGenerator
 
-from params import gen_param_group
+from params import set_params
 
 # open DYNAP-SE1 board to get Dynapse1Model
 device_name = "dynapse1"
@@ -95,10 +95,7 @@ for nid in neuron_ids:
     ut.print_neuron_destinations(neuron)
 
 # set parameters
-paramGroup = gen_param_group()
-for chip in range(4):
-    for core in range(4):
-        model.update_parameter_group(paramGroup, chip, core)
+set_params(model)
 
 # start the spikegen
 fpga_spike_gen.start()
