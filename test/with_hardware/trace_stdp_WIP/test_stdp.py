@@ -19,7 +19,7 @@ if __name__ == "__main__":
     schip=0
     score=0
     sids = [1, 2, 3]
-    rates = [0, 500, 0]
+    rates = [0, 200, 0]
 
     chip=1
     core=0
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     print(w_plast)
     print(int_w_plast)
     print('Learning starts!')
-    
+
     stdp.start_stdp()
 
     for sample in range(num_samples):

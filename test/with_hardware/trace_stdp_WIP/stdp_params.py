@@ -7,10 +7,10 @@ def gen_param_group():
 
     paramGroup = gen()
 
-    paramGroup.param_map["IF_TAU1_N"].coarse_value = 3
+    paramGroup.param_map["IF_TAU1_N"].coarse_value = 4
     paramGroup.param_map["IF_TAU1_N"].fine_value = 80
 
-    paramGroup.param_map["IF_THR_N"].coarse_value = 5
+    paramGroup.param_map["IF_THR_N"].coarse_value = 4
     paramGroup.param_map["IF_THR_N"].fine_value = 80
 
     # NMDA, pre to post neurons
