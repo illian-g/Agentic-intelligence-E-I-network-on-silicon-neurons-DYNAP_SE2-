@@ -95,6 +95,10 @@ if __name__ == "__main__":
 
     stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm=algorithm, new_thread=stdp_new_thread, remove_bad_traces=remove_bad_traces, spike_sink_debug=spike_sink_debug)
 
+    print(w_plast)
+    print(int_w_plast)
+    print('Learning starts!')
+    
     stdp.start_stdp()
 
     for sample in range(num_samples):
@@ -110,12 +114,13 @@ if __name__ == "__main__":
         remove_synapses(net_gen, connectivity['pre2post'])
 
         # add new pre-post connections using the latest w_plast
-        int_w_plast = floatW2intW(stdp.w_plast, max_pre_count)
+        current_w_plast = stdp.w_plast
+        int_w_plast = floatW2intW(current_w_plast, max_pre_count)
         connectivity['pre2post'] = Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, weight_matrix=int_w_plast)
         add_synapses(net_gen, connectivity['pre2post'])
 
-        print(stdp.w_plast)
-        # print(int_w_plast)
+        print(current_w_plast)
+        print(int_w_plast)
         # print(net_gen.network)
 
         new_config = net_gen.make_dynapse1_configuration()
