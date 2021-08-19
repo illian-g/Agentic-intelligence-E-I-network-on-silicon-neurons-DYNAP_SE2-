@@ -6,7 +6,7 @@ import numpy as np
 
 import samna
 
-import triplet_stdp_details as trip
+import stdp_algorithms.triplet_stdp_details as trip
 from stdp_utils import create_stdp_graph, bad_traces
 
 max_trace_num=10
@@ -14,7 +14,7 @@ max_time_interval=3*1e5
 
 class Stdp:
     """
-    A class which implements "realtime, onchip" STDP learning algorithm between a pre and a post neuron population.
+    A class which implements "realtime, onchip" learning algorithm between a pre and a post neuron population.
     """
     def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False, spike_sink_debug=False):
         self.model = model

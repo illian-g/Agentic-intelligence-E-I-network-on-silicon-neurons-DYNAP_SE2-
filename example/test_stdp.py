@@ -9,13 +9,21 @@ import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import dynapse1utils as ut
 from dynapse1constants import MAX_NUM_CAMS
-from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator, weight_matrix2lists, remove_synapses
-
+from netgen import NeuronGroup, Synapses, NetworkGenerator, add_synapses, remove_synapses
+from params import set_stdp_params
 from stdp import Stdp
 from stdp_utils import floatW2intW
-from stdp_params import set_params
+
 
 if __name__ == "__main__":
+    """
+    This is a demo of STDP training with 10 samples. The samples have the same value. The learned weight matrix should be similar to w = 
+    [[ 1  1  1]
+    [ 0 10  0]
+    [ 1  1  1]]
+    i.e. w[1][1] has the strongest weights because pre neuron1 and post neuron1 receive the strongest stimulation from the spike generators and thus fire the most.
+    """
+
     schip=0
     score=0
     sids = [1, 2, 3]
@@ -54,7 +62,7 @@ if __name__ == "__main__":
 
     model = getattr(store, device_name)
 
-    set_params(model)
+    set_stdp_params(model)
 
     # ------------------- build network -------------------
     net_gen = NetworkGenerator()
@@ -121,7 +129,6 @@ if __name__ == "__main__":
 
         print(current_w_plast)
         print(int_w_plast)
-        # print(net_gen.network)
 
         new_config = net_gen.make_dynapse1_configuration()
         model.apply_configuration(new_config)

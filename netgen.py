@@ -4,7 +4,7 @@ import random
 
 import dynapse1utils as ut
 from dynapse1constants import NUM_CHIPS, CORES_PER_CHIP, NEURONS_PER_CORE, MAX_NUM_CAMS
-from netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_lists, validate, convert_validated_network2dynapse1_configuration, find_neuron_in_dict, find_pre_in_post_incoming
+from details.netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_lists, validate, convert_validated_network2dynapse1_configuration, find_neuron_in_dict, find_pre_in_post_incoming
 
 def add_synapses(netgen, synapse):
     """Add a synapse group into a network generator"""
