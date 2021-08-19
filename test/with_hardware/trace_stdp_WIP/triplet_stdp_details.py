@@ -54,7 +54,7 @@ def triplet_stdp_algorithm(w_plast, onpre_traces, onpost_traces, pre_neuron_ids,
         post1 = 1.0
         post2 = 1.0
     """ 
-    print(len(onpre_traces), len(onpost_traces))
+    # print(len(onpre_traces), len(onpost_traces))
     # on pre, contains post1 trace
     for onpre_trace in onpre_traces:
         # for each pre spike timestamp

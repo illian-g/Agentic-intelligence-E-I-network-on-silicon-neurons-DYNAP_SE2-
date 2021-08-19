@@ -22,3 +22,9 @@ def gen_param_group():
     paramGroup.param_map["PS_WEIGHT_EXC_F_N"].fine_value = 80
 
     return paramGroup
+
+def set_params(model):
+    paramGroup = gen_param_group()
+    for chip in range(4):
+        for core in range(4):
+            model.update_parameter_group(paramGroup, chip, core)

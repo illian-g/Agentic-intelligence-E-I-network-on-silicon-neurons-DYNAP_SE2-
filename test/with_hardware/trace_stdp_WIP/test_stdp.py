@@ -13,7 +13,7 @@ from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 
 from stdp import Stdp
 from stdp_utils import floatW2intW
-from stdp_params import gen_param_group
+from stdp_params import set_params
 
 if __name__ == "__main__":
     schip=0
@@ -32,9 +32,9 @@ if __name__ == "__main__":
     post_neuron_ids = [(chip,core,x) for x in post_nids]
 
     algorithm='triplet_stdp'
-    stdp_new_thread = False # True False
+    stdp_new_thread = True # True False
     remove_bad_traces = False
-    spike_sink_debug = True
+    spike_sink_debug = False
 
     low_init_w = 0.1
     w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w
@@ -54,16 +54,7 @@ if __name__ == "__main__":
 
     model = getattr(store, device_name)
 
-    # set parameters
-    paramGroup = gen_param_group()
-    paramGroup.param_map["PS_WEIGHT_EXC_S_N"].coarse_value = 0
-    paramGroup.param_map["PS_WEIGHT_EXC_S_N"].fine_value = 0
-    for chip in range(4):
-        for core in range(4):
-            model.update_parameter_group(paramGroup, chip, core)
-
-    # get Dynapse1 api from the model
-    api = model.get_dynapse1_api()
+    set_params(model)
 
     # ------------------- build network -------------------
     net_gen = NetworkGenerator()

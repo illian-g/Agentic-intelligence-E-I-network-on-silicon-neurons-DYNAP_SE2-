@@ -67,7 +67,7 @@ class Stdp:
         onpost_traces = self.nodes['onpost_trace_sink'].get_events()
         return onpre_traces, onpost_traces
     
-    def get_spikes(self):
+    def get_spikes_debug(self):
         if self.spike_sink_debug:
             pre_spikes = self.nodes['pre_spike_sink'].get_events()
             post_spikes = self.nodes['post_spike_sink'].get_events()
@@ -78,19 +78,15 @@ class Stdp:
     def __run_stdp(self):
         # empty the buffer
         onpre_traces, onpost_traces = self.get_traces()
-        pre_spikes, post_spikes = self.get_spikes()
 
         while(self.stdp_on):
             onpre_traces, onpost_traces = self.get_traces()
-            pre_spikes, post_spikes = self.get_spikes()
 
             # drop bad traces, do not touch w_plast using them
             if self.remove_bad_traces and bad_traces(onpre_traces, onpost_traces, max_trace_num, max_time_interval):
                 continue
             
-            if len(onpre_traces) or len(onpost_traces) or len(pre_spikes) or len(post_spikes):
-                print(len(pre_spikes), len(onpre_traces), len(post_spikes), len(onpost_traces))
-
+            if len(onpre_traces) or len(onpost_traces):
                 # update w_plast using a specific learning algorithm
                 if self.algorithm == 'triplet_stdp':
                     trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
