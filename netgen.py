@@ -141,6 +141,14 @@ class NeuronGroup:
             neurons.append(Neuron(self.chip_id,self.core_id,nid,self.is_spike_gen))
         return neurons
     
+    @property
+    def tuple_neuron_ids(self):
+        """list[(chip, core, neuron)] getter: return a list of tuple neuron ids given the current chip/core/neuron ids"""
+        tuple_neuron_ids = []
+        for nid in self.neuron_ids:
+            tuple_neuron_ids.append((self.chip_id,self.core_id,nid))
+        return tuple_neuron_ids
+    
     def __eq__(self, other):
         """Only compares the ids. Consider a neuron group as an individual group without any external connections (i.e. not in a Network)"""
         return self.chip_id == other.chip_id and \

@@ -41,8 +41,6 @@ if __name__ == "__main__":
 
     algorithm='triplet_stdp'
     stdp_new_thread = True # True False
-    remove_bad_traces = False
-    spike_sink_debug = False
 
     low_init_w = 0.1
     w_plast = np.ones((len(pre_neuron_ids), len(post_neuron_ids)))*low_init_w

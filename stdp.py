@@ -9,14 +9,11 @@ import samna
 import stdp_algorithms.triplet_stdp_details as trip
 from stdp_utils import create_stdp_graph, bad_traces
 
-max_trace_num=10
-max_time_interval=3*1e5
-
 class Stdp:
     """
     A class which implements "realtime, onchip" learning algorithm between a pre and a post neuron population.
     """
-    def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False, spike_sink_debug=False):
+    def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False, spike_sink_debug=False, max_trace_num=10, max_time_interval=3*1e5):
         self.model = model
         self.net_gen = net_gen
         self.pre_neuron_ids = pre_neuron_ids
@@ -27,6 +24,9 @@ class Stdp:
         self.new_thread = new_thread
         self.stop_graph = stop_graph
         self.remove_bad_traces = remove_bad_traces
+        if remove_bad_traces:
+            self.max_trace_num = max_trace_num
+            self.max_time_interval = max_time_interval
         self.spike_sink_debug = spike_sink_debug
 
         self.graph, self.nodes = create_stdp_graph(model, spike_sink_debug)
@@ -83,7 +83,7 @@ class Stdp:
             onpre_traces, onpost_traces = self.get_traces()
 
             # drop bad traces, do not touch w_plast using them
-            if self.remove_bad_traces and bad_traces(onpre_traces, onpost_traces, max_trace_num, max_time_interval):
+            if self.remove_bad_traces and bad_traces(onpre_traces, onpost_traces, self.max_trace_num, self.max_time_interval):
                 continue
             
             if len(onpre_traces) or len(onpost_traces):
