@@ -2,7 +2,7 @@ import numpy as np
 
 class TripletStdp:
     """
-    All to all plastic connections between pre and post population.
+    Implementation of all to all plastic connections between pre and post population, including trace graph setup and algorithm implementation with retrieved traces.
 
     Triplet STDP is implemented, but can be replaced with other Hebbian-like learning algorithms
 
@@ -48,7 +48,9 @@ class TripletStdp:
         self.expEEpost = expEEpost
 
     def triplet_stdp_algorithm(self, w_plast, onpre_traces, onpost_traces, pre_neuron_ids, post_neuron_ids):
-        # print(len(onpre_traces), len(onpost_traces))
+        """
+        The implementation of triplet stdp algorithm given Dynapse1traces retrieved from the trace graph.
+        """
         # on pre, contains post1 trace
         for onpre_trace in onpre_traces:
             # for each pre spike timestamp
@@ -83,7 +85,10 @@ class TripletStdp:
         return w_plast
         
     def set_triplet_stdp_graph(self, spike_filter_node, onpre_trace_node, onpost_trace_node, pre_neuron_ids, post_neuron_ids):
-        # configure filter nodes: which neurons to filter?
+        """
+        Set up trace graph to calculate the traces for selected neurons.
+        """
+        # configure filter nodes: which neurons to filter
         spike_filter_node.set_neurons(pre_neuron_ids+post_neuron_ids)
 
         # on post: pre and post2 traces
