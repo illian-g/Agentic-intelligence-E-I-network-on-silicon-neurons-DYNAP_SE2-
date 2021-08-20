@@ -13,7 +13,7 @@ class Stdp:
     """
     A class which implements "realtime, onchip" learning algorithm between a pre and a post neuron population.
     """
-    def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False, spike_sink_debug=False, max_trace_num=10, max_time_interval=3*1e5):
+    def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, param_file, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False, spike_sink_debug=False, max_trace_num=10, max_time_interval=3*1e5):
         self.model = model
         self.net_gen = net_gen
         self.pre_neuron_ids = pre_neuron_ids
@@ -33,7 +33,7 @@ class Stdp:
 
         # set trace graph for the required traces
         if self.algorithm == 'triplet_stdp':
-            self.trip = TripletStdp()
+            self.trip = TripletStdp(param_file)
             self.trip.set_triplet_stdp_graph(self.nodes['spike_filter'], self.nodes['onpre_trace_filter'], self.nodes['onpost_trace_filter'], self.pre_neuron_ids, self.post_neuron_ids)
 
             if self.spike_sink_debug:

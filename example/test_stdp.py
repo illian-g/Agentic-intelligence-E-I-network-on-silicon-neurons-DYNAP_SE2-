@@ -40,6 +40,7 @@ if __name__ == "__main__":
     post_neuron_ids = [(chip,core,x) for x in post_nids]
 
     algorithm='triplet_stdp'
+    stdp_param_file = '../stdp_algorithms/triplet_stdp_params.json'
     stdp_new_thread = True # True False
 
     low_init_w = 0.1
@@ -99,7 +100,7 @@ if __name__ == "__main__":
         poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], rates[i])
     poisson_gen.start()
 
-    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, algorithm=algorithm, new_thread=stdp_new_thread)
+    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, stdp_param_file, algorithm=algorithm, new_thread=stdp_new_thread)
 
     print(w_plast)
     print(int_w_plast)
