@@ -6,7 +6,7 @@ import numpy as np
 
 import samna
 
-import stdp_algorithms.triplet_stdp_details as trip
+from stdp_algorithms.triplet_stdp_details import TripletStdp
 from stdp_utils import create_stdp_graph, bad_traces
 
 class Stdp:
@@ -33,7 +33,8 @@ class Stdp:
 
         # set trace graph for the required traces
         if self.algorithm == 'triplet_stdp':
-            trip.set_triplet_stdp_graph(self.nodes['spike_filter'], self.nodes['onpre_trace_filter'], self.nodes['onpost_trace_filter'], self.pre_neuron_ids, self.post_neuron_ids)
+            self.trip = TripletStdp()
+            self.trip.set_triplet_stdp_graph(self.nodes['spike_filter'], self.nodes['onpre_trace_filter'], self.nodes['onpost_trace_filter'], self.pre_neuron_ids, self.post_neuron_ids)
 
             if self.spike_sink_debug:
                 self.nodes['pre_spike_filter'].set_neurons(pre_neuron_ids)
@@ -89,6 +90,6 @@ class Stdp:
             if len(onpre_traces) or len(onpost_traces):
                 # update w_plast using a specific learning algorithm
                 if self.algorithm == 'triplet_stdp':
-                    trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
+                    self.trip.triplet_stdp_algorithm(self.w_plast, onpre_traces, onpost_traces, self.pre_neuron_ids, self.post_neuron_ids)
                 else:
                     print("Wrong algorithm name. Learning setup failed.")
