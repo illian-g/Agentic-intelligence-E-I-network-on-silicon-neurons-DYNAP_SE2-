@@ -3,7 +3,9 @@ import seaborn as sns; sns.set()
 import numpy as np
 import os
 import time
-from stdp_utils import get_selected_timestamps, get_selected_traces
+import sys
+sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
+from dynapse1utils import get_selected_timestamps, get_selected_traces
 
 def plot_w(w_plast, figpath="./w"):
     isExists=os.path.exists(figpath)

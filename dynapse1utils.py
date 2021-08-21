@@ -447,3 +447,99 @@ def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_b
     fpga_spike_gen.preload_stimulus(fpga_events)
     fpga_spike_gen.set_isi_multiplier(isi_base)
     fpga_spike_gen.set_repeat_mode(repeat_mode)
+
+def get_selected_timestamps(spikes, neuron_ids):
+    """
+    Given Dynapse1Spikes retrieved from NeuronSelect sinknode, filter out timestamps of selected neuron_ids.
+
+    Parameters
+    -----------
+    spikes : list[Dynapse1Spike]
+        result of sink_node.get_events()
+    neuron_ids : list[(int,int,int)]
+        neuron_ids
+    
+    Returns
+    ---------
+    timestamps : list[list[int]]
+        spike timestamps of selected neurons. The list indexing is the same as
+        the neuron indexing in the list neuron_ids.
+    """
+    if len(set(neuron_ids)) != len(neuron_ids):
+        raise Exception("Duplicate neuron ids exist!")
+
+    num_neurons = len(neuron_ids)
+    timestamps = []
+    for i in range(num_neurons):
+        timestamps.append([])
+    
+    for spike in spikes:
+        spike_neuron = (spike.chip_id, spike.core_id, spike.neuron_id)
+        try:
+            # if spike_neuron in neuron_ids, add timestamp to corresponding timestamp list
+            id_in_list = neuron_ids.index(spike_neuron)
+            timestamps[id_in_list].append(spike.timestamp)
+        except ValueError:
+            # if not, do nothing
+            pass
+    
+    return timestamps
+
+def get_selected_traces(timed_traces, neuron_ids):
+    """
+    Filter out timestamps and trace_values of selected neuron_ids.
+
+    Parameters
+    -----------
+    timed_traces : list[Dynapse1Trace]
+        result of sink_node.get_events()
+    neuron_ids : list[(int,int,int)]
+        neuron_ids
+    
+    Returns
+    ---------
+    timestamps : list[list[int]]
+        spike timestamps of selected neurons. The list indexing is the same as
+        the neuron indexing in the list neuron_ids.
+    trace_values : list[list[float]]
+        trace values at spike times. The list indexing is the same as
+        the neuron indexing in the list neuron_ids.
+    """
+    if len(set(neuron_ids)) != len(neuron_ids):
+        raise Exception("Duplicate neuron ids exist!")
+
+    num_neurons = len(neuron_ids)
+    timestamps = []
+    for i in range(num_neurons):
+        timestamps.append([])
+    trace_values = []
+    for i in range(num_neurons):
+        trace_values.append([])
+    
+    # tracemap over time
+    for trace in timed_traces:
+        trace_map = trace.trace_map
+        timestamp = trace.timestamp
+
+        for i in range(num_neurons):
+            neuron_id = neuron_ids[i]
+            trace_value = trace_map.get(neuron_id)
+            if trace_value != None:
+                trace_values[i].append(trace_value)
+                timestamps[i].append(timestamp)
+    
+    return timestamps, trace_values
+
+def get_trace_value(traces, timestamp):
+    """
+    Get 1 single trace value from a list of Dynapse1Traces
+    """
+    for trace in traces:
+        if trace.timestamp == timestamp:
+            return trace
+    
+    if timestamp < traces[0].timestamp:
+        print("Timestamp%i not found, < list start %i." % (timestamp, traces[0].timestamp))
+    if timestamp > traces[-1].timestamp:
+        print("Timestamp %i not found, > list end %i." % (timestamp, traces[-1].timestamp))
+    return None
