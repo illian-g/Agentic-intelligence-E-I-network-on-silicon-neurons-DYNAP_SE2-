@@ -117,6 +117,8 @@ if __name__ == "__main__":
         # learn: w_plast being updated in another thread
         time.sleep(float(duration_per_sample/1e3))
 
+        poisson_gen.stop()
+
         # remove the current pre post connections
         remove_synapses(net_gen, connectivity['pre2post'])
 
@@ -132,8 +134,7 @@ if __name__ == "__main__":
         new_config = net_gen.make_dynapse1_configuration()
         model.apply_configuration(new_config)
 
-        poisson_gen.stop()
-
+        # cooling down
         time.sleep(float(duration_cool_down/1e3))
 
     stdp.stop_stdp()

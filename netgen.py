@@ -123,7 +123,7 @@ class NeuronGroup:
                 raise Exception("neuron ids invalid!")
         
         # check if you use neuron0 of a chip
-        if core_id == 0:
+        if core_id == 0 and (not is_spike_gen):
             for nid in neuron_ids:
                 if nid == 0:
                     print("WARNING: be careful, you are using neuron 0 from a chip to construct a neuron group!")
@@ -223,13 +223,13 @@ class WTA_connections:
         ee_posts: list[int], post_index_list of the EE connections.
     """
     def __init__(self, exc_group, inh_group, syn_type_ei, syn_type_ie, syn_type_ee=None, p_ei=1, p_ie=1, ee_pres=None, ee_posts=None, rand_seed=None, mux_conn_ei=1, mux_conn_ie=1, mux_conn_ee=1):
-        self.ei = Synapses(exc_group, inh_group, syn_type_ei, conn_type='all2all', p=p_ei, rand_seed=rand_seed, mux_conn_ei=mux_conn_ei)
-        self.ie = Synapses(inh_group, exc_group, syn_type_ie, conn_type='all2all', p=p_ie, rand_seed=rand_seed, mux_conn_ie=mux_conn_ie)
+        self.ei = Synapses(exc_group, inh_group, syn_type_ei, conn_type='all2all', p=p_ei, rand_seed=rand_seed, mux_conn=mux_conn_ei)
+        self.ie = Synapses(inh_group, exc_group, syn_type_ie, conn_type='all2all', p=p_ie, rand_seed=rand_seed, mux_conn=mux_conn_ie)
 
         if syn_type_ee != None:
             if ee_pres == None or ee_posts == None:
                 raise Exception('ee_pres and ee_posts must be given to create EE connections')
-            self.ee = Synapses(exc_group, exc_group, syn_type_ee, pre_list=ee_pres, post_list=ee_posts, mux_conn_ee=mux_conn_ee)
+            self.ee = Synapses(exc_group, exc_group, syn_type_ee, pre_list=ee_pres, post_list=ee_posts, mux_conn=mux_conn_ee)
         else:
             self.ee = None
 
@@ -288,7 +288,7 @@ class Network:
                 print("WARNING: you are building connections from left chips [0,2] to right chips [1,3]!")
         
         # Neuron 0 warning. Please avoid neuron 0 of each chip
-        if pre.core_id == 0 and pre.neuron_id == 0:
+        if pre.core_id == 0 and pre.neuron_id == 0 and (not pre.is_spike_gen):
             print("WARNING: you are using neuron 0 of chip %i as a pre neuron!" % (pre.chip_id))
         if post.core_id == 0 and post.neuron_id == 0:
             print("WARNING: you are using neuron 0 of chip %i as a post neuron!" % (post.chip_id))

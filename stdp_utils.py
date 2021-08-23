@@ -103,21 +103,31 @@ def bad_traces(onpre_traces, onpost_traces, max_num=10, max_time_interval=3*1e5)
 
     return False
 
-def floatW2intW(float_w_plast, max_pre_count, unit=0.1):
+def floatW2intW(float_w_plast, max_pre_count, rand_seed=None, unit=0.1):
     """
     Convert a float w_plast into a network.
     0.1 -> 1 connection
     """
+    np.random.seed(rand_seed)
     int_w_plast = float_w_plast*(1/unit)
     int_w_plast = int_w_plast.astype(int)
     post_cam_counts = np.sum(int_w_plast, axis=0)
 
     for post in range(len(post_cam_counts)):
         if post_cam_counts[post] > max_pre_count:
+            # number of cams that needs to be removed
+            extra_cam_count = post_cam_counts[post]-max_pre_count
+
             pre_post_weights = int_w_plast[:,post]
-            max_pre = np.argmax(pre_post_weights)
+            num_pres = len(pre_post_weights)
 
-            # punish the largest weight pre,post connection
-            int_w_plast[max_pre][post] = min(int_w_plast[max_pre][post]-1, max_pre_count) 
+            # pruning of pre_post_weights: randomly remove extra_cam_count cams
+            while(extra_cam_count>0):
+                pre = np.random.randint(num_pres, size=1)
+                if int_w_plast[pre,post] !=0:
+                    int_w_plast[pre,post] -= 1
+                    extra_cam_count -= 1
 
+    np.random.seed(None)
+    
     return int_w_plast
