@@ -18,9 +18,11 @@
 
 - We added some new features to the Python libs (mainly in [netgen.py](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/netgen.py)), e.g. NeuronGroup, several add_connections* functions to create connections between 2 neuron groups, more convenient printing for Neuron and Network, etc. Specifically, this [example](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_neuron_group.py) shows you a more convenient way of creating a network.
 
-- Dynapse1TraceNode goes into version 0.8.22.0, which can be used to track instantaneous firing rates, or to do STDP-like learning. [Here](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/test/with_hardware/trace_stdp_WIP/neuron_trace_test.py) is an example showing how the trace filter works.
+- New Samna version 0.8.22.0 comes with new features!
+  - "Dynapse1NeuronTrace" filter node is implemented, which can be used to track instantaneous firing rates, or to do STDP-like learning. [Here](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/test/with_hardware/trace_stdp_WIP/neuron_trace_test.py) is an example showing how the trace filter works, and this [script](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) is a simple STDP learning example.
+  - "Dynapse1NeuronSelect" update: `set_neurons()` now accepts tuple neuron ID list, i.e. list[(int,int,int)] indicating (chip,core,neuron) IDs, instead of global neuron ids. Please adapt your scripts accordingly. 
   
-- The Python [libraries](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1) are updated.
+- The Python [libraries](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1) are updated as well.
   - File names are changed to match Python name convention: e.g. NetworkGenerator.py -> netgen.py, Dynapse1Constants.py -> dynapse1constants.py, Dynapse1Utils.py -> dynapse1utils.py, etc. Sorry for the inconvenience, but please modify your import accordingly.
   - STDP modules are added so that implementation of STDP-like learning are supported. Check this [script](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) as a simple learning example.
 
