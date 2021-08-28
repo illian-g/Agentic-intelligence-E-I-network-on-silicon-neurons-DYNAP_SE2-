@@ -153,7 +153,7 @@ class NeuronGroup:
         """Only compares the ids. Consider a neuron group as an individual group without any external connections (i.e. not in a Network)"""
         return self.chip_id == other.chip_id and \
             self.core_id == other.core_id and \
-            self.neuron_ids == other.neuron_ids and \
+            self.neuron_ids.any() == other.neuron_ids.any() and \
             self.is_spike_gen == other.is_spike_gen
 
 class Synapses:
@@ -215,6 +215,27 @@ class Synapses:
             self.p = None
             self.rand_seed = None
 
+    def __eq__(self, other):
+        result = (self.pre == other.pre and \
+               self.post == other.post and \
+               self.synapse_type == other.synapse_type and \
+               self.mux_conn == other.mux_conn and \
+               self.conn_type == other.conn_type and \
+               self.p == other.p and \
+               self.rand_seed == other.rand_seed)
+        
+        if self.pre_list is None:
+            result = result and (self.pre_list == other.pre_list)
+        else:
+            result = result and (list(self.pre_list) == list(other.pre_list))
+
+        if self.post_list is None:
+            result = result and (self.post_list == other.post_list)
+        else:
+            result = result and (list(self.post_list) == list(other.post_list))
+
+        return result
+
 class WTA_connections:
     """
     Define WTA EE EI IE connections of for an EXC and an INH population.
@@ -232,6 +253,11 @@ class WTA_connections:
             self.ee = Synapses(exc_group, exc_group, syn_type_ee, pre_list=ee_pres, post_list=ee_posts, mux_conn=mux_conn_ee)
         else:
             self.ee = None
+    
+    def __eq__(self, other):
+        return self.ei == other.ei and \
+               self.ie == other.ie and \
+               self.ee == other.ee
 
 class Network:
     """
