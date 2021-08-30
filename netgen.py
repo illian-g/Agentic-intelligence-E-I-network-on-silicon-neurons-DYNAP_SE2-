@@ -15,7 +15,7 @@ def add_wta_conns(netgen, wta_conns):
     """Add WTA connections for a WTA into a network generator"""
     add_synapses(netgen, wta_conns.ei)
     add_synapses(netgen, wta_conns.ie)
-    if wta_conns.ee !=None:
+    if wta_conns.ee is not None:
         add_synapses(netgen, wta_conns.ee)
 
 def remove_synapses(netgen, synapse):
@@ -89,7 +89,7 @@ class Neuron:
     
     def __hash__(self):
 
-        h = hash("{}.{}.{}.{}.{}".format(self.chip_id,self.chip_id,
+        h = hash("{}.{}.{}.{}.{}".format(self.chip_id,self.core_id,
                                         self.neuron_id,self.is_spike_gen,
                                         self.incoming_connections))
 
@@ -216,6 +216,12 @@ class Synapses:
             self.rand_seed = None
 
     def __eq__(self, other):
+        if self is None:
+            if other is None:
+                return True
+            else:
+                return False
+        
         result = (self.pre == other.pre and \
                self.post == other.post and \
                self.synapse_type == other.synapse_type and \
