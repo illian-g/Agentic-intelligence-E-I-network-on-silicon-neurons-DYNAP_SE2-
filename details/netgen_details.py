@@ -68,7 +68,6 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
     '''
     valid = False
     # dictionary to save weights > 1, e.g. (pre_tag, post_neuron): num_cams
-    large_conn_weight_dict = {}
     post_neuron_dict = network.post_neuron_dict
 
     for core in post_neuron_dict:
@@ -106,9 +105,6 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
 
                 # the number of cams needed for this pre tag
                 num_cams += weight
-
-                if weight > 1:
-                    large_conn_weight_dict[(pre_tag, post)] = weight
 
             if num_cams > max_num_cams:
                 raise Exception("ERROR: post neuron "+repr(post)+" has too many pre neurons or spike generators!")
@@ -148,9 +144,9 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
 
     # print("Validation complete: the network is good to go!")
     valid = True
-    return valid, large_conn_weight_dict
+    return valid
 
-def convert_validated_network2dynapse1_configuration(network, large_conn_weight_dict):
+def convert_validated_network2dynapse1_configuration(network):
     """
     Convert a validated "network" to a Dynapse1Configuration which can be applied using Dynapse1Model.
     """
@@ -189,10 +185,8 @@ def convert_validated_network2dynapse1_configuration(network, large_conn_weight_
                 # write how many pre_tags into the cams of post_neuron?
                 # num_cams = weights of (pre_tag, post) connection
                 # all the pre neurons should have the same weight (validated already) !
-                if (pre_tag, post_neuron) in large_conn_weight_dict:
-                    weight = large_conn_weight_dict[(pre_tag, post_neuron)]
-                else:
-                    weight = 1
+                pre_weight_dict = dict(Counter(post_neuron.incoming_connections[pre_tag]))
+                weight = list(pre_weight_dict.values())[0]
 
                 check_and_write_post_cam(post_in_config, pre_core_id,
                                         pre_neuron_id, synapse_type,

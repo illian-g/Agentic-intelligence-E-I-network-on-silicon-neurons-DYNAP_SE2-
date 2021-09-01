@@ -481,28 +481,11 @@ class NetworkGenerator:
         If not: raise exception
         '''
         if validation:
-            is_valid, large_conn_weight_dict = validate(self.network, MAX_NUM_CAMS)
+            is_valid = validate(self.network, MAX_NUM_CAMS)
 
-            self.config = convert_validated_network2dynapse1_configuration(self.network, large_conn_weight_dict)
-            # print("Converted the validated network to a Dynapse1 configuration!")
+        self.config = convert_validated_network2dynapse1_configuration(self.network)
+        # print("Converted the validated network to a Dynapse1 configuration!")
         
-        else:
-            large_conn_weight_dict = {}
-
-            for core in self.network.post_neuron_dict:
-                post_neurons = self.network.post_neuron_dict[core]
-                for post in post_neurons:
-                    # pre neurons with different (core_id, neuron_id, synapse_type)
-                    for pre_tag in post.incoming_connections:
-                        pre_weight_dict = dict(Counter(post.incoming_connections[pre_tag]))
-                        weight = list(pre_weight_dict.values())[0]
-
-                        # the number of cams needed for this pre tag
-                        if weight > 1:
-                            large_conn_weight_dict[(pre_tag, post)] = weight
-            
-            self.config = convert_validated_network2dynapse1_configuration(self.network, large_conn_weight_dict)
-
         return self.config
 
     def make_dynapse1_configuration_in_chip(self, chip_id):

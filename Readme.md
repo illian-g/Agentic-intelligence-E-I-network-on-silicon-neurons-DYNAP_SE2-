@@ -26,6 +26,9 @@
   - File names are changed to match Python name convention: e.g. NetworkGenerator.py -> netgen.py, Dynapse1Constants.py -> dynapse1constants.py, Dynapse1Utils.py -> dynapse1utils.py, etc. Sorry for the inconvenience, but please modify your import accordingly.
   - STDP modules are added so that implementation of STDP-like learning are supported. Check this [script](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) as a simple learning example.
 
+- How to contribute?
+  - Please read [How to contribute?](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/master) and you need to change `master` branch to `samna-dynapse1`.
+
 - Issue: the GUI and `matplotlib.pyplot` may not work depending on your system.
   - If you get the error below, please `open_dynapse1` without GUI.
     > samna.open_remote_node(visualizer_id, viz_name)

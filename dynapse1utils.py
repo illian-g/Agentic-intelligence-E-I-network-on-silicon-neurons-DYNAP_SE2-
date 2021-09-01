@@ -243,6 +243,9 @@ def get_global_id_list(tuple_list):
 def get_parameters(config, chip, core):
     return config.chips[chip].cores[core].parameter_group.param_map.values()
 
+def get_parameter_value(config, chip, core, name):
+    return (config.chips[chip].cores[core].parameter_group.param_map[name].coarse_value, config.chips[chip].cores[core].parameter_group.param_map[name].fine_value)
+
 def save_parameters2txt_file(config, filename="./dynapse_parameters.txt"):
     save_file = open(filename, "w")
     for chip in range(NUM_CHIPS):
