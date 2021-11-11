@@ -3,7 +3,7 @@ import json
 
 class TripletStdp:
     """
-    Implementation of all to all plastic connections between pre and post population, including trace graph setup and algorithm implementation with retrieved traces.
+    Implementation of all to all plastic connections between pre and post population, including trace graph setup and algorithm implementation with retrieved traces. http://arxiv.org/abs/1608.08267.
 
     Triplet STDP is implemented, but can be replaced with other Hebbian-like learning algorithms
 
@@ -27,15 +27,15 @@ class TripletStdp:
     
     Parameters:
         method = "increase_to", # "increase_by",  "increase_to"
-        trace_max = 1, 
-        pre_tau = 20, # millisec in JSON file
-        post1_tau = 40, # millisec in JSON file
-        post2_tau = 40, # millisec in JSON file
-        nuEEpre = 0.005, 
-        nuEEpost = 0.025, 
-        wmaxEE = 1, 
+        trace_max = 1, # maximum trace value
+        pre_tau = 20, # time constant of trace pre, millisec in JSON file
+        post1_tau = 40, # time constant of trace post1, millisec in JSON file
+        post2_tau = 40, # time constant of trace post2, millisec in JSON file
+        nuEEpre = 0.005, # presynaptic spike learning rate
+        nuEEpost = 0.025, # postsynaptic spike learning rate
+        wmaxEE = 1, # maximum weight
         expEEpre = 0.2, # presynaptic weight dependence
-        expEEpost = 0.2
+        expEEpost = 0.2 # postsynaptic weight dependence
     """ 
     def __init__(self,
                  param_file):
@@ -59,7 +59,7 @@ class TripletStdp:
         """
         The implementation of triplet stdp algorithm given Dynapse1traces retrieved from the trace graph.
         """
-        # on pre, contains post1 trace
+        # on pre, LTD, contains post1 trace
         for onpre_trace in onpre_traces:
             # for each pre spike timestamp
             pre_neuron = onpre_trace.trigger_neuron
@@ -73,7 +73,7 @@ class TripletStdp:
                 delta_w = self.nuEEpre * post1 * w_plast[i][j]**self.expEEpre
                 w_plast[i][j] = np.clip(w_plast[i][j]-delta_w, 0, self.wmaxEE)
         
-        # on post, contains pre and post2 trace
+        # on post, LTP, contains pre and post2 trace
         for onpost_trace in onpost_traces:
             # for each post spike timestamp
             post_neuron = onpost_trace.trigger_neuron

@@ -117,7 +117,7 @@ def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335,
     if gui:
         return store, gui_process
     else:
-        return store
+        return store, ''
 
 def open_gui(store, device_name, visualizer_id=3):
     model = getattr(store, device_name)
