@@ -8,7 +8,7 @@
         
         ```--upgrade``` is needed if you already installed Samna.
 
-    - To get a specific version, e.g. 0.7.19, you can do:
+    - If the latest version does not work for DYNAP-SE1, please use version 0.8.32.0 which has been tested with DYNAP-SE1 boards. To get a specific version, e.g. 0.7.19, you can do:
         
         ```pip install samna==0.7.19 -i https://gitlab.com/api/v4/projects/27423070/packages/pypi/simple```
 
