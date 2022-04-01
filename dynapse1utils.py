@@ -7,7 +7,9 @@ import random
 import time
 import json
 from multiprocessing import Process
+from threading import Thread
 import numpy as np
+import sys, os
 
 def free_port():
     """
@@ -48,7 +50,7 @@ def open_device(device_name, sender_port, receiver_port, select_device=False):
     # ----------- connect Python to C++ ----------------
 
     # retrieve unopened device
-    devices = samna.device_node.DeviceController.get_unopened_devices()
+    devices = samna.device.get_unopened_devices()
 
     if len(devices) == 0:
         raise Exception("no device detected!")
@@ -63,7 +65,7 @@ def open_device(device_name, sender_port, receiver_port, select_device=False):
         idx = 0
 
     # open the device
-    samna.device_node.DeviceController.open_device(devices[int(idx)], device_name)
+    device = samna.device.open_device(devices[int(idx)])
 
     samna_info_dict = {
         "sender_port":sender_endpoint,
@@ -73,7 +75,7 @@ def open_device(device_name, sender_port, receiver_port, select_device=False):
         "python_node_id":interpreter_id
     }
 
-    return samna.device_node, samna_info_dict
+    return device, samna_info_dict
 
 def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335, select_device=False):
     """
@@ -92,13 +94,13 @@ def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335,
         sender_port=33336
         receiver_port=33335
     
-    store, samna_info_dict = open_device(device_name, sender_port, receiver_port, select_device)
+    device, samna_info_dict = open_device(device_name, sender_port, receiver_port, select_device)
     
     if gui:
         visualizer_id = 3
 
         # open the gui
-        gui_process, gui_receiving_port = open_gui(store, device_name, visualizer_id)
+        gui_process, gui_receiving_port = open_gui(device, device_name, visualizer_id)
 
         samna_info_dict["gui_receiving_port"] = gui_receiving_port
         samna_info_dict["gui_node_id"] = visualizer_id
@@ -115,39 +117,29 @@ def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335,
         json.dump(samna_info_dict, json_file, indent=4)
 
     if gui:
-        return store, gui_process
+        return device, gui_process
     else:
-        return store, ''
+        return device, ''
 
-def open_gui(store, device_name, visualizer_id=3):
-    model = getattr(store, device_name)
+def open_gui(device, device_name, visualizer_id=3):
 
     # add a node in filter gui_graph
     global gui_graph
     gui_graph = samna.graph.EventFilterGraph()
     # Add a converter node that translate the raw DVS events
-    dynapse1_to_visualizer_converter_id = gui_graph.add_filter_node("Dynapse1EventToVizConverter") # Dynapse1EventToVizConverter
+    dynapse1_to_visualizer_converter_id = get_Dynapse1_viz_converter() # Dynapse1EventToVizConverter
     # Add a streamer node that streams visualization events to our graph
-    streamer_id = gui_graph.add_filter_node("VizEventStreamer")
-
-    # connect nodes in graph
-    gui_graph.connect(dynapse1_to_visualizer_converter_id, streamer_id)
-
-    # connect a node from outside a gui_graph to a node inside the gui_graph
-    # We need to explicitly select the input channel
-    model.get_source_node().add_destination(gui_graph.get_node_input(dynapse1_to_visualizer_converter_id))
+    
+    source_node, converter_node, streamer_node = gui_graph.sequential([device.get_source_node(), dynapse1_to_visualizer_converter_id, "VizEventStreamer"])
 
     gui_graph.start()
 
     # create gui process
-    gui_process = Process(target=samnagui.runVisualizer)
-    gui_process.start()
-    time.sleep(1)
+    visualizer, gui_thread = open_visualizer(0.75, 0.75, samna_node.get_receiver_endpoint(), samna_node.get_sender_endpoint(), visualizer_id)
 
     port = random.randint(10**4, 10**5)
-    viz_name = "visualizer"+str(port)
+    viz_name = "visualizer"+str(visualizer_id)
     # open a connection to the GUI node
-    samna.open_remote_node(visualizer_id, viz_name)
     visualizer = getattr(samna, viz_name)
 
     try:
@@ -157,8 +149,6 @@ def open_gui(store, device_name, visualizer_id=3):
     except Exception as e:
         print("ERROR: "+str(e)+", please re-run open_gui()!")
 
-    # get streamer node
-    streamer_node = gui_graph.get_node(streamer_id)
     # stream on the same endpoint as the receiver is listening to
     streamer_node.set_streamer_endpoint(gui_receiving_port)
 
@@ -172,7 +162,119 @@ def open_gui(store, device_name, visualizer_id=3):
     # List currently displayed plots
     visualizer.plots.report()
 
-    return gui_process, gui_receiving_port
+    return gui_thread, gui_receiving_port
+
+def get_Dynapse1_viz_converter():
+
+    filter_source = '''
+        template<typename T>
+        class Dynapse1ToViz : public iris::FilterInterface<std::shared_ptr<const std::vector<T>>, std::shared_ptr<const std::vector<ui::Event>>> {
+        public:
+            void apply() override
+            {
+                auto outputCollection = std::make_shared<std::vector<ui::Event>>();
+                while (const auto input = this->receiveInput()) {
+                    std::for_each(input.value()->cbegin(), input.value()->cend(),
+                                  [&](auto&& ev) {
+                                      if (std::holds_alternative<dynapse1::Spike>(ev)) {
+                                          const dynapse1::Spike& spike = std::get<dynapse1::Spike>(ev);
+                                          uint16_t row, col, core_row, core_col;
+                                          core_row = 16;
+                                          core_col = 16;
+    
+                                          row = spike.chipId / 2 * core_row * 2 +
+                                                spike.coreId / 2 * core_row +
+                                                spike.neuronId / core_row;
+                                          col = spike.chipId % 2 * core_col * 2 +
+                                                spike.coreId % 2 * core_col +
+                                                spike.neuronId % core_col;
+    
+                                          uint32_t polarity;
+    
+                                          if (static_cast<uint16_t>(spike.coreId) == 0 or static_cast<uint16_t>(spike.coreId) == 3) {
+                                              polarity = 1;
+                                          }
+                                          else {
+                                              polarity = 0;
+                                          }
+    
+                                          outputCollection->emplace_back(ui::DvsEvent{0,
+                                                                         63 - static_cast<uint64_t>(row),
+                                                                         static_cast<uint64_t>(col),
+                                                                         0, static_cast<uint32_t>(spike.timestamp),
+                                                                         polarity});
+                                      }
+                                  });
+                }
+                if (outputCollection->empty()) {
+                    return;
+                }
+    
+                this->forwardResult(std::move(outputCollection));
+            }
+    
+        };
+    
+        namespace svejs {
+        template<typename T>
+        struct RegisterImplementation<Dynapse1ToViz<T>> {
+    
+            using Type = Dynapse1ToViz<T>;
+    
+            static constexpr inline auto registerConstructors()
+            {
+                return constructors(constructor<>());
+            }
+    
+            static constexpr inline auto registerMembers()
+            {
+                return members();
+            }
+    
+            static constexpr inline auto registerMemberFunctions()
+            {
+                return memberFunctions();
+            }
+    
+            static constexpr inline auto registerBaseClasses()
+            {
+                return svejs::BaseClasses<iris::NodeInterface>();
+            }
+    
+            static inline auto registerName()
+            {
+                return std::string("Dynapse1ToViz_") + svejs::snakeCase(svejs::registerName<T>());
+            }
+        };
+        }
+    '''
+    
+    return samna.graph.JitFilter('Dynapse1ToViz', filter_source)
+
+def open_visualizer(window_width, window_height, receiver_endpoint, sender_endpoint, visualizer_id):
+    # start visualizer in a isolated process which is required on mac, intead of a sub process.
+    # it will not return until the remote node is opened. Return the opened visualizer.
+    gui_cmd = f"import samna, samnagui; samnagui.runVisualizer({window_width}, {window_height}, '{receiver_endpoint}', '{sender_endpoint}', {visualizer_id})"
+    os_cmd = f'{sys.executable} -c "{gui_cmd}"'
+    print("Visualizer start command: ", os_cmd)
+    gui_thread = Thread(target=os.system, args=(os_cmd,))
+    gui_thread.start()
+
+    # wait for open visualizer and connect to it.
+    timeout = 10
+    begin = time.time()
+    name = "visualizer" + str(visualizer_id)
+    while time.time() - begin < timeout:
+        try:
+            time.sleep(0.05)
+            samna.open_remote_node(visualizer_id, name)
+        except:
+            continue
+        else:
+            return getattr(samna, name), gui_thread
+
+    raise Exception("open_remote_node failed:  visualizer id %d can't be opened in %d seconds!!" % (visualizer_id, timeout))
+
 
 def close_dynapse1(store, device_name, gui_process=''):
     '''
@@ -319,7 +421,7 @@ def print_dynapse1_spike(event):
             event.core_id*NEURONS_PER_CORE+
             event.chip_id*NEURONS_PER_CHIP), end=',')
 
-def create_neuron_select_graph(model, neuron_ids):
+def create_neuron_select_graph(device, neuron_ids):
     """
     Attribute:
         model: Dynapse1Model, returned by getattr(store, device_name)
@@ -339,22 +441,13 @@ def create_neuron_select_graph(model, neuron_ids):
     """
     # create a graph. A graph is a thread.
     graph = samna.graph.EventFilterGraph()
-    # Filtered sinkNode. Node 3. Initialized outside graph, not by add_filter_node.
-    sink_node = samna.BufferSinkNode_dynapse1_dynapse1_event()
+    
+    sink_node = samna.BasicSinkNode_dynapse1_dynapse1_event()
 
     # NeuronSelectFilterNode. Node 2. Initialized inside graph, by add_filter_node.
-    filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
+    _, filter_node, _ = graph.sequential([device.get_source_node(), "Dynapse1NeuronSelect", sink_node])
     # Get this filterNode from the created graph and set selected neuron IDs.
-    filter_node = graph.get_node(filter_node_id)
     filter_node.set_neurons(neuron_ids)
-
-    # dk.get_source_node() is Node 1. Initialized outside graph, not by add_filter_node.
-    # Connect Node 1 to Node 2, using add_destination because Node 1 not inside graph.
-    # Use graph.connect(node_id_1, node_id_2) only if both nodes inside graph.
-    model.get_source_node().add_destination(graph.get_node_input(filter_node_id))
-
-    # connect Node 2 to Node 3.
-    graph.add_destination(filter_node_id, sink_node.get_input_channel())
 
     return graph, filter_node, sink_node
 
