@@ -195,11 +195,12 @@ def gen_stdp_params():
 
     return param_group
 
-def set_params(model, dc=False):
-    if dc:
-        param_group = gen_dc_params()
-    else:
-        param_group = gen_param_group()
+def set_params(model, dc=False, param_group=None):
+    if param_group is None:
+        if dc:
+            param_group = gen_dc_params()
+        else:
+            param_group = gen_param_group()
         
     for chip in range(4):
         for core in range(4):
