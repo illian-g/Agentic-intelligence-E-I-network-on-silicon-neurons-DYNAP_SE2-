@@ -131,5 +131,4 @@ fpga_spike_gen.stop()
 print("Example finished")
 
 # close Dynapse1
-# close with GUI
 ut.close_dynapse1(store, device_name, gui_process)

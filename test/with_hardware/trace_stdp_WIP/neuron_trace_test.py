@@ -18,10 +18,7 @@ Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow s
 if __name__ == "__main__":
     # open DYNAP-SE1 board to get Dynapse1Model
     device_name = "dynapse1"
-
-    # open with GUI
-    # store, gui_process = ut.open_dynapse1(device_name)
-    store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
+    store, gui_process = ut.open_dynapse1(device_name, gui=False)
 
     model = getattr(store, device_name)
 
@@ -151,7 +148,4 @@ if __name__ == "__main__":
     print("Example finished")
 
     # close Dynapse1
-
-    # close with GUI
-    # ut.close_dynapse1(store, device_name, gui_process)
-    ut.close_dynapse1(store, device_name)
+    ut.close_dynapse1(store, device_name, gui_process)

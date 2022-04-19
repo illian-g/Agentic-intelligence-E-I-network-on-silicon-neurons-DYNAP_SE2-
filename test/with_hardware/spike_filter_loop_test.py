@@ -16,10 +16,7 @@ from params import set_params
 if __name__ == "__main__":
     # open DYNAP-SE1 board to get Dynapse1Model
     device_name = "dynapse1"
-
-    # open with GUI
-    # store, gui_process = ut.open_dynapse1(device_name)
-    store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
+    store, gui_proc = ut.open_dynapse1(device_name, gui=False)
 
     model = getattr(store, device_name)
 
