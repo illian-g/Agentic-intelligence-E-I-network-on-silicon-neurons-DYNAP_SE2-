@@ -10,6 +10,7 @@ from multiprocessing import Process
 from threading import Thread
 import numpy as np
 import sys, os
+import warnings
 
 def free_port():
     """
@@ -22,11 +23,10 @@ def free_port():
     free_socket.close()
     return port
 
-def open_device(device_name, sender_port, receiver_port, select_device=False):
+def open_device(sender_port=33336, receiver_port=33335, select_device=False):
     """
     Get unopened devices detected by samna.
     Attribute:
-        device_name: string, name the device you want to open.
         sender_port: int, samnaNode's sending port.
         receiver_port: int, samnaNode's receiving port.
     """
@@ -71,36 +71,41 @@ def open_device(device_name, sender_port, receiver_port, select_device=False):
         "sender_port":sender_endpoint,
         "receiver_port":receiver_endpoint,
         "samna_node_id":node_id,
-        "device_name":device_name,
+        "device_name":devices[int(idx)].device_type_name,
         "python_node_id":interpreter_id
     }
 
     return device, samna_info_dict
 
-def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335, select_device=False):
+def open_dynapse1(device_name=None, gui=True, sender_port=33336, receiver_port=33335, select_device=False):
     """
     open DYNAP-SE1 board with or without GUI.
 
     Attribute:
-        device_name: string, name the DYNAP-SE1 board you want to open.
-        gui: if to open the gui or not
+        gui: whether to open the gui or not
             True: will return store and gui_process
             False: only return store
+        select_device: whether to select one DYNAP-SE1 board out of some connected ones
+            False: board 0 will be opened
+            True: user will be asked to choose the board index
     """
     # ports = random.sample(range(10**4, 10**5), k=2)
 
+    # TODO: remove attribute device_name
+    if device_name is not None:
+        warnings.warn("device_name will be deprecated soon, please do not assign device_name anymore! You cannot name DYNAP-SE1 board by yourself because it's now assigned as 'Dynapse1DevKit:index' by open_dynapse1()", DeprecationWarning)
     if gui:
         # has to be these 2 numbers if you want to run the GUI
         sender_port=33336
         receiver_port=33335
     
-    device, samna_info_dict = open_device(device_name, sender_port, receiver_port, select_device)
+    device, samna_info_dict = open_device(sender_port, receiver_port, select_device)
     
     if gui:
         visualizer_id = 3
 
         # open the gui
-        gui_process, gui_receiving_port = open_gui(device, device_name, visualizer_id)
+        gui_process, gui_receiving_port = open_gui(device, visualizer_id)
 
         samna_info_dict["gui_receiving_port"] = gui_receiving_port
         samna_info_dict["gui_node_id"] = visualizer_id
@@ -121,7 +126,7 @@ def open_dynapse1(device_name, gui=True, sender_port=33336, receiver_port=33335,
     else:
         return device, ''
 
-def open_gui(device, device_name, visualizer_id=3):
+def open_gui(device, visualizer_id=3):
 
     # add a node in filter gui_graph
     global gui_graph
@@ -276,13 +281,13 @@ def open_visualizer(window_width, window_height, receiver_endpoint, sender_endpo
     raise Exception("open_remote_node failed:  visualizer id %d can't be opened in %d seconds!!" % (visualizer_id, timeout))
 
 
-def close_dynapse1(store, device_name, gui_process=''):
+def close_dynapse1(model, gui_process=''):
     '''
     Close DYNAP-SE1 board with or without the GUI.
     '''
     if gui_process != '':
         gui_process.join()
-    store.DeviceController.close_device(device_name)
+    samna.device.close_device(model)
 
 def get_neuron_from_config(config, chip, core, neuron):
     """
@@ -407,14 +412,23 @@ def set_parameters_in_json_file(model, filename="./dynapse_parameters.json"):
         param = dyn1.Dynapse1Parameter(p['parameter_name'], int(p['coarse_value']), int(p['fine_value']))
         model.update_single_parameter(param, int(p['chip']), int(p['core']))
 
-def get_serial_number(store, device_name):
-    devices = store.DeviceController.get_opened_devices()
-    for device in devices:
-        if device.name == device_name:
-            print(device.name)
-            print(device.device_info)
-            return device.device_info.serial_number
-    raise Exception("wrong device name!")
+def get_serial_number(device_idx=0, select_device=False):
+    """
+    Get serial number of an opened DYNAP-SE1 board.
+    Attribute:
+        device_idx: int, DYNAP-SE1 board index.
+        select_device: whether to select one DYNAP-SE1 board out of multiple connected ones.
+    """
+    if type(device_idx) is str:
+        warnings.warn("device_name is deprecated, please use device_idx.", DeprecationWarning)
+        device_idx = 0
+    device_infos = samna.device.get_opened_devices()
+    if select_device:
+        for i in range(len(device_infos)):
+            print("["+str(i)+"]: ", device_infos[i], "serial_number", device_infos[i].serial_number)
+        device_idx = input("Select the device you want to open by index: ") 
+    else:
+        return device_infos[device_idx].serial_number
 
 def print_dynapse1_spike(event):
     print((event.timestamp, event.neuron_id+
@@ -424,7 +438,7 @@ def print_dynapse1_spike(event):
 def create_neuron_select_graph(device, neuron_ids):
     """
     Attribute:
-        model: Dynapse1Model, returned by getattr(store, device_name)
+        model: Dynapse1Model, returned by open_dynapse1()
         neuron_ids: list of tuple(int, int, int) in the order of (chip, core, neuron), neuron ids of the neurons you want to monitor.
     Process and usage of the graph:
         Create a graph: source_node in model -> filter_node in graph -> sink_node to get events.
@@ -454,7 +468,7 @@ def create_neuron_select_graph(device, neuron_ids):
 def get_time_wrap_events(model):
     """
     Attribute:
-        model: Dynapse1Model, returned by getattr(store, device_name)
+        model: Dynapse1Model, returned by open_dynapse1()
     Purpose:
         DYNAP-SE1 sends out 2 types of events: spike and timeWrapEvent.
         timeWrapEvent occurs when the 32 bit timestamp wraps around.

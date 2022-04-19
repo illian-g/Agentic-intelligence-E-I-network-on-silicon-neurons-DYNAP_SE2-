@@ -53,13 +53,7 @@ if __name__ == "__main__":
     duration_cool_down = 500 # millisec
 
     # open DYNAP-SE1 board to get Dynapse1Model
-    device_name = "dynapse1"
-
-    # open with GUI
-    # store, gui_process = ut.open_dynapse1(device_name)
-    store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=13346)
-
-    model = getattr(store, device_name)
+    model, gui_process = ut.open_dynapse1(gui=False, sender_port=12345, receiver_port=13346)
 
     set_stdp_params(model)
 
@@ -139,5 +133,4 @@ if __name__ == "__main__":
 
     stdp.stop_stdp()
 
-    # ut.close_dynapse1(store, device_name, gui_process)
-    ut.close_dynapse1(store, device_name)
+    ut.close_dynapse1(model, gui_process)
