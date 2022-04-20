@@ -1,5 +1,6 @@
 # Documentation 
-The documentation of Samna for DYNAP-SE1 is [here](https://code.ini.uzh.ch/jzhao/samna-dynapse1-doc). The documentation of Samna 0.14.10.0 is [here](https://synsense-sys-int.gitlab.io/samna/).
+- The documentation of Samna for DYNAP-SE1 is [here](https://code.ini.uzh.ch/jzhao/samna-dynapse1-doc). The manual of Samna 0.14.10.0 is [here](https://synsense-sys-int.gitlab.io/samna/).
+- This branch (```samna-dynapse1```) works with Samna 0.14.10.0. For an old version, please use branch ```samna-dynapse1-0.8.32.0``` which is compatible with Samna 0.8.32.0.
 
 # Installation
 
