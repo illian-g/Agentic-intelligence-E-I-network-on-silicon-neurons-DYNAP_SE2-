@@ -114,6 +114,4 @@ poisson_gen.stop()
 print("Example finished")
 
 # close Dynapse1
-
-# close with GUI
 ut.close_dynapse1(model, gui_process)

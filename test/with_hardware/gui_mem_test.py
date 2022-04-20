@@ -12,6 +12,10 @@ import random
 
 from params import set_params
 
+"""
+Outdated testing code for samna 0.8.32.0
+"""
+
 def open_dynapse1_no_plot(device_name):
     """
     Attribute:

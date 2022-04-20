@@ -154,12 +154,7 @@ if __name__ == "__main__":
         print("Srams:")
         ut.print_neuron_destinations(neuron)
 
-    device_name = "dynapse1"
-    store, gui_process = ut.open_dynapse1(device_name)
-
-    # get the handle of the device
-    model = getattr(store, device_name)
-    # model = store.dynapse1
+    model, gui_process = ut.open_dynapse1()
 
     print("get dynapse1 model")
     # get the interface api
@@ -183,5 +178,4 @@ if __name__ == "__main__":
 
     # net_gen.print_network()
 
-    # samna.device_node.DeviceController.close_device(device_name)
-    ut.close_dynapse1(store, device_name, gui_process)
+    ut.close_dynapse1(model, gui_process)

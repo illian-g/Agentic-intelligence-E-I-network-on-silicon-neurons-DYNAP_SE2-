@@ -10,6 +10,7 @@ import dynapse1utils as ut
 from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 from params import set_params
 from plotter import plot_raster, plot_trace
+import matplotlib.pyplot as plt
 
 """
 Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow spike (from trigger neuron 1 (1,0,17)), and increases at each blue spike (from the trace neuron itself). The increase at the blue spikes may not obvious because it's the value that's first decayed, then increased.
@@ -17,13 +18,7 @@ Expected figure: the green trace of neuron 0 (1,0,16) decreases at each yellow s
 
 if __name__ == "__main__":
     # open DYNAP-SE1 board to get Dynapse1Model
-    device_name = "dynapse1"
-
-    # open with GUI
-    # store, gui_process = ut.open_dynapse1(device_name)
-    store = ut.open_dynapse1(device_name, gui=False, sender_port=12345, receiver_port=12346)
-
-    model = getattr(store, device_name)
+    model, gui_process = ut.open_dynapse1()
 
     # get Dynapse1 api from the model
     api = model.get_dynapse1_api()
@@ -79,26 +74,18 @@ if __name__ == "__main__":
     set_params(model)
 
     # ---------------- create a graph ----------------
-    # create a graph: source node to 2 filter nodes, one neuron select, one neuron trace.
+    """
+    create a graph: source node to 2 filter nodes, one neuron select, one neuron trace.
+    connect source node to filter nodes, connect filter nodes to sink nodes
+    """
     graph = samna.graph.EventFilterGraph()
 
     # create sink nodes
-    spike_sink_node = samna.BufferSinkNode_dynapse1_dynapse1_event()
-    trace_sink_node = samna.BufferSinkNode_dynapse1_dynapse1_trace()
+    spike_sink_node = samna.BasicSinkNode_dynapse1_dynapse1_event()
+    trace_sink_node = samna.BasicSinkNode_dynapse1_dynapse1_trace()
 
-    # create and add filter nodes to graph
-    spike_filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
-    trace_filter_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    spike_filter_node = graph.get_node(spike_filter_node_id)
-    trace_filter_node = graph.get_node(trace_filter_node_id)
-
-    # connect source node to filter nodes
-    model.get_source_node().add_destination(graph.get_node_input(spike_filter_node_id))
-    model.get_source_node().add_destination(graph.get_node_input(trace_filter_node_id))
-
-    # connect filter nodes to sink nodes
-    graph.add_destination(spike_filter_node_id, spike_sink_node.get_input_channel())
-    graph.add_destination(trace_filter_node_id, trace_sink_node.get_input_channel())
+    _, spike_filter_node, _ = graph.sequential([model.get_source_node(), "Dynapse1NeuronSelect", spike_sink_node])
+    _, trace_filter_node, _ = graph.sequential([model.get_source_node(), "Dynapse1NeuronTrace", trace_sink_node])
 
     # configure filter node: which neurons to filter?
     tau = int(40*1e3) # 50*1e3 in microsec
@@ -137,12 +124,12 @@ if __name__ == "__main__":
         print(trace.timestamp, trace.trace_map, end=',')
     print('')
 
-    # fig = plt.figure()
-    # plot_raster(spikes, neuron_ids) # [neuron_ids[1]]
-    # plot_trace(timed_traces, [neuron_ids[0]]) # [neuron_ids[1]]
-    # plt.xlabel('Time (us)')
-    # plt.ylabel('Trace')
-    # plt.show()
+    fig = plt.figure()
+    plot_raster(spikes, neuron_ids) # [neuron_ids[1]]
+    plot_trace(timed_traces, [neuron_ids[0]]) # [neuron_ids[1]]
+    plt.xlabel('Time (us)')
+    plt.ylabel('Trace')
+    plt.show()
 
 
     graph.stop()
@@ -151,7 +138,4 @@ if __name__ == "__main__":
     print("Example finished")
 
     # close Dynapse1
-
-    # close with GUI
-    # ut.close_dynapse1(store, device_name, gui_process)
-    ut.close_dynapse1(store, device_name)
+    ut.close_dynapse1(model, gui_process)

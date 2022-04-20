@@ -40,7 +40,7 @@ if __name__ == "__main__":
     post_neuron_ids = [(chip,core,x) for x in post_nids]
 
     algorithm='triplet_stdp'
-    stdp_param_file = '../stdp_algorithms/triplet_stdp_params.json'
+    stdp_param_file = '/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/stdp_algorithms/triplet_stdp_params.json'
     stdp_new_thread = True # True False
 
     low_init_w = 0.1

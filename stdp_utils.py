@@ -7,33 +7,20 @@ from dynapse1constants import MAX_NUM_CAMS
 def create_stdp_graph(model, spike_sink_debug=False):
     """
     Create on pre and on post traces in which pre and post are the trigger neurons, respectively.
+    Graph:
+        source_node in model -> Dynapse1NeuronSelect filter_node
+        -> Dynapse1NeuronTrace onpost and onpre trace filter_nodes
+        -> onpost and onpre trace sink_nodes
     """  
     graph = samna.graph.EventFilterGraph()
-    # create and add filter nodes to graph
-    # pre+post spike filter
-    spike_filter_node_id = graph.add_filter_node("Dynapse1NeuronSelect")
-    spike_filter_node = graph.get_node(spike_filter_node_id)
-
-    onpost_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    onpost_trace_node = graph.get_node(onpost_trace_node_id)
-
-    onpre_trace_node_id = graph.add_filter_node("Dynapse1NeuronTrace")
-    onpre_trace_node = graph.get_node(onpre_trace_node_id)
 
     # create sink nodes
-    onpost_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
-    onpre_trace_sink = samna.BufferSinkNode_dynapse1_dynapse1_trace()
+    onpost_trace_sink = samna.BasicSinkNode_dynapse1_dynapse1_trace()
+    onpre_trace_sink = samna.BasicSinkNode_dynapse1_dynapse1_trace()
 
-    # connect source node to spike filter node
-    model.get_source_node().add_destination(graph.get_node_input(spike_filter_node_id))
+    _, spike_filter_node, onpre_trace_node, _ = graph.sequential([model.get_source_node(), "Dynapse1NeuronSelect", "Dynapse1NeuronTrace", onpre_trace_sink])
+    _, onpost_trace_node, _ = graph.sequential([spike_filter_node, "Dynapse1NeuronTrace", onpost_trace_sink])
 
-    # connect spike filter to 2 trace nodes
-    graph.add_destination(spike_filter_node_id, graph.get_node_input(onpost_trace_node_id))
-    graph.add_destination(spike_filter_node_id, graph.get_node_input(onpre_trace_node_id))
-
-    # connect 2 trace nodes to 2 sink nodes
-    graph.add_destination(onpost_trace_node_id, onpost_trace_sink.get_input_channel())
-    graph.add_destination(onpre_trace_node_id, onpre_trace_sink.get_input_channel())
 
     nodes = {
         'spike_filter': spike_filter_node,
@@ -44,23 +31,17 @@ def create_stdp_graph(model, spike_sink_debug=False):
     }
 
     if spike_sink_debug:
-        # pre and post spike filter
-        pre_spike_filter_id = graph.add_filter_node("Dynapse1NeuronSelect")
-        pre_spike_filter = graph.get_node(pre_spike_filter_id)
-        post_spike_filter_id = graph.add_filter_node("Dynapse1NeuronSelect")
-        post_spike_filter = graph.get_node(post_spike_filter_id)
-
+        """
+        Dynapse1NeuronSelect filter_node above
+        -> Dynapse1NeuronSelect pre and post spike filter_nodes
+        -> pre and post spike sink_nodes
+        """
         # create sink nodes
-        pre_spike_sink = samna.BufferSinkNode_dynapse1_dynapse1_event()
-        post_spike_sink = samna.BufferSinkNode_dynapse1_dynapse1_event()
-        
-        # connect spike filter to 2 pre and post spike filters
-        graph.add_destination(spike_filter_node_id, graph.get_node_input(pre_spike_filter_id))
-        graph.add_destination(spike_filter_node_id, graph.get_node_input(post_spike_filter_id))
+        pre_spike_sink = samna.BasicSinkNode_dynapse1_dynapse1_event()
+        post_spike_sink = samna.BasicSinkNode_dynapse1_dynapse1_event()
 
-        # connect filter to sink nodes
-        graph.add_destination(pre_spike_filter_id, pre_spike_sink.get_input_channel())
-        graph.add_destination(post_spike_filter_id, post_spike_sink.get_input_channel())
+        _, pre_spike_filter, _ = graph.sequential([spike_filter_node, "Dynapse1NeuronSelect", pre_spike_sink])
+        _, post_spike_filter, _ = graph.sequential([spike_filter_node, "Dynapse1NeuronSelect", post_spike_sink])
 
         spike_nodes = {
             'pre_spike_filter': pre_spike_filter,

@@ -7,7 +7,10 @@ import samnagui
 from multiprocessing import Process
 import random
 
-# can't be executed here, copied to build/src, run there!
+"""
+Outdated testing code for samna 0.8.32.0
+It can't be executed directly, copied to build/src, run there!
+"""
 
 def get_filtered_events(filteredSinkNode, selectedNeuronIds):
     t_start = datetime.datetime.now()

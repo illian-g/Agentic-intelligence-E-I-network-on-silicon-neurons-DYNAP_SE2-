@@ -4,6 +4,10 @@ import samnagui
 import samna
 from multiprocessing import Process
 
+"""
+Outdated testing code for samna 0.8.32.0
+"""
+
 # initialize the main SamnaNode
 # ports = random.sample(range(10**4, 10**5), k=2)
 # sender_endpoint = "tcp://0.0.0.0:"+str(ports[0])
