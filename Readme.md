@@ -1,4 +1,4 @@
-- The documentation of Samna for DYNAP-SE1 is [here](https://code.ini.uzh.ch/jzhao/samna-dynapse1-doc).
+- The documentation of Samna for DYNAP-SE1 is [here](https://code.ini.uzh.ch/jzhao/samna-dynapse1-doc). The documentation of Samna 0.14.10.0 is [here](https://synsense-sys-int.gitlab.io/samna/).
 
 - Installation:
 

@@ -1,3 +1,5 @@
+import sys
+sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import samna
 import samna.dynapse1 as dyn1
 import dynapse1utils as ut
@@ -8,16 +10,18 @@ import time
 
 from params import gen_param_group
 
+"""
+Test how long it takes to for the timestamp to wrap around.
+"""
+
 # open DYNAP-SE1 board to get Dynapse1Model
-device_name = "dynapse1"
-store, gui_process = ut.open_dynapse1(device_name)
-model = getattr(store, device_name)
+model, gui_process = ut.open_dynapse1()
 
 # get Dynapse1 api from the model
 api = model.get_dynapse1_api()
 
-serial_number = ut.get_serial_number(store, device_name)
-print(device_name, "serial number is", serial_number)
+serial_number = ut.get_serial_number()
+print("serial number is", serial_number)
 
 # monitor neuron using oscilloscope
 print("Monitor neuron 123 in chip 1")
@@ -131,4 +135,4 @@ graph_wrap.stop()
 poisson_gen.stop()
 
 # close Dynapse1
-ut.close_dynapse1(store, device_name, gui_process)
+ut.close_dynapse1(model, gui_process)

@@ -7,6 +7,10 @@ import time
 import samna
 import json
 
+"""
+Outdated testing code for samna 0.8.32.0
+"""
+
 # read the samna info from json file written by py_server.py
 with open('./samna_info.json') as f:
     data = json.load(f)

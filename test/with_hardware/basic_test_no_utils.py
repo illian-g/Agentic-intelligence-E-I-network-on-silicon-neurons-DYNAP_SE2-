@@ -241,7 +241,7 @@ if __name__ == "__main__":
     api.monitor_neuron(1, 66)
 
     # Full sinkNode
-    full_readout_node = samna.BufferSinkNode_dynapse1_dynapse1_event()
+    full_readout_node = samna.BasicSinkNode_dynapse1_dynapse1_event()
 
     # connect source node in Dynapse1DevKit to full_readout_node.
     model.get_source_node().add_destination(full_readout_node.get_input_channel())
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     dynapse1_graph = samna.graph.EventFilterGraph()
 
     # Filtered sinkNode. Node 3. Initialized outside dynapse1_graph, not by add_filter_node.
-    neuron_select_readout_node = samna.BufferSinkNode_dynapse1_dynapse1_event()
+    neuron_select_readout_node = samna.BasicSinkNode_dynapse1_dynapse1_event()
 
     # NeuronSelectFilterNode. Node 2. Initialized inside dynapse1_graph, by add_filter_node.
     neuron_select_filter_id = dynapse1_graph.add_filter_node("Dynapse1NeuronSelect")

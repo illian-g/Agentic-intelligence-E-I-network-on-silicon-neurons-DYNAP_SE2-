@@ -452,6 +452,8 @@ def create_neuron_select_graph(device, neuron_ids):
         sink_node.get_events()
         sleep(1)
         events = sink_node.get_events()
+
+        See details at: https://synsense-sys-int.gitlab.io/samna/filters.html#
     """
     # create a graph. A graph is a thread.
     graph = samna.graph.EventFilterGraph()
@@ -476,16 +478,10 @@ def get_time_wrap_events(model):
         With the graph created here, you can monitor if any timeWrapEvent is generated.
     """
     graph = samna.graph.EventFilterGraph()
-    # add a filter node to the graph
-    filter_node_id = graph.add_filter_node("Dynapse1TimestampWrapEventFilter")
-    filter_node = graph.get_node(filter_node_id)
 
-    # connect sourceNode (outside the graph) to the filterNode
-    model.get_source_node().add_destination(graph.get_node_input(filter_node_id))
+    sink_node = samna.BasicSinkNode_dynapse1_dynapse1_event()
 
-    # connect the filterNode to a sinkNode (outside the graph)
-    sink_node = samna.BufferSinkNode_dynapse1_dynapse1_event()
-    graph.add_destination(filter_node_id, sink_node.get_input_channel())
+    _, filter_node, _ = graph.sequential([model.get_source_node(), "Dynapse1TimestampWrapEventFilter", sink_node])
 
     return graph, sink_node
 
