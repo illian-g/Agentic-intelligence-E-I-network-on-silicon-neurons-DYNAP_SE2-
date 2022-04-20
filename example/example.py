@@ -11,19 +11,14 @@ from netgen import Neuron, NetworkGenerator
 
 from params import set_params
 
-# open DYNAP-SE1 board to get Dynapse1Model
-device_name = "dynapse1"
-# gui = True/False: open with/without GUI
-gui = True
-store, gui_process = ut.open_dynapse1(device_name, gui=gui)
-
-model = getattr(store, device_name)
+# open DYNAP-SE1 board to get Dynapse1Model (with spiking GUI)
+model, gui_process = ut.open_dynapse1()
 
 # get Dynapse1 api from the model
 api = model.get_dynapse1_api()
 
-serial_number = ut.get_serial_number(store, device_name)
-print(device_name, "serial number is", serial_number)
+serial_number = ut.get_serial_number()
+print("serial number is", serial_number)
 
 # monitor neuron using oscilloscope
 print("Monitor neuron 123 in chip 1")
@@ -119,4 +114,15 @@ poisson_gen.stop()
 print("Example finished")
 
 # close Dynapse1
+<<<<<<< HEAD
 ut.close_dynapse1(store, device_name, gui_process)
+||||||| merged common ancestors
+
+# close with GUI
+ut.close_dynapse1(store, device_name, gui_process)
+
+# close without GUI
+# ut.close_dynapse1(store, device_name)
+=======
+ut.close_dynapse1(model, gui_process)
+>>>>>>> samna-dynapse1-0.14.06

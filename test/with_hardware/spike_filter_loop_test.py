@@ -15,10 +15,7 @@ from params import set_params
 
 if __name__ == "__main__":
     # open DYNAP-SE1 board to get Dynapse1Model
-    device_name = "dynapse1"
-    store, gui_proc = ut.open_dynapse1(device_name, gui=False)
-
-    model = getattr(store, device_name)
+    model, gui_process = ut.open_dynapse1(gui=False)
 
     # set parameters
     set_params(model, dc=True)

@@ -13,18 +13,13 @@ from netgen import Neuron, NetworkGenerator
 from params import set_params
 
 # open DYNAP-SE1 board to get Dynapse1Model
-device_name = "dynapse1"
-
-# open with GUI
-store, gui_process = ut.open_dynapse1(device_name)
-
-model = getattr(store, device_name)
+model, gui_process = ut.open_dynapse1()
 
 # get Dynapse1 api from the model
 api = model.get_dynapse1_api()
 
-serial_number = ut.get_serial_number(store, device_name)
-print(device_name, "serial number is", serial_number)
+serial_number = ut.get_serial_number()
+print("serial number is", serial_number)
 
 # monitor neuron using oscilloscope
 print("Monitor neuron 123 in chip 1")
@@ -131,4 +126,4 @@ fpga_spike_gen.stop()
 print("Example finished")
 
 # close Dynapse1
-ut.close_dynapse1(store, device_name, gui_process)
+ut.close_dynapse1(model, gui_process)
