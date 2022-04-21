@@ -245,10 +245,21 @@ class Synapses:
 
 class WTA_connections:
     """
-    Define WTA EE EI IE connections of for an EXC and an INH population.
+    Define EI IE EE connections of a WTA with an EXC and an INH population.
     Parameters:
+        exc_group: NeuronGroup
+        inh_group: NeuronGroup
+        syn_type_ei: EI synapse type
+        syn_type_ie: IE synapse type
+        syn_type_ee: recurrent excitation inside EXC neurons
+        p_ei: probability of EI connections
+        p_ie: probability of IE connections
         ee_pres: list[int], pre_index_list of the EE connections.
         ee_posts: list[int], post_index_list of the EE connections.
+        rand_seed: random seed for EI and IE connections
+        mux_conn_ei: multiplexer of EI connections
+        mux_conn_ie: multiplexer of IE connections
+        mux_conn_ee: multiplexer of EE connections
     """
     def __init__(self, exc_group, inh_group, syn_type_ei, syn_type_ie, syn_type_ee=None, p_ei=1, p_ie=1, ee_pres=None, ee_posts=None, rand_seed=None, mux_conn_ei=1, mux_conn_ie=1, mux_conn_ee=1):
         self.ei = Synapses(exc_group, inh_group, syn_type_ei, conn_type='all2all', p=p_ei, rand_seed=rand_seed, mux_conn=mux_conn_ei)
