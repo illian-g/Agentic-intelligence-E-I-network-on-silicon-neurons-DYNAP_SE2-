@@ -6,17 +6,34 @@
 
 - Method 1: to get the latest version, you can do:
     
-    ```pip install samna```
+    ```bash
+    pip install samna
+    ```
     
     This installs the samna loader package. The full module is loaded with the first ```import samna```.
 - Method 2:
-  ```pip install samna [--upgrade] --index-url https://gitlab.com/api/v4/projects/27423070/packages/pypi/simple```
+  ```bash
+  pip install samna [--upgrade] --index-url https://gitlab.com/api/v4/projects/27423070/packages/pypi/simple
+  ```
   ```--upgrade``` is needed if you already installed Samna and want to have the latest version.
 
-- Method 3: to get a specific version, e.g. 0.8.32.0, you can do:
-  ```pip install samna==0.8.32.0 -i https://gitlab.com/api/v4/projects/27423070/packages/pypi/simple```
+- Method 3: If the latest version does NOT work, you can roll back to version 0.8.32.0 by doing:
+  ```bash
+  pip install samna==0.8.32.0 -i https://gitlab.com/api/v4/projects/27423070/packages/pypi/simple
+  ```
+  And use branch ```samna-dynapse1-0.8.32.0```
 
 See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation.
+
+# How to compile the sphinx doc?
+- Install [sphinx](https://www.sphinx-doc.org/en/master/) following the instructions [here](https://www.sphinx-doc.org/en/master/usage/installation.html).
+- Then go to the `doc` folder and compile the document.
+
+```bash
+cd doc
+make html
+```
+The html files will be generated under `doc/build/html`.
 
 # How to contribute?
 Please read [How to contribute?](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/master) and you need to change `master` branch to `samna-dynapse1`.        
