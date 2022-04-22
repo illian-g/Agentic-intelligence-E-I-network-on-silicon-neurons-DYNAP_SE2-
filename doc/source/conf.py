@@ -15,7 +15,8 @@
 # sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
 
 import sys
-sys.path.append("/home/jingyue/aa_projects/sphinx_tutorial/")
+# TODO: can we change it to relative path?
+sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib")
 
 
 # -- Project information -----------------------------------------------------
