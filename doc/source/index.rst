@@ -9,6 +9,6 @@ Contents
    contents/intro
    contents/tutorial1
    contents/tutorial2
+   contents/apis
    contents/debug
-   contents/autodoc
-   contents/api
+   contents/api_sum

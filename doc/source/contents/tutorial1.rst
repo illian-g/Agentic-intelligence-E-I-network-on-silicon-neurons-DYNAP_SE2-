@@ -4,20 +4,6 @@ Tutorial 1: basic usage
 Import required libraries
 ----------------------------------
 
-The Python files (libraries) in the `samna-dynapse1` branch of the Python `repository <https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1>`_ have the following functions: 
-
-* `dynapse1constants.py` defines the hardware specific parameters. 
-
-* `dynapse1utils.py` contains functions that wraps around low-level Samna APIs for DYNAP-SE1 users.
-
-* `netgen.py` includes basic network elements, e.g. neuron groups, synapses and Winner-Take-All(WTA) structures, that can be added into ``NetworkGenerator`` to implement Spiking Neural Networks (SNNs) on DYNAP-SE1 processor.
-
-* The `example` folder has some example scripts to use the DYNAP-SE1 board. `example.py` gives a simple example of how to implement a network on DYNAP-SE1 and `example_fpga_gen.py` changes the input from Poisson to constant spikes. `example_neuron_group.py` shows how to use building blocks in `netgen.py` to construct a network. Some example parameter files can be found in `example_parameter_files` folder. The other folders hold some testing scripts.
-
-* `params.py` gives some board parameter configurations as examples.
-
-* `stdp.py` and `stdp_utils.py` provide a learning framework for STDP-like algorithms. Implementation of triplet-STDP is given as an example, and other algorithms can be implemented by users. An example of training the plastic connections between a presynaptic and a postsynaptic neuron group is in `example/test_stdp.py`.
-
 Here, we import the related files as the following:
 
 .. code-block::
@@ -49,16 +35,26 @@ Without the GUI, if your PC cannot have the required visualization libraries e.g
 ``gui_process`` will be empty if ``gui=False``.
 
 
-``model`` is :class:`Dynapse1Model <Dynapse1Model>`, with which you can configure DYNAP-SE1 board, get the current configuration of the board, set the parameters, set up the stimulus, get the spikes out of DYNAP-SE1 and so on. 
+``model`` is :class:`Dynapse1Model <Dynapse1Model>`, with which you can configure DYNAP-SE1 
+board, get the current configuration of the board, set the parameters, set up the stimulus, 
+get the spikes out of DYNAP-SE1 and so on. 
 
 
 Create a network
 -----------------------
-We need to use the :func:`NetworkGenerator <NetworkGenerator.NetworkGenerator>` to first create a network specifying the connections among neurons, then make a DYNAP-SE1 configuration out of this network, and apply the configuration to the board.
+We need to use the :func:`NetworkGenerator <NetworkGenerator.NetworkGenerator>` to first 
+create a network specifying the connections among neurons, then make a DYNAP-SE1 
+configuration out of this network, and apply the configuration to the board.
 
-To define the network, you need to use :func:`Neuron <NetworkGenerator.Neuron>` instead of :func:`Dynapse1Neuron <samna.dynapse1.Dynapse1Neuron>` as the basic unit, and add connections between them to the network. The former only holds the topology-related information of the network, the latter maintains the hardware-specific data structures required by the :func:`Dynapse1Configuration <samna.dynapse1.Dynapse1Configuration>`.
+To define the network, you need to use :func:`Neuron <NetworkGenerator.Neuron>` instead of 
+:func:`Dynapse1Neuron <samna.dynapse1.Dynapse1Neuron>` as the basic unit, and add 
+connections between them to the network. The former only holds the topology-related 
+information of the network, the latter maintains the hardware-specific data structures 
+required by the :func:`Dynapse1Configuration <samna.dynapse1.Dynapse1Configuration>`.
 
-Apart from the basic unit :func:`Neuron <NetworkGenerator.Neuron>`, we provide some building blocks, e.g. ``NeuronGroup``, ``Synapses``, ``WTA_connections`` that uses groups of :func:`Neuron <NetworkGenerator.Neuron>` to construct the network. 
+Apart from the basic unit :func:`Neuron <NetworkGenerator.Neuron>`, we provide some building
+blocks, e.g. ``NeuronGroup``, ``Synapses``, ``WTA_connections`` that uses groups of 
+:func:`Neuron <NetworkGenerator.Neuron>` to construct the network. 
 
 Define neuron groups
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -87,7 +83,10 @@ Create 2 neuron groups, one with spike generators and the other with neurons, us
 Define synapses between neuron groups
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Define connections between the 2 neuron groups using ``Synapses``. Connection pattern can be defined using ``conn_type``, ``weight_matrix`` or ``pre_list`` and ``post_list``. ``conn_type`` can be 'one2one' or 'all2all'. ``mux_conn`` can be used to duplicate the defined connectivity by multiplying the weights by ``mux_conn``.
+Define connections between the 2 neuron groups using ``Synapses``. Connection pattern can be
+defined using ``conn_type``, ``weight_matrix`` or ``pre_list`` and ``post_list``. 
+``conn_type`` can be 'one2one' or 'all2all'. ``mux_conn`` can be used to duplicate the 
+defined connectivity by multiplying the weights by ``mux_conn``.
 
 * One-to-one connections: 
 
@@ -120,7 +119,9 @@ Define connections between the 2 neuron groups using ``Synapses``. Connection pa
     
 Add synapses into network generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-We need to add synapses (which contain also the related neuron groups information) into the network generator to create a network, then convert the network into a DYNAP-SE1 configuration and apply it to the hardware.
+We need to add synapses (which contain also the related neuron groups information) into the
+network generator to create a network, then convert the network into a DYNAP-SE1 
+configuration and apply it to the hardware.
 
 .. code-block::
 
@@ -142,14 +143,18 @@ We need to add synapses (which contain also the related neuron groups informatio
 
 Create WTA
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Define 2 neuron groups (note here: both of them are physical neurons instead of spike generators), specify the WTA connections between them using ``WTA_connections``, then add the WTA into the network generator.
+Define 2 neuron groups (note here: both of them are physical neurons instead of spike 
+generators), specify the WTA connections between them using ``WTA_connections``, then add 
+the WTA into the network generator.
 
 .. code-block::
 
     exc_group = NeuronGroup(chip1, core1, nids1)
     inh_group = NeuronGroup(chip2, core2, nids2)
 
-    wta = WTA_connections(exc_group, inh_group, syn_type_ei= dyn1.Dynapse1SynType.AMPA, syn_type_ie=dyn1.Dynapse1SynType.GABA_B, syn_type_ee=dyn1.Dynapse1SynType.NMDA, ee_pres=[0,1,2], ee_posts=[0,1,2])
+    wta = WTA_connections(exc_group, inh_group, syn_type_ei= dyn1.Dynapse1SynType.AMPA, 
+    syn_type_ie=dyn1.Dynapse1SynType.GABA_B, syn_type_ee=dyn1.Dynapse1SynType.NMDA, ee_pres=
+    [0,1,2], ee_posts=[0,1,2])
 
     add_wta_conns(net_gen, wta)
 
@@ -157,7 +162,8 @@ Define 2 neuron groups (note here: both of them are physical neurons instead of 
 Define a network using individual neurons
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can also customize your network by selecting the spike generators and neurons you want to use, and build connections between individual neurons. An example is shown below.
+You can also customize your network by selecting the spike generators and neurons you want 
+to use, and build connections between individual neurons. An example is shown below.
 
 .. code-block::
 
@@ -201,7 +207,9 @@ You can also customize your network by selecting the spike generators and neuron
 
 Set up Dynapse1PoissonGen
 --------------------------------
-Below is an example of how to set up one single Poisson spike generator :class:`Dynapse1PoissonGen <Dynapse1PoissonGen>`. Here we use spike generator No.10 on the FPGA to generate Poisson spikes at 200 Hz.
+Below is an example of how to set up one single Poisson spike generator 
+:class:`Dynapse1PoissonGen <Dynapse1PoissonGen>`. Here we use spike generator No.10 
+on the FPGA to generate Poisson spikes at 200 Hz.
 
 .. code-block::
 
@@ -222,7 +230,10 @@ Below is an example of how to set up one single Poisson spike generator :class:`
 
 Set up Dynapse1FpgaSpikeGen
 ------------------------------------
-Below is an example of how to set up the FPGA spike generators :class:`Dynapse1FpgaSpikeGen <Dynapse1FpgaSpikeGen>` using :func:`set_fpga_spike_gen <dynapse1utils.set_fpga_spike_gen>`. Here, we use spike generator No.15 on the FPGA to generate 400 spikes in 2 second with constant inter-spike interval.
+Below is an example of how to set up the FPGA spike generators 
+:class:`Dynapse1FpgaSpikeGen <Dynapse1FpgaSpikeGen>` using :func:`set_fpga_spike_gen 
+<dynapse1utils.set_fpga_spike_gen>`. Here, we use spike generator No.15 on the FPGA to 
+generate 400 spikes in 2 second with constant inter-spike interval.
 
 .. code-block::
     
@@ -243,14 +254,18 @@ Below is an example of how to set up the FPGA spike generators :class:`Dynapse1F
     fpga_spike_gen = model.get_fpga_spike_gen()
 
     # set up the fpga_spike_gen
-    ut.set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_base, repeat_mode)
+    ut.set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_base, 
+    repeat_mode)
 
     # remember to start the spikegen
     fpga_spike_gen.start()
 
 Set up parameters
 -----------------------
-Each parameter group :class:`Dynapse1ParameterGroup <samna.dynapse1.Dynapse1ParameterGroup>` has 25 different parameters. A parameter :class:`Dynapse1Parameter <samna.dynapse1.Dynapse1Parameter>` has name, coarse value, and fine value. Below is recommended initial values of the parameters.
+Each parameter group :class:`Dynapse1ParameterGroup <samna.dynapse1.
+Dynapse1ParameterGroup>` has 25 different parameters. A parameter 
+:class:`Dynapse1Parameter <samna.dynapse1.Dynapse1Parameter>` has name, coarse value, and
+ fine value. Below is recommended initial values of the parameters.
 
 .. code-block:: 
 
@@ -308,7 +323,9 @@ Set parameters per core
 
 You have 3 ways to set up the parameters.
 
-1. Generate paremeter groups and apply them using :func:`update_parameter_group() <Dynapse1Model.update_parameter_group>`. Below is an example of configuration that silence the neurons of the 16 cores in 4 chips.
+1. Generate paremeter groups and apply them using :func:`update_parameter_group()
+ <Dynapse1Model.update_parameter_group>`. Below is an example of configuration 
+that silence the neurons of the 16 cores in 4 chips.
 
 .. code-block:: 
 
@@ -320,7 +337,10 @@ You have 3 ways to set up the parameters.
         for core in range(4):
             model.update_parameter_group(paramGroup, chip, core)
 
-2. Set the parameters saved in a JSON file. Below is an example. JSON is a standard formating style. An example JSON parameter file is `here <https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_parameter_files/FS_EXC_parameters.json>`_.
+2. Set the parameters saved in a JSON file. Below is an example. JSON is a standard 
+formating style. An example JSON parameter file is `here <https://gitlab.com/neuroinf/
+ctxctl_contrib/-/blob/samna-dynapse1/example/example_parameter_files/FS_EXC_parameters.
+json>`_.
 
 .. code-block:: 
 
@@ -333,7 +353,10 @@ You have 3 ways to set up the parameters.
     # save params
     save_parameters2json_file(config, filename="./dynapse_parameters.json")
 
-3. Set the parameters saved in a txt file. Below is an example. The txt format here is self-defined and more compact. An example txt parameter file is `here <https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_parameter_files/parameters.txt>`_.
+3. Set the parameters saved in a txt file. Below is an example. The txt format here is 
+self-defined and more compact. An example txt parameter file is `here <https://gitlab.com/
+neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_parameter_files/parameters.
+txt>`_.
 
 .. code-block:: 
 
@@ -361,7 +384,12 @@ If you want change only 1 single parameter value, you can use the method :func:`
 Get spikes out of DYNAP-SE1
 --------------------------------------
 
-Usually we want monitor spikes of some specific neurons in our network. For this, we need to create a graph using :func:`create_neuron_select_graph() <dynapse1utils.create_neuron_select_graph>` to stream the spikes out. In this graph, we connect the source node in Dynapse1Model to a filter node that filters the spikes of the selected neurons, then this filter node is connected to a sink node which receives the spikes and store them in its buffer.
+Usually we want monitor spikes of some specific neurons in our network. For this, we need
+to create a graph using :func:`create_neuron_select_graph() <dynapse1utils. 
+create_neuron_select_graph>` to stream the spikes out. In this graph, we connect the 
+source node in Dynapse1Model to a filter node that filters the spikes of the selected 
+neurons, then this filter node is connected to a sink node which receives the spikes and 
+store them in its buffer.
 
 ``monitored_neurons`` require neuron ids as a list of tuples (chip_id, core_id, neuron_id).
 
@@ -399,7 +427,10 @@ Usually we want monitor spikes of some specific neurons in our network. For this
 Monitor membrane potential of neurons using an oscilloscope
 -------------------------------------------------------------
 
-To monitor Imem of the silicon neurons using an oscilloscope, you first get the Dynapse1Model model, then get the Dynapse1Interface api, then :func:`monitor_neuron <Dynapse1Interface.monitor_neuron>` can be called using this api. In each core, one neuron can be monitored at a time.
+To monitor Imem of the silicon neurons using an oscilloscope, you first get the 
+Dynapse1Model model, then get the Dynapse1Interface api, then :func:`monitor_neuron 
+<Dynapse1Interface.monitor_neuron>` can be called using this api. In each core, one neuron 
+can be monitored at a time.
 
 .. code-block:: 
 
@@ -414,7 +445,10 @@ Close DYNAP-SE1
 
 You should use :func:`close_dynapse1 <dynapse1utils.close_dynapse1>` at the end of your script the close the device.
 
-If you opened DYNAP-SE1 with the GUI, this function will block the running program of your script til you click the close button of the GUI window. If you close the GUI window when your script is still running, it will NOT affect the running program, however you will not be able open the GUI again until next time you open the device.
+If you opened DYNAP-SE1 with the GUI, this function will block the running program of your 
+script til you click the close button of the GUI window. If you close the GUI window when 
+your script is still running, it will NOT affect the running program, however you will not 
+be able open the GUI again until next time you open the device.
 
 .. code-block:: 
 

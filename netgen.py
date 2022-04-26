@@ -5,7 +5,7 @@ import random
 
 import dynapse1utils as ut
 from dynapse1constants import NUM_CHIPS, CORES_PER_CHIP, NEURONS_PER_CORE, MAX_NUM_CAMS
-from details.netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_lists, _validate, _convert_validated_network2dynapse1_configuration, find_neuron_in_dict, find_pre_in_post_incoming
+from details.netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_lists, validate, convert_validated_network2dynapse1_configuration, find_neuron_in_dict, find_pre_in_post_incoming
 
 def add_synapses(netgen, synapse):
     """Add a Synapses object into a network generator.
@@ -786,9 +786,9 @@ class NetworkGenerator:
             samna.dynapse1.Dynapse1Configuration: Dynapse1Configuration.
         """        
         if validation:
-            is_valid = _validate(self.network, MAX_NUM_CAMS)
+            is_valid = validate(self.network, MAX_NUM_CAMS)
 
-        self.config = _convert_validated_network2dynapse1_configuration(self.network)
+        self.config = convert_validated_network2dynapse1_configuration(self.network)
         # print("Converted the validated network to a Dynapse1 configuration!")
         
         return self.config
