@@ -10,8 +10,13 @@ from stdp_algorithms.triplet_stdp_details import TripletStdp
 from stdp_utils import create_stdp_graph, bad_traces
 
 class Stdp:
-    """
-    A class which implements "realtime, onchip" learning algorithm between a pre and a post neuron population.
+    """A class which implements "realtime, onchip" learning algorithm between
+    a pre and a post neuron population.
+
+    Args:
+
+    Attributes:
+    
     """
     def __init__(self, model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, param_file, algorithm='triplet_stdp', new_thread = True, remove_bad_traces=False, stop_graph=False, spike_sink_debug=False, max_trace_num=10, max_time_interval=3*1e5):
         self.model = model

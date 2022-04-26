@@ -2,6 +2,12 @@ import samna
 import samna.dynapse1 as dyn1
 
 def gen_clean_param_group():
+    """Generate a Dynapse1ParameterGroup of one core which should 
+    be able to silence the neurons.
+
+    Returns:
+        samna.dynapse1.Dynapse1ParameterGroup: Dynapse1ParameterGroup.
+    """
     param_group = dyn1.Dynapse1ParameterGroup()
     # THR
     # ok
@@ -85,6 +91,12 @@ def gen_clean_param_group():
     return param_group
 
 def gen_param_group():
+    """Generate a Dynapse1ParameterGroup of one core with some synapse
+    weights turned on for examples.
+
+    Returns:
+        samna.dynapse1.Dynapse1ParameterGroup: Dynapse1ParameterGroup.
+    """
     param_group = dyn1.Dynapse1ParameterGroup()
     # THR
     # ok
@@ -168,6 +180,12 @@ def gen_param_group():
     return param_group
 
 def gen_dc_params():
+    """Generate a Dynapse1ParameterGroup based on silent neurons, and turned
+    DC current on.
+
+    Returns:
+        samna.dynapse1.Dynapse1ParameterGroup: Dynapse1ParameterGroup.
+    """
     param_group = gen_clean_param_group()
 
     param_group.param_map["IF_DC_P"].coarse_value = 2
@@ -176,7 +194,11 @@ def gen_dc_params():
     return param_group
 
 def gen_stdp_params():
+    """Generate a Dynapse1ParameterGroup for STDP example.
 
+    Returns:
+        samna.dynapse1.Dynapse1ParameterGroup: Dynapse1ParameterGroup.
+    """
     param_group = gen_param_group()
 
     param_group.param_map["IF_TAU1_N"].coarse_value = 4
@@ -196,6 +218,14 @@ def gen_stdp_params():
     return param_group
 
 def set_params(model, dc=False, param_group=None):
+    """Set 16 DYNAP-SE1  cores with the same Dynapse1ParameterGroup for examples.
+
+    Args:
+        model (samna.dynapse1.Dynapse1Model): Dynapse1Model
+        dc (bool, optional): Turn DC on if True. Defaults to False.
+        param_group (samna.dynapse1.Dynapse1ParameterGroup, optional): 
+            Dynapse1ParameterGroup can be specified. Defaults to None.
+    """
     if param_group is None:
         if dc:
             param_group = gen_dc_params()
@@ -207,6 +237,11 @@ def set_params(model, dc=False, param_group=None):
             model.update_parameter_group(param_group, chip, core)
         
 def set_stdp_params(model):
+    """Set 16 DYNAP-SE1 cores with the same Dynapse1ParameterGroup for STDP example.
+
+    Args:
+        model (samna.dynapse1.Dynapse1Model): Dynapse1Model
+    """
     param_group = gen_stdp_params()
 
     for chip in range(4):
