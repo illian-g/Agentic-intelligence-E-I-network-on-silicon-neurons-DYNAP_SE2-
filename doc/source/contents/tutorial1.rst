@@ -32,7 +32,7 @@ Here, we import the related files as the following:
 Open DYNAP-SE1 board to get Dynapse1Model
 ------------------------------------------------
 
-You can open the board with or without the Graphical User Interfaces (GUI) using :func:`open_dynapse1 <Dynapse1Utils.open_dynapse1>`.
+You can open the board with or without the Graphical User Interfaces (GUI) using :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
 
 With the GUI, you should see blinking spikes of the firing silicon neurons.
 
@@ -222,7 +222,7 @@ Below is an example of how to set up one single Poisson spike generator :class:`
 
 Set up Dynapse1FpgaSpikeGen
 ------------------------------------
-Below is an example of how to set up the FPGA spike generators :class:`Dynapse1FpgaSpikeGen <Dynapse1FpgaSpikeGen>` using :func:`set_fpga_spike_gen <Dynapse1Utils.set_fpga_spike_gen>`. Here, we use spike generator No.15 on the FPGA to generate 400 spikes in 2 second with constant inter-spike interval.
+Below is an example of how to set up the FPGA spike generators :class:`Dynapse1FpgaSpikeGen <Dynapse1FpgaSpikeGen>` using :func:`set_fpga_spike_gen <dynapse1utils.set_fpga_spike_gen>`. Here, we use spike generator No.15 on the FPGA to generate 400 spikes in 2 second with constant inter-spike interval.
 
 .. code-block::
     
@@ -361,7 +361,7 @@ If you want change only 1 single parameter value, you can use the method :func:`
 Get spikes out of DYNAP-SE1
 --------------------------------------
 
-Usually we want monitor spikes of some specific neurons in our network. For this, we need to create a graph using :func:`create_neuron_select_graph() <Dynapse1Utils.create_neuron_select_graph>` to stream the spikes out. In this graph, we connect the source node in Dynapse1Model to a filter node that filters the spikes of the selected neurons, then this filter node is connected to a sink node which receives the spikes and store them in its buffer.
+Usually we want monitor spikes of some specific neurons in our network. For this, we need to create a graph using :func:`create_neuron_select_graph() <dynapse1utils.create_neuron_select_graph>` to stream the spikes out. In this graph, we connect the source node in Dynapse1Model to a filter node that filters the spikes of the selected neurons, then this filter node is connected to a sink node which receives the spikes and store them in its buffer.
 
 ``monitored_neurons`` require neuron ids as a list of tuples (chip_id, core_id, neuron_id).
 
@@ -412,7 +412,7 @@ Note: you should use the neuron ID in the corresponding chip ranging [0, 1023), 
 Close DYNAP-SE1
 --------------------------
 
-You should use :func:`close_dynapse1 <Dynapse1Utils.close_dynapse1>` at the end of your script the close the device.
+You should use :func:`close_dynapse1 <dynapse1utils.close_dynapse1>` at the end of your script the close the device.
 
 If you opened DYNAP-SE1 with the GUI, this function will block the running program of your script til you click the close button of the GUI window. If you close the GUI window when your script is still running, it will NOT affect the running program, however you will not be able open the GUI again until next time you open the device.
 

@@ -38,7 +38,13 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx_autopackagesummary',
+    'sphinx.ext.napoleon'
 ]
+
+napoleon_custom_sections = [('Returns', 'params_style')]
+
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

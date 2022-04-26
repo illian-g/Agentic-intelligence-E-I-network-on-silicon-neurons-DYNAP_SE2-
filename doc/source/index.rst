@@ -10,4 +10,5 @@ Contents
    contents/tutorial1
    contents/tutorial2
    contents/debug
-   contents/classes
+   contents/autodoc
+   contents/api
