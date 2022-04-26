@@ -26,9 +26,15 @@ def free_port():
 def open_device(sender_port=33336, receiver_port=33335, select_device=False):
     """
     Get unopened devices detected by samna.
+
     Args:
         sender_port (int): samnaNode's sending port.
         receiver_port (int): samnaNode's receiving port.
+        select_device (bool): Defaults to False.
+    
+    Returns:
+        device: Samna device model
+        samna_info_dict (dictionary): information dictionary.
     """
     # ----------- connect Python to C++ ----------------
     sender_endpoint = "tcp://0.0.0.0:"+str(sender_port)
@@ -133,7 +139,8 @@ def open_dynapse1(gui=True, select_device=False, sender_port=33336, receiver_por
         return model, ''
 
 def open_gui(device, visualizer_id=3):
-
+    """Open DYNAP-SE1 spiking GUI.
+    """
     # add a node in filter gui_graph
     global gui_graph
     gui_graph = samna.graph.EventFilterGraph()
@@ -141,12 +148,14 @@ def open_gui(device, visualizer_id=3):
     dynapse1_to_visualizer_converter_id = get_Dynapse1_viz_converter() # Dynapse1EventToVizConverter
     # Add a streamer node that streams visualization events to our graph
     
-    source_node, converter_node, streamer_node = gui_graph.sequential([device.get_source_node(), dynapse1_to_visualizer_converter_id, "VizEventStreamer"])
+    source_node, converter_node, streamer_node = gui_graph.sequential([device.get_source_node(), 
+    dynapse1_to_visualizer_converter_id, "VizEventStreamer"])
 
     gui_graph.start()
 
     # create gui process
-    visualizer, gui_thread = open_visualizer(0.75, 0.75, samna_node.get_receiver_endpoint(), samna_node.get_sender_endpoint(), visualizer_id)
+    visualizer, gui_thread = open_visualizer(0.75, 0.75, samna_node.get_receiver_endpoint(), 
+    samna_node.get_sender_endpoint(), visualizer_id)
 
     port = random.randint(10**4, 10**5)
     viz_name = "visualizer"+str(visualizer_id)
@@ -176,7 +185,8 @@ def open_gui(device, visualizer_id=3):
     return gui_thread, gui_receiving_port
 
 def get_Dynapse1_viz_converter():
-
+    """Helper function to reuse viz node for DYNAP-SE1 GUI.
+    """    
     filter_source = '''
         template<typename T>
         class Dynapse1ToViz : public iris::FilterInterface<std::shared_ptr<const std::vector<T>>, std::shared_ptr<const std::vector<ui::Event>>> {
@@ -263,9 +273,11 @@ def get_Dynapse1_viz_converter():
     return samna.graph.JitFilter('Dynapse1ToViz', filter_source)
 
 def open_visualizer(window_width, window_height, receiver_endpoint, sender_endpoint, visualizer_id):
-    # start visualizer in a isolated process which is required on mac, intead of a sub process.
-    # it will not return until the remote node is opened. Return the opened visualizer.
-    gui_cmd = f"import samna, samnagui; samnagui.runVisualizer({window_width}, {window_height}, '{receiver_endpoint}', '{sender_endpoint}', {visualizer_id})"
+    """start visualizer in a isolated process which is required on mac, intead of a sub process.
+    It will not return until the remote node is opened. Return the opened visualizer.
+    """
+    gui_cmd = f"import samna, samnagui; samnagui.runVisualizer({window_width}, {window_height}, \
+        '{receiver_endpoint}', '{sender_endpoint}', {visualizer_id})"
     os_cmd = f'{sys.executable} -c "{gui_cmd}"'
     print("Visualizer start command: ", os_cmd)
     gui_thread = Thread(target=os.system, args=(os_cmd,))
@@ -284,16 +296,19 @@ def open_visualizer(window_width, window_height, receiver_endpoint, sender_endpo
         else:
             return getattr(samna, name), gui_thread
 
-    raise Exception("open_remote_node failed:  visualizer id %d can't be opened in %d seconds!!" % (visualizer_id, timeout))
+    raise Exception("open_remote_node failed:  visualizer id %d can't be opened in %d seconds!!" 
+    % (visualizer_id, timeout))
 
 
 def close_dynapse1(model, gui_process=''):
     '''
     Close DYNAP-SE1 board with or without the GUI.
 
-    :param Dynapse1Model model: the DYNAP-SE1 model you get when you :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
+    :param Dynapse1Model model: the DYNAP-SE1 model you get when you 
+    :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
 
-    :param Process gui_process: the GUI process handler you created when you :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
+    :param Process gui_process: the GUI process handler you created when you 
+    :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
 
     '''
     if gui_process != '':
@@ -313,7 +328,9 @@ def get_neuron_from_config(config, chip, core, neuron):
     return config.chips[chip].cores[core].neurons[neuron]
 
 def gen_synapse_string(synapse):
-    """Print a Dynapse1Synapse in the format: c<listen_core_id>n<listen_neuron_id><synapse_type>. e.g., c1n25NMDA means this synapse listens to core 1 neuron 25 with type NMDA.
+    """Convert a Dynapse1Synapse in the string format for printing: 
+    c<listen_core_id>n<listen_neuron_id><synapse_type>. 
+    e.g., c1n25NMDA means this synapse listens to core 1 neuron 25 with type NMDA.
 
     :param Dynapse1Synapse synapse: synapse.
     """
@@ -346,14 +363,23 @@ def print_neuron_synapses(neuron, synapse_id_list=range(MAX_NUM_CAMS)):
         print(gen_synapse_string(synapses[i]), end = end)
 
 def gen_destination_string(destination):
+    """Convert a Dynapse1Destination in the string format for printing: 
+    C<target_chip_id>c<core_mask><in_use>. 
+    e.g., C2c1True means this Dynapse1Destination has target_chip_id=2, 
+    core_mask=1 and it's occupied.
+
+    :param Dynapse1Destination destination: destination.
+    """
     return "C"+str(destination.target_chip_id)+\
             "c"+str(destination.core_mask)+\
             str(destination.in_use)
 
 def print_neuron_destinations(neuron, destination_id_list=range(4)):
-    """Print a Dynapse1Destination in the format: C<target_chip_id>c<core_mask><in_use>. e.g., C2c1True means this Dynapse1Destination has target_chip_id=2, core_mask=1 and it's occupied.
+    """Print the destinations of the neuron given the destination id list. 
 
-    :param Dynapse1Destination destination: destination.
+    :param Dynapse1Neuron neuron: neuron.
+    :param list[int] destination_id_list: destination IDs you want to print out.
+
     """
     destinations = neuron.destinations
     for i in destination_id_list:
@@ -401,7 +427,20 @@ def get_parameters(config, chip, core):
     return config.chips[chip].cores[core].parameter_group.param_map.values()
 
 def get_parameter_value(config, chip, core, name):
-    return (config.chips[chip].cores[core].parameter_group.param_map[name].coarse_value, config.chips[chip].cores[core].parameter_group.param_map[name].fine_value)
+    """Get the parameter (coarse, fine) value of a specific parameter in the
+    DYNAP-SE1 configuration.
+
+    Args:
+        config (samna.dynapse1.Dynapse1Configuration): Dynapse1Configuration
+        chip (int): chip ID.
+        core (int): core ID.
+        name (str): parameter name.
+
+    Returns:
+        tuple(int,int): (coarse, fine) value.
+    """
+    return (config.chips[chip].cores[core].parameter_group.param_map[name].coarse_value, 
+    config.chips[chip].cores[core].parameter_group.param_map[name].fine_value)
 
 def save_parameters2txt_file(config, filename="./dynapse_parameters.txt"):
     """Save the parameters of 16 cores into a txt file.
@@ -521,7 +560,8 @@ def create_neuron_select_graph(model, neuron_ids):
     To get events, sink_node.get_events().
     If you graph.stop(), for now the graph actually won't stop, all events are still
     streamed into the buffer of sink_node. This is work in progess.
-    Thus to get events for 1 second, you need to first clear the buffer of sink_node using get_events().
+    Thus to get events for 1 second, you need to first clear the buffer 
+    of sink_node using get_events().
     i.e.,
     .. code-block::
 
@@ -533,12 +573,15 @@ def create_neuron_select_graph(model, neuron_ids):
     
     Args:
         model (Dynapse1Model): , returned by open_dynapse1()
-        neuron_ids (list[tuple(int, int, int)]): tuple in the order of (chip, core, neuron), neuron ids of the neurons you want to monitor.
+        neuron_ids (list[tuple(int, int, int)]): tuple in the order of (chip, core, neuron), 
+            neuron ids of the neurons you want to monitor.
         
     Returns:
         graph (samna.graph.EventFilterGraph): samna filtering graph.
-        filter_node (samna.graph.nodes.Dynapse1NeuronSelect_dynapse1_dynapse1_event): filter_node that filters the events of selected neurons.
-        sink_node (samna.BasicSinkNode_dynapse1_dynapse1_event): sink node that receives the events from the filter node.
+        filter_node (samna.graph.nodes.Dynapse1NeuronSelect_dynapse1_dynapse1_event): 
+            filter_node that filters the events of selected neurons.
+        sink_node (samna.BasicSinkNode_dynapse1_dynapse1_event): sink node that receives 
+            the events from the filter node.
     """
     # create a graph. A graph is a thread.
     graph = samna.graph.EventFilterGraph()
@@ -554,7 +597,10 @@ def create_neuron_select_graph(model, neuron_ids):
 
 def get_time_wrap_events(model):
     """
-    DYNAP-SE1 sends out 2 types of events: spike and timeWrapEvent. timeWrapEvent occurs when the 32 bit timestamp wraps around. This happens every ~37(?) minutes. With the graph created by this method, you can monitor if any timeWrapEvent is generated effectively with the C++ backend.
+    DYNAP-SE1 sends out 2 types of events: spike and timeWrapEvent. 
+    timeWrapEvent occurs when the 32 bit timestamp wraps around. 
+    This happens every ~37(?) minutes. With the graph created by this method, 
+    you can monitor if any timeWrapEvent is generated effectively with the C++ backend.
 
     Agrs:
         model (samna.dynapse1.Dynapse1Model): returned by open_dynapse1()
@@ -594,7 +640,8 @@ def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_b
     FPGA by 900/90 us = 10 us
 
     Args:
-        fpga_spike_gen (samna.dynapse1.Dynapse1FpgaSpikeGen): Dynapse1FpgaSpikeGen retrieved from Dynapse1Model.
+        fpga_spike_gen (samna.dynapse1.Dynapse1FpgaSpikeGen): Dynapse1FpgaSpikeGen 
+            retrieved from Dynapse1Model.
         spike_times    (list): list of input spike times, in second.
         indices     (list): list of FPGA spike generator ids sorted according to 
                             time of spike.
@@ -640,7 +687,8 @@ def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_b
 
 def get_selected_timestamps(spikes, neuron_ids):
     """
-    Given Dynapse1Spikes retrieved from NeuronSelect sinknode, filter out timestamps of selected neuron_ids.
+    Given Dynapse1Spikes retrieved from NeuronSelect sinknode, 
+    filter out timestamps of selected neuron_ids.
 
     Parameters
     -----------
@@ -722,7 +770,14 @@ def get_selected_traces(timed_traces, neuron_ids):
 
 def get_trace_value(traces, timestamp):
     """
-    Get 1 single trace value from a list of Dynapse1Traces
+    Get 1 single trace value from a list of Dynapse1Traces.
+
+    Args:
+        traces (list[samna.dynapse1.Dynapse1Trace]): list of trace events.
+        timestamp (int): DYNAP-SE1 timestamp, in microsecond.
+
+    Returns:
+        samna.dynapse1.Dynapse1Trace: the trace with timestamp. If not found, return None.
     """
     for trace in traces:
         if trace.timestamp == timestamp:
