@@ -153,16 +153,7 @@ Set up FPGASpikeGen
 Parameters related methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. py:method:: Dynapse1Utils.get_parameters(config, chip, core)
 
-    Get a list of Dynapse1Parameter (25 in total) of a specific core.
-
-    :param Dynapse1Configuration config: Dynapse1Configuration retrieved from Dynapse1Model.
-    :param int chip: chip ID, [0,4).
-    :param int core: core ID, [0,4).
-
-    :returns: current parameter setup of the core.
-    :rtype: list[samna.dynapse1.Dynapse1Parameter].
 
 .. py:method:: Dynapse1Utils.save_parameters2json_file(config, filename="./dynapse_parameters.json")
 
@@ -177,6 +168,8 @@ Parameters related methods
 
     :param Dynapse1Model model: Dynapse1Model.
     :param string filename: the path and filename of the input paramter file.
+
+    
 
 .. py:method:: Dynapse1Utils.save_parameters2txt_file(config, filename="./dynapse_parameters.txt")
 

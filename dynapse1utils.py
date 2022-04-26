@@ -26,9 +26,9 @@ def free_port():
 def open_device(sender_port=33336, receiver_port=33335, select_device=False):
     """
     Get unopened devices detected by samna.
-    Attribute:
-        sender_port: int, samnaNode's sending port.
-        receiver_port: int, samnaNode's receiving port.
+    Args:
+        sender_port (int): samnaNode's sending port.
+        receiver_port (int): samnaNode's receiving port.
     """
     # ----------- connect Python to C++ ----------------
     sender_endpoint = "tcp://0.0.0.0:"+str(sender_port)
@@ -302,16 +302,21 @@ def close_dynapse1(model, gui_process=''):
 
 def get_neuron_from_config(config, chip, core, neuron):
     """
-    Get a neuron by its neuron id from a configuration
-    Attributes:
-        config: Dynapse1Configuration
-        chip: int
-        core: int
-        neuron: int
+    Get a neuron by its global_neuron_id from a configuration.
+
+    :param Dynapse1Configuration config: Dynapse1Configuration. 
+    :param int global_neuron_id: global neuron id, [0,4096).
+
+    :returns: Dynapse1Neuron.
+    :rtype: samna.dynapse1.Dynapse1Neuron().
     """
     return config.chips[chip].cores[core].neurons[neuron]
 
 def gen_synapse_string(synapse):
+    """Print a Dynapse1Synapse in the format: c<listen_core_id>n<listen_neuron_id><synapse_type>. e.g., c1n25NMDA means this synapse listens to core 1 neuron 25 with type NMDA.
+
+    :param Dynapse1Synapse synapse: synapse.
+    """
     syn_type = synapse.syn_type
     if syn_type == dyn1.Dynapse1SynType.NMDA:
         syn_str = "NMDA"
@@ -327,6 +332,11 @@ def gen_synapse_string(synapse):
             syn_str
 
 def print_neuron_synapses(neuron, synapse_id_list=range(MAX_NUM_CAMS)):
+    """Print the synapses of the neuron given the synapse id list.
+
+    :param Dynapse1Neuron neuron: neuron.
+    :param list[int] synapse_id_list: synapse IDs you want to print out.
+    """
     synapses = neuron.synapses
     for i in synapse_id_list:
         if i == len(synapse_id_list)-1:
@@ -341,6 +351,10 @@ def gen_destination_string(destination):
             str(destination.in_use)
 
 def print_neuron_destinations(neuron, destination_id_list=range(4)):
+    """Print a Dynapse1Destination in the format: C<target_chip_id>c<core_mask><in_use>. e.g., C2c1True means this Dynapse1Destination has target_chip_id=2, core_mask=1 and it's occupied.
+
+    :param Dynapse1Destination destination: destination.
+    """
     destinations = neuron.destinations
     for i in destination_id_list:
         if i == len(destination_id_list)-1:
@@ -350,21 +364,51 @@ def print_neuron_destinations(neuron, destination_id_list=range(4)):
         print(gen_destination_string(destinations[i]), end = end)
 
 def get_global_id(chip, core, neuron):
+    """Conveniently generate the corresponding global neuron ID given chip, core, neuron IDs.
+
+    :param int chip: chip ID, [0,4).
+    :param int core: core ID, [0,4) for physical neurons, [0,1) for spike generators on the FPGA.
+    :param int neuron: neuron ID, [0,256).
+
+    :returns: global_neuron_id.
+    :rtype: int.
+    """
     if (isinstance(chip, int) and isinstance(core, int) and isinstance(neuron, int)) == False:
         raise Exception("Chip core and neuron IDs should be integer!")
     return neuron+core*NEURONS_PER_CORE+chip*NEURONS_PER_CHIP
 
 def get_global_id_list(tuple_list):
+    """Conveniently generate a list of global neuron IDs given a list of [chip, core, neuron ID] tuples.
+
+    :param list[[int,int,int]] tuple_list: a list of global neuron IDs.
+
+    :returns: global_neuron_ids.
+    :rtype: list[int].
+    """
     return [tuple_list[2]+tuple_list[1]*NEURONS_PER_CORE+tuple_list[0]*NEURONS_PER_CHIP\
                 for tuple_list in tuple_list]
 
 def get_parameters(config, chip, core):
+    """Get a list of Dynapse1Parameter (25 in total) of a specific core.
+
+    :param Dynapse1Configuration config: Dynapse1Configuration retrieved from Dynapse1Model.
+    :param int chip: chip ID, [0,4).
+    :param int core: core ID, [0,4).
+
+    :returns: current parameter setup of the core.
+    :rtype: list[samna.dynapse1.Dynapse1Parameter].
+    """
     return config.chips[chip].cores[core].parameter_group.param_map.values()
 
 def get_parameter_value(config, chip, core, name):
     return (config.chips[chip].cores[core].parameter_group.param_map[name].coarse_value, config.chips[chip].cores[core].parameter_group.param_map[name].fine_value)
 
 def save_parameters2txt_file(config, filename="./dynapse_parameters.txt"):
+    """Save the parameters of 16 cores into a txt file.
+
+    :param Dynapse1Configuration config: Dynapse1Configuration retrieved from Dynapse1Model.
+    :param string filename: the path and filename of the output paramter file.
+    """
     save_file = open(filename, "w")
     for chip in range(NUM_CHIPS):
         for core in range(CORES_PER_CHIP):
@@ -379,6 +423,11 @@ def save_parameters2txt_file(config, filename="./dynapse_parameters.txt"):
                         param.fine_value))
 
 def set_parameters_in_txt_file(model, filename="./dynapse_parameters.txt"):
+    """Load the parameters in a txt file to DYNAP-SE1 board.
+
+    :param Dynapse1Model model: Dynapse1Model.
+    :param string filename: the path and filename of the input paramter file.
+    """
     # parse file and update parameters
     with open(filename) as f:
         lines = f.read().splitlines()
@@ -398,6 +447,12 @@ def set_parameters_in_txt_file(model, filename="./dynapse_parameters.txt"):
         model.update_single_parameter(param, int(chip), int(core))
 
 def save_parameters2json_file(config, filename="./dynapse_parameters.json"):
+    """Save the parameters of 16 cores into a JSON file.
+
+    :param Dynapse1Configuration config: Dynapse1Configuration retrieved from Dynapse1Model.
+    :param string filename: the path and filename of the output paramter file.
+
+    """
     data = {}
     data['parameters'] = []
     for chip in range(NUM_CHIPS):
@@ -417,6 +472,11 @@ def save_parameters2json_file(config, filename="./dynapse_parameters.json"):
         json.dump(data, json_file, indent=4)
 
 def set_parameters_in_json_file(model, filename="./dynapse_parameters.json"):
+    """Load the parameters in a JSON file to DYNAP-SE1 board.
+
+    :param Dynapse1Model model: Dynapse1Model.
+    :param string filename: the path and filename of the input paramter file.
+    """
     with open(filename) as json_file:
         data = json.load(json_file)
     for p in data['parameters']:
@@ -426,9 +486,10 @@ def set_parameters_in_json_file(model, filename="./dynapse_parameters.json"):
 def get_serial_number(device_idx=0, select_device=False):
     """
     Get serial number of an opened DYNAP-SE1 board.
-    Attribute:
-        device_idx: int, DYNAP-SE1 board index.
-        select_device: whether to select one DYNAP-SE1 board out of multiple connected ones.
+    Args:
+        device_idx (int): DYNAP-SE1 board index.
+        select_device (bool): whether to select one DYNAP-SE1 board out of 
+            multiple connected ones.
     """
     if type(device_idx) is str:
         warnings.warn("device_name is deprecated, please use device_idx.", DeprecationWarning)
@@ -442,6 +503,10 @@ def get_serial_number(device_idx=0, select_device=False):
         return device_infos[device_idx].serial_number
 
 def print_dynapse1_spike(event):
+    """Print the Spike in the following format: "(timestamp, global_neuron_id),".
+
+    :param samna.dynapse1.Spike event: spike.
+    """
     print((event.timestamp, event.neuron_id+
             event.core_id*NEURONS_PER_CORE+
             event.chip_id*NEURONS_PER_CHIP), end=',')
@@ -489,13 +554,10 @@ def create_neuron_select_graph(model, neuron_ids):
 
 def get_time_wrap_events(model):
     """
-    Attribute:
-        model: Dynapse1Model, returned by open_dynapse1()
-    Purpose:
-        DYNAP-SE1 sends out 2 types of events: spike and timeWrapEvent.
-        timeWrapEvent occurs when the 32 bit timestamp wraps around.
-        This happens every ~37 minutes.
-        With the graph created here, you can monitor if any timeWrapEvent is generated.
+    DYNAP-SE1 sends out 2 types of events: spike and timeWrapEvent. timeWrapEvent occurs when the 32 bit timestamp wraps around. This happens every ~37(?) minutes. With the graph created by this method, you can monitor if any timeWrapEvent is generated effectively with the C++ backend.
+
+    Agrs:
+        model (samna.dynapse1.Dynapse1Model): returned by open_dynapse1()
     """
     graph = samna.graph.EventFilterGraph()
 
@@ -510,27 +572,16 @@ def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_b
     """
     Author: Nicoletta Risi. Adapted by Jingyue Zhao.
 
-    This sets the FpgaSpikeGen object.
-    Args:
-        spike_times    (list): list of input spike times, in sec
-        indices     (list): list of FPGA spike generator ids sorted according to 
-                            time of spike
-        target_chip    (list): list of target chip to which each event will be
-                            sent.
-        isi_base        (int): 90 or 900 (See below)
-        repeat_mode    (bool): If repeat is True, the spike generator will 
-                            loop from the beginning when it reaches the end 
-                            of the stimulus.                    
     This function sets the SpikeGenerator object given a list of spike times, 
     in sec, correspondent input neuron ids and the target chips, i.e. the
     chip destination of each input event. 
     
-    About  **** isi_base ****:
+    About  `isi_base`:
     Given a list of spike times (in sec) a list of isi (Inter Stimulus Interval) 
     is generated. Given a list of isi, the resulting list of isi set from the 
     FPGA will be:
         isi*unit_fpga
-    with             
+        with             
         unit_fpga = isi_base/90 * us    
         
     Thus, given a list of spike_times in sec:
@@ -541,6 +592,19 @@ def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_b
             given the input isi_base)        
     E.g.: if isi_base=900 the list of generated isi will be multiplied on
     FPGA by 900/90 us = 10 us
+
+    Args:
+        fpga_spike_gen (samna.dynapse1.Dynapse1FpgaSpikeGen): Dynapse1FpgaSpikeGen retrieved from Dynapse1Model.
+        spike_times    (list): list of input spike times, in second.
+        indices     (list): list of FPGA spike generator ids sorted according to 
+                            time of spike.
+        target_chips    (list): list of target chip to which each event will be
+                            sent.
+        isi_base        (int): 90 or 900 (See above)
+        repeat_mode    (bool): If repeat is True, the spike generator will 
+                            loop from the beginning when it reaches the end 
+                            of the stimulus.     
+
     
     """
     assert all(np.sort(spike_times)==(spike_times)), 'Spike times must be sorted!'

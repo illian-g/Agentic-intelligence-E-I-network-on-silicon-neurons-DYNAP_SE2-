@@ -15,7 +15,6 @@
    
       add_synapses
       add_wta_conns
-      convert_incoming_conns_dict2list
       print_post_neuron_dict
       remove_synapses
    
