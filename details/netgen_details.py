@@ -46,7 +46,7 @@ def gen_all2all_lists(pre_neurons, post_neurons, p, rand_seed):
     random.seed(None)
     return pre_list, post_list
 
-def validate(network, max_num_cams=MAX_NUM_CAMS):
+def _validate(network, max_num_cams=MAX_NUM_CAMS):
     '''
     Validation rules:
     First check cams: check the number of incoming connections of each neuron (after reusing cam):
@@ -146,7 +146,7 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
     valid = True
     return valid
 
-def convert_validated_network2dynapse1_configuration(network):
+def _convert_validated_network2dynapse1_configuration(network):
     """
     Convert a validated "network" to a Dynapse1Configuration which can be applied using Dynapse1Model.
     """

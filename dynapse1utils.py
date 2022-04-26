@@ -77,35 +77,41 @@ def open_device(sender_port=33336, receiver_port=33335, select_device=False):
 
     return device, samna_info_dict
 
-def open_dynapse1(device_name=None, gui=True, sender_port=33336, receiver_port=33335, select_device=False):
+def open_dynapse1(gui=True, select_device=False, sender_port=33336, receiver_port=33335):
     """
-    open DYNAP-SE1 board with or without GUI.
+    open DYNAP-SE1 board with or without GUI. Note that input parameter device_name 
+    has been deprecated now, please do not assign device_name anymore! 
+    You cannot name DYNAP-SE1 board by yourself because it's now assigned as 
+    'Dynapse1DevKit:index' by open_dynapse1()
 
-    Attribute:
-        gui: whether to open the gui or not
-            True: will return store and gui_process
-            False: only return store
-        select_device: whether to select one DYNAP-SE1 board out of some connected ones
-            False: board 0 will be opened
-            True: user will be asked to choose the board index
+    :param bool gui: whether to open the gui or not. "True" will return store and gui_process;
+    "False" will only return store.
+    :param bool select_device: whether to select one DYNAP-SE1 board out of some connected ones.
+    "False": board 0 will be opened; "True": user will be asked to choose the board index
+    :param int sender_port: samnaNode's sending port. Should be 33336 if gui=True, 
+    otherwise you can use a 5-digits port number.
+    :param int receiver_port: samnaNode's receiving port. Should be 33335 if gui=True, 
+    otherwise you can use a 5-digits port number which is different from sender_port.
+
+    :returns:
+        Dynapse1Model: model, DYNAP-SE1 model of the selected device.
+        gui_process: the gui process handler if gui=True. Otherwise, an empty string ''.
+
     """
     # ports = random.sample(range(10**4, 10**5), k=2)
 
-    # TODO: remove attribute device_name
-    if device_name is not None:
-        warnings.warn("device_name will be deprecated soon, please do not assign device_name anymore! You cannot name DYNAP-SE1 board by yourself because it's now assigned as 'Dynapse1DevKit:index' by open_dynapse1()", DeprecationWarning)
     if gui:
         # has to be these 2 numbers if you want to run the GUI
         sender_port=33336
         receiver_port=33335
     
-    device, samna_info_dict = open_device(sender_port, receiver_port, select_device)
+    model, samna_info_dict = open_device(sender_port, receiver_port, select_device)
     
     if gui:
         visualizer_id = 3
 
         # open the gui
-        gui_process, gui_receiving_port = open_gui(device, visualizer_id)
+        gui_process, gui_receiving_port = open_gui(model, visualizer_id)
 
         samna_info_dict["gui_receiving_port"] = gui_receiving_port
         samna_info_dict["gui_node_id"] = visualizer_id
@@ -122,9 +128,9 @@ def open_dynapse1(device_name=None, gui=True, sender_port=33336, receiver_port=3
         json.dump(samna_info_dict, json_file, indent=4)
 
     if gui:
-        return device, gui_process
+        return model, gui_process
     else:
-        return device, ''
+        return model, ''
 
 def open_gui(device, visualizer_id=3):
 
@@ -284,6 +290,11 @@ def open_visualizer(window_width, window_height, receiver_endpoint, sender_endpo
 def close_dynapse1(model, gui_process=''):
     '''
     Close DYNAP-SE1 board with or without the GUI.
+
+    :param Dynapse1Model model: the DYNAP-SE1 model you get when you :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
+
+    :param Process gui_process: the GUI process handler you created when you :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
+
     '''
     if gui_process != '':
         gui_process.join()
@@ -435,25 +446,34 @@ def print_dynapse1_spike(event):
             event.core_id*NEURONS_PER_CORE+
             event.chip_id*NEURONS_PER_CHIP), end=',')
 
-def create_neuron_select_graph(device, neuron_ids):
+def create_neuron_select_graph(model, neuron_ids):
     """
-    Attribute:
-        model: Dynapse1Model, returned by open_dynapse1()
-        neuron_ids: list of tuple(int, int, int) in the order of (chip, core, neuron), neuron ids of the neurons you want to monitor.
-    Process and usage of the graph:
-        Create a graph: source_node in model -> filter_node in graph -> sink_node to get events.
-        Only filter_node is in the graph. Source and sink nodes are outside graph.
-        To use the graph, first graph.start().
-        To get events, sink_node.get_events().
-        If you graph.stop(), for now the graph actually won't stop, all events are still
-        streamed into the buffer of sink_node. This is work in progess.
-        Thus to get events for 1 second, you need to first clear the buffer of sink_node using get_events().
-        i.e.,
+    Create a graph: source_node in model -> filter_node in graph -> sink_node to get events.
+    Only filter_node is in the graph. Source and sink nodes are outside graph.
+    
+    Usage:
+    To use the created/returned graph, first graph.start().
+    To get events, sink_node.get_events().
+    If you graph.stop(), for now the graph actually won't stop, all events are still
+    streamed into the buffer of sink_node. This is work in progess.
+    Thus to get events for 1 second, you need to first clear the buffer of sink_node using get_events().
+    i.e.,
+    .. code-block::
+
         sink_node.get_events()
         sleep(1)
         events = sink_node.get_events()
 
-        See details at: https://synsense-sys-int.gitlab.io/samna/filters.html#
+    See details at: https://synsense-sys-int.gitlab.io/samna/filters.html#
+    
+    Args:
+        model (Dynapse1Model): , returned by open_dynapse1()
+        neuron_ids (list[tuple(int, int, int)]): tuple in the order of (chip, core, neuron), neuron ids of the neurons you want to monitor.
+        
+    Returns:
+        graph (samna.graph.EventFilterGraph): samna filtering graph.
+        filter_node (samna.graph.nodes.Dynapse1NeuronSelect_dynapse1_dynapse1_event): filter_node that filters the events of selected neurons.
+        sink_node (samna.BasicSinkNode_dynapse1_dynapse1_event): sink node that receives the events from the filter node.
     """
     # create a graph. A graph is a thread.
     graph = samna.graph.EventFilterGraph()
@@ -461,7 +481,7 @@ def create_neuron_select_graph(device, neuron_ids):
     sink_node = samna.BasicSinkNode_dynapse1_dynapse1_event()
 
     # NeuronSelectFilterNode. Node 2. Initialized inside graph, by add_filter_node.
-    _, filter_node, _ = graph.sequential([device.get_source_node(), "Dynapse1NeuronSelect", sink_node])
+    _, filter_node, _ = graph.sequential([model.get_source_node(), "Dynapse1NeuronSelect", sink_node])
     # Get this filterNode from the created graph and set selected neuron IDs.
     filter_node.set_neurons(neuron_ids)
 

@@ -58,5 +58,5 @@ Please read [How to contribute?](https://gitlab.com/neuroinf/ctxctl_contrib/-/tr
   - "Dynapse1NeuronSelect" update: `set_neurons()` now accepts tuple neuron ID list, i.e. list[(int,int,int)] indicating (chip,core,neuron) IDs, instead of global neuron ids. Please adapt your scripts accordingly. 
   
 - The Python [libraries](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1) are updated as well.
-  - File names are changed to match Python name convention: e.g. NetworkGenerator.py -> netgen.py, Dynapse1Constants.py -> dynapse1constants.py, Dynapse1Utils.py -> dynapse1utils.py, etc. Sorry for the inconvenience, but please modify your import accordingly.
+  - File names are changed to match Python name convention: e.g. NetworkGenerator.py -> netgen.py, dynapse1constants.py -> dynapse1constants.py, dynapse1utils.py -> dynapse1utils.py, etc. Sorry for the inconvenience, but please modify your import accordingly.
   - STDP modules are added so that implementation of STDP-like learning are supported. Check this [script](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) as a simple learning example.

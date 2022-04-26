@@ -5,7 +5,7 @@ import random
 
 import dynapse1utils as ut
 from dynapse1constants import NUM_CHIPS, CORES_PER_CHIP, NEURONS_PER_CORE, MAX_NUM_CAMS
-from details.netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_lists, validate, convert_validated_network2dynapse1_configuration, find_neuron_in_dict, find_pre_in_post_incoming
+from details.netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_lists, _validate, _convert_validated_network2dynapse1_configuration, find_neuron_in_dict, find_pre_in_post_incoming
 
 def add_synapses(netgen, synapse):
     """Add a synapse group into a network generator"""
@@ -25,14 +25,31 @@ def remove_synapses(netgen, synapse):
         netgen.remove_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
 class Neuron:
+    # google docstring style
     """
-    Attribute:
-        chip_id, core_id, neuron_id: int
-        is_spike_gen: bool, if this neuron is a spike generator on the FPGA or a physical neuron on chip.
-        incoming_connections: a dictionarty which stores the incoming_connections. Only starts to play a role after add_connection(pre, neuron).
-            key: tuple, (pre.core_id,pre.neuron_id,synapse_type).
-                Corresponds to cam. Divide the connections by its cam value for cam reuse.
-            value: list, [(pre.chip_id, pre.is_spike_gen), (pre.chip_id, pre.is_spike_gen),...].
+    Neuron object used to create network topology inside a network generator,
+    Not the silicon neuron on DYNAP-SE1 hardware.
+
+    Args:
+        chip_id (int): Defaults to 0.
+        core_id (int): Defaults to 0.
+        neuron_id (int): Defaults to 0.
+        is_spike_gen (bool): True if this neuron is a spike generator on the FPGA, otherwise a physical neuron on chip.
+            Defaults to False.
+
+    Attributes:
+        chip_id (int): Defaults to 0.
+        core_id (int): Defaults to 0.
+        neuron_id (int): Defaults to 0.
+        is_spike_gen (bool): True if this neuron is a spike generator on the FPGA, otherwise a physical neuron on chip.
+            Defaults to False.
+        incoming_connections (dictionarty): a dictionarty which stores the incoming_connections. Only starts to play a  
+            role after add_connection(pre, neuron).
+            
+            - key (tuple): (pre.core_id,pre.neuron_id,synapse_type). Corresponds to cam. 
+                Divide the connections by its  cam value for cam reuse.
+            
+            - value (list): [(pre.chip_id, pre.is_spike_gen), (pre.chip_id, pre.is_spike_gen),...]. 
                 To tell if the post neurons are the same neuron. get the connection weight.
     """
     def __init__(self, chip_id=0, core_id=0, neuron_id=0, is_spike_gen=False):
@@ -62,7 +79,17 @@ class Neuron:
         return f"C{self.chip_id}c{self.core_id}{neur_str}{self.neuron_id}"
     
     def __eq__(self, other):
-        """Only compares the ids. Consider a neuron as an individual neuron without any external connections (i.e. not in a Network)"""
+        """
+        Check if 2 neurons have the same physical ID. Consider a neuron as an individual neuron without 
+        any external connections (i.e. not in a Network)
+
+        Args:
+            other (netgen.Neuron): a neuron.
+        
+        Returns:
+            True if neuron IDs are the same, False otherwise.
+             
+        """
         eq_flag1 = self.chip_id == other.chip_id and \
             self.core_id == other.core_id and \
             self.neuron_id == other.neuron_id and \
@@ -75,7 +102,15 @@ class Neuron:
         return eq_flag1 and eq_flag2
     
     def __lt__(self, other):
-        """	To get called on comparison using < operator. For sorting."""
+        """	
+        Comparison function for sorting. Get called on comparison using < operator.
+
+        Args:
+            other (netgen.Neuron): a neuron.
+        
+        Returns:
+            True if this neuron ID is smaller than the other one, False otherwise.
+        """
         flag = False
         if self.chip_id < other.chip_id:
             flag = True
@@ -89,6 +124,12 @@ class Neuron:
         return flag
     
     def __hash__(self):
+        """	
+        Return hashable string of the object.
+
+        Returns:
+            str: hashable string of the object.
+        """
 
         h = hash("{}.{}.{}.{}.{}".format(self.chip_id,self.core_id,
                                         self.neuron_id,self.is_spike_gen,
@@ -97,7 +138,21 @@ class Neuron:
         return h
 
 class NeuronGroup:
+    # numpy docstring style
     """
+    A collection of netgen.Neurons for neural population operations. 
+
+    Parameters
+    ----------
+    chip_id : int
+        chip id, defaults to 0.
+    core_id : int
+        core id, defaults to 0.
+    neuron_ids: list[int]
+        list of neuron ids, defaults to None.
+    is_spike_gen: bool, defaults to False.
+        True if this neuron group is a group of spike generators on the FPGA, otherwise silicon neurons on chip.
+
     Attributes
     ------------
     chip_id : int
@@ -108,6 +163,7 @@ class NeuronGroup:
         list of neuron ids
     is_spike_gen: bool 
         if this neuron group is a group of spike generators on the FPGA or silicon neurons on chip.
+
     """
     def __init__(self, chip_id=0, core_id=0, neuron_ids=None, is_spike_gen=False):
         if is_spike_gen:
@@ -136,7 +192,14 @@ class NeuronGroup:
 
     @property
     def neurons(self):
-        """neurons getter: return a list of neurons given the current chip/core/neuron ids"""
+        """
+        neurons getter function to get neurons according to the current chip/core/neuron ids of the neuron group.
+
+        Returns
+        -------
+        list[netgen.Neuron]
+            A list of neurons given the current chip/core/neuron ids.
+        """
         neurons = []
         for nid in self.neuron_ids:
             neurons.append(Neuron(self.chip_id,self.core_id,nid,self.is_spike_gen))
@@ -144,14 +207,36 @@ class NeuronGroup:
     
     @property
     def tuple_neuron_ids(self):
-        """list[(chip, core, neuron)] getter: return a list of tuple neuron ids given the current chip/core/neuron ids"""
+        """list[(chip, core, neuron)] getter function
+
+        Returns
+        -------
+        list[netgen.Neuron]
+            A list of tuple neuron ids given the current chip/core/neuron ids
+        """
+
         tuple_neuron_ids = []
         for nid in self.neuron_ids:
             tuple_neuron_ids.append((self.chip_id,self.core_id,nid))
         return tuple_neuron_ids
     
     def __eq__(self, other):
-        """Only compares the ids. Consider a neuron group as an individual group without any external connections (i.e. not in a Network)"""
+        """
+        Compare two neuron groups. Only compares the neuron ids. 
+        Consider a neuron group as an individual group without any external 
+        connections (i.e. not in a Network)
+
+        Parameters
+        ----------
+        other: NeuronGroup
+            The other neuron group.
+        
+        Returns
+        -------
+        bool
+            True if equal, False otherwise.
+
+        """
         return self.chip_id == other.chip_id and \
             self.core_id == other.core_id and \
             self.neuron_ids.any() == other.neuron_ids.any() and \
@@ -159,18 +244,41 @@ class NeuronGroup:
 
 class Synapses:
     """
-    Connections from a pre NeuronGroup to a post NeuronGroup. Stores the information of the connectivity.
-    Parameters:
-        pre_group: NeuronGroup
-        post_group: NeuronGroup
-        synapse_type: samna.dynapse1.Dynapse1SynType
-        pre_list: list[int], the index of each neuron in the pre_group, not the (chip, core, neuron) id.
-        post_list: list[int], the index of each neuron in the post_group, not the (chip, core, neuron) id.
-        conn_type: string, in ['one2one', 'all2all'].
-        p: float, possibility of all2all random connections
-        rand_seed: int, random seed of all2all random connections
-        weight_matrix: weight matrix between pre_group and          post_group. Rows represent pre_ids, columns represent post_ids.
-        mux_conn: the multiplexer number of the connections. Each pre-post synapse will be mux_conn connections. 
+    Stores the information of the connectivity from a pre NeuronGroup to a post NeuronGroup.
+    The connections can be defined in 3 ways:
+        - using self-defined pre_list and post_list
+        - using connectivity pattern, conn_type
+        - using weight_matrix
+
+    Args:
+        pre (NeuronGroup): presynaptic neuron group.
+        post (NeuronGroup): postsynaptic neuron group.
+        synapse_type (samna.dynapse1.Dynapse1SynType): synapse type.
+        pre_list (list[int]): the relative index of neurons in the pre_group, not the (chip, core, neuron) id.
+            Defaults to None.
+        post_list (list[int]): the relative index of neurons in the post_group, not the (chip, core, neuron) id.
+            Defaults to None.
+        conn_type (str): in ['one2one', 'all2all']. Defaults to None.
+        p (float): possibility of all2all random connections. Defaults to None.
+        rand_seed (int): random seed of all2all random connections. Defaults to None.
+        mux_conn (int): the multiplexer number of the connections. Each pre-post synapse will be mux_conn connections.
+            Defaults to 1.
+
+    Attributes:
+        pre_group (NeuronGroup): presynaptic neuron group.
+        post_group (NeuronGroup): postsynaptic neuron group.
+        synapse_type (samna.dynapse1.Dynapse1SynType): synapse type.
+        pre_list (list[int]): the relative index of neurons in the pre_group, not the (chip, core, neuron) id.
+            Defaults to None.
+        post_list (list[int]): the relative index of neurons in the post_group, not the (chip, core, neuron) id.
+            Defaults to None.
+        conn_type (str): in ['one2one', 'all2all']. Defaults to None.
+        p (float): possibility of all2all random connections. Defaults to None.
+        rand_seed (int): random seed of all2all random connections. Defaults to None.
+        weight_matrix (numpy.array()): weight matrix between pre_group and post_group.
+            Rows represent pre_ids, columns represent post_ids. Defaults to None.
+        mux_conn (int): the multiplexer number of the connections. Each pre-post synapse will be mux_conn connections.
+            Defaults to 1.
     """
     def __init__(self, pre_group, post_group, synapse_type, pre_list=None, post_list=None, conn_type=None, p=None, rand_seed=None, weight_matrix=None, mux_conn=1):
         self.pre = pre_group
@@ -217,6 +325,18 @@ class Synapses:
             self.rand_seed = None
 
     def __eq__(self, other):
+        """
+        Check if 2 Synapses objects are the same, which means same pre and post populations
+        and same connections between them.
+
+        Args:
+            other (netgen.Synapses): a Synapses object.
+        
+        Returns:
+            True if equal, False otherwise.
+             
+        """
+
         if self is None:
             if other is None:
                 return True
@@ -244,22 +364,28 @@ class Synapses:
         return result
 
 class WTA_connections:
-    """
-    Define EI IE EE connections of a WTA with an EXC and an INH population.
+    """Define EI IE EE connections of a WTA with an excitatory and an inhibitory population.
+
+    Attributes:
+        ei (netgen.Synapses): EI connections.
+        ie (netgen.Synapses): IE connections.
+        ee (netgen.Synapses): EE connections. Defaults to None.
+
     Parameters:
-        exc_group: NeuronGroup
-        inh_group: NeuronGroup
-        syn_type_ei: EI synapse type
-        syn_type_ie: IE synapse type
-        syn_type_ee: recurrent excitation inside EXC neurons
-        p_ei: probability of EI connections
-        p_ie: probability of IE connections
-        ee_pres: list[int], pre_index_list of the EE connections.
-        ee_posts: list[int], post_index_list of the EE connections.
-        rand_seed: random seed for EI and IE connections
-        mux_conn_ei: multiplexer of EI connections
-        mux_conn_ie: multiplexer of IE connections
-        mux_conn_ee: multiplexer of EE connections
+        exc_group (NeuronGroup): excitatory neuron group.
+        inh_group (NeuronGroup): inhibitory neuron group.
+        syn_type_ei (samna.dynapse1.SynType): EI synapse type.
+        syn_type_ie (samna.dynapse1.SynType): IE synapse type.
+        syn_type_ee (samna.dynapse1.SynType): recurrent excitatory (EE) synapse type inside      
+            excitatory neurons. Defaults to None.
+        p_ei (float): probability of EI connections.
+        p_ie (float): probability of IE connections.
+        ee_pres (list[int]): pre_index_list of the EE connections. Defaults to None.
+        ee_posts (list[int]): post_index_list of the EE connections. Defaults to None.
+        rand_seed (int): random seed for EI and IE connections. Defaults to None.
+        mux_conn_ei (int): multiplexer of EI connections.
+        mux_conn_ie (int): multiplexer of IE connections.
+        mux_conn_ee (int): multiplexer of EE connections.
     """
     def __init__(self, exc_group, inh_group, syn_type_ei, syn_type_ie, syn_type_ee=None, p_ei=1, p_ie=1, ee_pres=None, ee_posts=None, rand_seed=None, mux_conn_ei=1, mux_conn_ie=1, mux_conn_ee=1):
         self.ei = Synapses(exc_group, inh_group, syn_type_ei, conn_type='all2all', p=p_ei, rand_seed=rand_seed, mux_conn=mux_conn_ei)
@@ -273,17 +399,31 @@ class WTA_connections:
             self.ee = None
     
     def __eq__(self, other):
+        """
+        Check if 2 WTA_connections objects are the same, which means same excitatory and 
+        inhibitory populations and same connections between them.
+
+        Args:
+            other (netgen.WTA_connections): a WTA_connections object.
+        
+        Returns:
+            True if equal, False otherwise.
+             
+        """
         return self.ei == other.ei and \
                self.ie == other.ie and \
                self.ee == other.ee
 
 class Network:
     """
-    Attribute:
-        post_neuron_dict: a dictionary which stores all the post neurons (and their incoming connections).
-            key: tuple, (post.chip_id, post.core_id).
+    Network that checks and maintains the topology of a spiking neural network that meets DYNAP-SE1 hardware constraints.
+
+    Attributes:
+        post_neuron_dict (dictionary): a dictionary which stores all the post neurons
+            (and their incoming connections).
+            - key: tuple, (post.chip_id, post.core_id).
                 Divide the post neurons by its location (core) for aliasing check.
-            value: list of neurons each of which has incoming connections.
+            - value: list of neurons each of which has incoming connections.
     """
     def __init__(self):
         # only track onchip post neurons
@@ -291,7 +431,11 @@ class Network:
         self.post_neuron_dict = collections.defaultdict(list)
     
     def __repr__(self):
-        """Create official string for class Network. print(Network), str(Network) can be used."""
+        """Create official string for class Network. print(Network), str(Network) can be used.
+        
+        Returns:
+            str: string format of a Network object.
+        """
         
         if len(self.post_neuron_dict.keys()) == 0:
             return f"The network is empty!"
@@ -306,13 +450,23 @@ class Network:
                 post_neurons = item[1]
                 for post in post_neurons:
                     incoming_connections_list, incoming_connections_str_list = \
-                        convert_incoming_conns_dict2list(post.incoming_connections)
+                        _convert_incoming_conns_dict2list(post.incoming_connections)
                     result_str += str(post) +': ' + str(incoming_connections_str_list) + '\n'
             
             return f"{result_str}"
     
     def __eq__(self, other):
-        """Compare 2 networks."""
+        """
+        Check if 2 Network objects are the same, which means same neurons and same connections between them.
+
+        Args:
+            other (netgen.Network): a Network object.
+        
+        Returns:
+            True if equal, False otherwise.
+             
+        """
+
         eq_flag = True
         for key in self.post_neuron_dict:
             eq_flag = eq_flag and (sorted(self.post_neuron_dict[key]) == sorted(other.post_neuron_dict[key]))
@@ -320,6 +474,17 @@ class Network:
         return eq_flag
 
     def add_connection(self, pre, post, synapse_type):
+        """Add a connection between the (pre,post) neuron pair and checks if the new connection
+        meet DYNAP-SE1 hardware constraints. Raise warnings or exceptions if something goes wrong.
+
+        Args:
+            pre (netgen.Neuron): presynaptic neuron.
+            post (netgen.Neuron): postsynaptic neuron.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+
+        Raises:
+            Exception: post neuron cannot be a spike generator.
+        """        
         if post.is_spike_gen:
             raise Exception("post neuron cannot be a spike generator!")
 
@@ -355,6 +520,18 @@ class Network:
                 synapse_type)].append((pre.chip_id, pre.is_spike_gen))
 
     def remove_connection(self, pre, post, synapse_type):
+        """Remove connection between the (pre,post) neuron pair.
+
+        Args:
+            pre (netgen.Neuron): presynaptic neuron.
+            post (netgen.Neuron): postsynaptic neuron.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+
+        Raises:
+            Exception: post neuron cannot be a spike generator.
+            Exception: connection that does not exist in the network cannot be remove.
+            Exception: connection that does not exist in the network cannot be remove.
+        """        
         if post.is_spike_gen:
             raise Exception("post neuron cannot be a spike generator!")
 
@@ -404,9 +581,15 @@ class Network:
                                 print("Network cleared!")
     
     def add_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
-        '''
-        add multiple connections between 2 neuron groups.
-        '''
+        """Add multiple connections between 2 neuron groups.
+
+        Args:
+            pre_neurons (list[netgen.Neuron]): list of neuron objects.
+            post_neurons (list[netgen.Neuron]): list of neuron objects.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+            pre_ids (list[int]): neuron indices in pre_neurons list.
+            post_ids (list[int]): neuron indices in post_neurons list.
+        """        
         assert(len(pre_ids)==len(post_ids)), 'Pre neuron ids '+\
             ' and post neuron ids need to have the same length'
         
@@ -414,19 +597,32 @@ class Network:
             self.add_connection(pre_neurons[i], post_neurons[j], synapse_type)
     
     def remove_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
-        '''
-        remove multiple connections between 2 neuron groups.
-        '''
+        """Remove multiple connections between 2 neuron groups
+
+        Args:
+            pre_neurons (list[netgen.Neuron]): list of neuron objects.
+            post_neurons (list[netgen.Neuron]): list of neuron objects.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+            pre_ids (list[int]): neuron indices in pre_neurons list.
+            post_ids (list[int]): neuron indices in post_neurons list.
+        """        
         assert(len(pre_ids)==len(post_ids)), 'Pre neuron ids '+\
             ' and post neuron ids need to have the same length'
         
         for (i, j) in zip(pre_ids, post_ids):
             self.remove_connection(pre_neurons[i], post_neurons[j], synapse_type)
 
-    def add_connections_from_type(self, pre_neurons, post_neurons, synapse_type, conn_type, p=1, rand_seed=None):
-        '''
-        add multiple connections between 2 neuron groups given connectivity type: 'one2one' or 'all2all'.
-        '''
+    def add_connections_from_type(self, pre_neurons, post_neurons, synapse_type, conn_type, p=1.0, rand_seed=None):
+        """Add multiple connections between 2 neuron groups given connectivity type: 'one2one' or 'all2all'.
+
+        Args:
+            pre_neurons (list[netgen.Neuron]): list of neuron objects.
+            post_neurons (list[netgen.Neuron]): list of neuron objects.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+            conn_type (str): 'one2one' or 'all2all'.
+            p (float, optional): possibility of all2all connections. Defaults to 1.0.
+            rand_seed (int, optional): random seed for all2all connections. Defaults to None.
+        """        
         print("Warning: this is an old way of creating connections which will not save pre_list and post_list as the connections. The preferable way is to create a Synapses object syn, then use add_synapses(net_gen, syn).")
 
         if conn_type == 'one2one':
@@ -451,55 +647,145 @@ class Network:
             random.seed(None)
 
 class NetworkGenerator:
-    """
+    """NetworkGenerator maintains a Network and a corresponding Dynapse1Configuration.
+    A NetworkGenerator must be used to convert you network topology added to the
+    NetworkGenerator into a Dynapse1Configuration that can be applied to hardware.
+
     Whenever you want to change your network, you need to add/remove connections
-    using the previous NeuronNeuronConnector from which you took the configuration
+    using the previous NetworkGenerator from which you took the configuration
     and applied it using the model during your last modification of the network.
-    Otherwise, you just create a new NeuronNeuronConnector and configuration
+    Otherwise, you just create a new NetworkGenerator and configuration
     from the scratch and apply it.
-    """
+
+    Attributes:
+        config (samna.dynapse1.Dynapse1Configuration): hardware applicable DYNAP-SE1 configuration converted
+            from the network stored in the NetworkGenerator.
+        network (netgen.Network): network description of neurons and connections.
+
+    Raises:
+        exception: _description_
+        Exception: _description_
+        Exception: _description_
+        Exception: _description_
+        Exception: _description_
+
+    """    
     def __init__(self):
         self.config = dyn1.Dynapse1Configuration()
         self.network = Network()
 
     def add_connection(self, pre, post, synapse_type):
+        """Add a connection between the (pre,post) neuron pair and checks if the new connection
+        meet DYNAP-SE1 hardware constraints. Raise warnings or exceptions if something goes wrong.
+
+        Args:
+            pre (netgen.Neuron): presynaptic neuron.
+            post (netgen.Neuron): postsynaptic neuron.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+        """        
         self.network.add_connection(pre, post, synapse_type)
 
     def remove_connection(self, pre, post, synapse_type):
+        """Remove connection between the (pre,post) neuron pair.
+
+        Args:
+            pre (netgen.Neuron): presynaptic neuron.
+            post (netgen.Neuron): postsynaptic neuron.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+
+        """    
         self.network.remove_connection(pre, post, synapse_type)
     
     def add_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
+        """Add multiple connections between 2 neuron groups.
+
+        Args:
+            pre_neurons (list[netgen.Neuron]): list of neuron objects.
+            post_neurons (list[netgen.Neuron]): list of neuron objects.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+            pre_ids (list[int]): neuron indices in pre_neurons list.
+            post_ids (list[int]): neuron indices in post_neurons list.
+        """    
         self.network.add_connections_from_list(pre_neurons, post_neurons, synapse_type, pre_ids, post_ids)
     
     def remove_connections_from_list(self, pre_neurons, post_neurons, synapse_type, pre_ids, post_ids):
+        """Remove multiple connections between 2 neuron groups
+
+        Args:
+            pre_neurons (list[netgen.Neuron]): list of neuron objects.
+            post_neurons (list[netgen.Neuron]): list of neuron objects.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+            pre_ids (list[int]): neuron indices in pre_neurons list.
+            post_ids (list[int]): neuron indices in post_neurons list.
+        """   
         self.network.remove_connections_from_list(pre_neurons, post_neurons, synapse_type, pre_ids, post_ids)
     
     def add_connections_from_type(self, pre_neurons, post_neurons, synapse_type, conn_type, p=1, rand_seed=None):
+        """Add multiple connections between 2 neuron groups given connectivity type: 'one2one' or 'all2all'.
+
+        Args:
+            pre_neurons (list[netgen.Neuron]): list of neuron objects.
+            post_neurons (list[netgen.Neuron]): list of neuron objects.
+            synapse_type (samna.dynapse1.SynType): synapse type.
+            conn_type (str): 'one2one' or 'all2all'.
+            p (float, optional): possibility of all2all connections. Defaults to 1.0.
+            rand_seed (int, optional): random seed for all2all connections. Defaults to None.
+        """
         self.network.add_connections_from_type(pre_neurons, post_neurons, synapse_type, conn_type, p, rand_seed)
 
     def clear_network(self):
+        """
+        Clear all neurons and connections added to the network.
+        """
         self.network.post_neuron_dict.clear()
 
     def print_network(self):
-        print("Warning: print_network is deprecated and will be removed in a future release, use print(NetworkGenerator.network). Note: str(NetworkGenerator.network) gives you the string format of a network.")
+        """Warning: print_network is deprecated and will be removed in a future release,
+            use print(NetworkGenerator.network). Note: str(NetworkGenerator.network) gives
+            you the string format of a network.
+        """
+
+        print("Warning: print_network is deprecated and will be removed in a future release, \
+            use print(NetworkGenerator.network). Note: str(NetworkGenerator.network) gives \
+            you the string format of a network.")
 
         print(self.network)
 
     def make_dynapse1_configuration(self, validation=True):
-        '''
-        check if the self.network is valid or not.
-        If valid: convert it to a configuration
-        If not: raise exception
-        '''
-        if validation:
-            is_valid = validate(self.network, MAX_NUM_CAMS)
+        """Convert network defined in the network generator into a DYNAP-SE1 applicable configuration.
+        Checks if the network of the network generator is valid or not,
+        i.e. meets DYNAP-SE1 hardware constraints.
+        If valid, network will be converted to a DYNAP-SE1 configuration.
+        Otherwise, exceptions will be raised.
 
-        self.config = convert_validated_network2dynapse1_configuration(self.network)
+        Args:
+            validation (bool, optional): whether to validate the network before converting
+                to a DYNAP-SE1 configuration. Defaults to True.
+
+        Returns:
+            samna.dynapse1.Dynapse1Configuration: Dynapse1Configuration.
+        """        
+        if validation:
+            is_valid = _validate(self.network, MAX_NUM_CAMS)
+
+        self.config = _convert_validated_network2dynapse1_configuration(self.network)
         # print("Converted the validated network to a Dynapse1 configuration!")
         
         return self.config
 
     def make_dynapse1_configuration_in_chip(self, chip_id):
+        """Convert network defined in the network generator into a DYNAP-SE1 applicable configuration
+        which only lies in one target chip. The configuration of the remaining 3 chips will not be changed.
+
+        Args:
+            chip_id (int): chip id.
+
+        Raises:
+            Exception: network has neuron(s) outside the target chip.
+
+        Returns:
+            samna.dynapse1.Dynapse1Configuration: Dynapse1Configuration.
+        """        
         # first check if the neurons in the network are all in the chip
         post_neuron_dict = self.network.post_neuron_dict
         for post_chip_core in post_neuron_dict:
@@ -522,6 +808,19 @@ class NetworkGenerator:
         return config
 
     def make_dynapse1_configuration_in_core(self, chip_id, core_id):
+        """Convert network defined in the network generator into a DYNAP-SE1 applicable configuration
+        which only lies in one target core. The configuration of the remaining 15 cores will not be changed.
+
+        Args:
+            chip_id (int): chip id.
+            core_id (int): core id.
+
+        Raises:
+            Exception: network has neuron(s) outside the target core.
+
+        Returns:
+            samna.dynapse1.Dynapse1Configuration: Dynapse1Configuration.
+        """
         # first check if the neurons in the network are all in the core
         post_neuron_dict = self.network.post_neuron_dict
         for post_chip_core in post_neuron_dict:
@@ -549,7 +848,7 @@ class NetworkGenerator:
         config = self.make_dynapse1_configuration()
         return config
 
-def convert_incoming_conns_dict2list(incoming_connections_dict):
+def _convert_incoming_conns_dict2list(incoming_connections_dict):
     """
     Convert (pre.core_id,pre.neuron_id,synapse_type): [(pre.chip_id, pre.is_spike_gen), (pre.chip_id, pre.is_spike_gen),...]
     to
@@ -583,6 +882,11 @@ def convert_incoming_conns_dict2list(incoming_connections_dict):
     return incoming_connections_list, incoming_connections_str_list
     
 def print_post_neuron_dict(post_neuron_dict):
+    """Print post_neuron_dict of the Network.
+
+    Args:
+        post_neuron_dict (dictionary): post_neuron_dict.
+    """    
     if len(post_neuron_dict.keys()) == 0:
         print("The network is empty!")
     else:
@@ -593,5 +897,5 @@ def print_post_neuron_dict(post_neuron_dict):
             post_neurons = item[1]
             for post in post_neurons:
                 incoming_connections_list, incoming_connections_str_list = \
-                    convert_incoming_conns_dict2list(post.incoming_connections)
+                    _convert_incoming_conns_dict2list(post.incoming_connections)
                 print(post+":", incoming_connections_str_list)
