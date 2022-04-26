@@ -8,19 +8,39 @@ from dynapse1constants import NUM_CHIPS, CORES_PER_CHIP, NEURONS_PER_CORE, MAX_N
 from details.netgen_details import weight_matrix2lists, gen_one2one_lists, gen_all2all_lists, _validate, _convert_validated_network2dynapse1_configuration, find_neuron_in_dict, find_pre_in_post_incoming
 
 def add_synapses(netgen, synapse):
-    """Add a synapse group into a network generator"""
+    """Add a Synapses object into a network generator.
+
+    Args:
+        netgen (netgen.NetworkGenerator): NetworkGenerator.
+        synapse (netgen.Synapses): synapse that contains pre, post neurons and 
+            connections between them.
+    """
     for i in range(synapse.mux_conn):
         netgen.add_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
 def add_wta_conns(netgen, wta_conns):
-    """Add WTA connections for a WTA into a network generator"""
+    """Add WTA connections to create a WTA in the network generator.
+
+    Args:
+        netgen (netgen.NetworkGenerator): NetworkGenerator.
+        wta_conns (netgen.WTA_connections): WTA_connections that contains excitatory, 
+            inhibitory neurons and WTA connections between them.
+    """
     add_synapses(netgen, wta_conns.ei)
     add_synapses(netgen, wta_conns.ie)
     if wta_conns.ee is not None:
         add_synapses(netgen, wta_conns.ee)
 
 def remove_synapses(netgen, synapse):
-    """Remove a synapse group into a network generator"""
+    """Remove a synapse group from a network generator.
+    If a neuron pair (pre, post) doesn't have any connections after this 
+    remove operation, both of the neurons will be removed from the network generator.
+
+    Args:
+        netgen (netgen.NetworkGenerator): NetworkGenerator.
+        wta_conns (netgen.synapse): synapse that contains pre, post neurons and 
+            connections between them.
+    """
     for i in range(synapse.mux_conn):
         netgen.remove_connections_from_list(synapse.pre.neurons, synapse.post.neurons, synapse.synapse_type, pre_ids=synapse.pre_list, post_ids=synapse.post_list)
 
@@ -31,9 +51,9 @@ class Neuron:
     Not the silicon neuron on DYNAP-SE1 hardware.
 
     Args:
-        chip_id (int): Defaults to 0.
-        core_id (int): Defaults to 0.
-        neuron_id (int): Defaults to 0.
+        chip_id (int): [0,4).Defaults to 0.
+        core_id (int): [0,4).Defaults to 0.
+        neuron_id (int): [0,256).Defaults to 0.
         is_spike_gen (bool): True if this neuron is a spike generator on the FPGA, otherwise a physical neuron on chip.
             Defaults to False.
 
@@ -71,6 +91,11 @@ class Neuron:
         self.incoming_connections = collections.defaultdict(list)
     
     def __repr__(self):
+        """Create official string for class Neuron. print(Neuron), str(Neuron) can be used.
+        
+        Returns:
+            str: string format of a Neuron object.
+        """
         if self.is_spike_gen:
             neur_str = 's'
         else:
@@ -521,6 +546,9 @@ class Network:
 
     def remove_connection(self, pre, post, synapse_type):
         """Remove connection between the (pre,post) neuron pair.
+        If the (pre, post) neuron pair only has one connection, the
+        neurons will be removed from the network as well. Otherwise
+        only this connection is removed. 
 
         Args:
             pre (netgen.Neuron): presynaptic neuron.
@@ -662,21 +690,13 @@ class NetworkGenerator:
             from the network stored in the NetworkGenerator.
         network (netgen.Network): network description of neurons and connections.
 
-    Raises:
-        exception: _description_
-        Exception: _description_
-        Exception: _description_
-        Exception: _description_
-        Exception: _description_
-
     """    
     def __init__(self):
         self.config = dyn1.Dynapse1Configuration()
         self.network = Network()
 
     def add_connection(self, pre, post, synapse_type):
-        """Add a connection between the (pre,post) neuron pair and checks if the new connection
-        meet DYNAP-SE1 hardware constraints. Raise warnings or exceptions if something goes wrong.
+        """Add a connection between the pre and post neuron with type "synapse_type" into the network.
 
         Args:
             pre (netgen.Neuron): presynaptic neuron.
@@ -686,7 +706,7 @@ class NetworkGenerator:
         self.network.add_connection(pre, post, synapse_type)
 
     def remove_connection(self, pre, post, synapse_type):
-        """Remove connection between the (pre,post) neuron pair.
+        """Remove a connection between the pre and post neuron with type "synapse_type" into the network.
 
         Args:
             pre (netgen.Neuron): presynaptic neuron.
@@ -777,8 +797,13 @@ class NetworkGenerator:
         """Convert network defined in the network generator into a DYNAP-SE1 applicable configuration
         which only lies in one target chip. The configuration of the remaining 3 chips will not be changed.
 
+        This function should be followed by :func:`apply_configuration_by_chip() <Dynapse1Model.apply_configuration_by_chip>` which applies the new configuration only to a single chip of the DYNAP-SE1 board. 
+
+        NOTE:
+            Be careful if you use this method because this is specifically designed for the user who only does experiments in a single chip. If you have network components in other chips, you will get an error. 
+
         Args:
-            chip_id (int): chip id.
+            chip_id (int): chip id, [0,4).
 
         Raises:
             Exception: network has neuron(s) outside the target chip.
@@ -811,9 +836,14 @@ class NetworkGenerator:
         """Convert network defined in the network generator into a DYNAP-SE1 applicable configuration
         which only lies in one target core. The configuration of the remaining 15 cores will not be changed.
 
+        This function should be followed by :func:`apply_configuration_by_core() <Dynapse1Model.apply_configuration_by_core>` which applies the new configuration only to a single chip of the DYNAP-SE1 board.
+        
+        NOTE: 
+            Be careful if you use this method because this is specifically designed for the user who only does experiments in a single core. If you have network components in other core, you will get an error.
+
         Args:
-            chip_id (int): chip id.
-            core_id (int): core id.
+            chip_id (int): chip id, [0,4).
+            core_id (int): core id, [0,4).
 
         Raises:
             Exception: network has neuron(s) outside the target core.

@@ -210,11 +210,16 @@ def _convert_validated_network2dynapse1_configuration(network):
     return config
 
 def gen_neuron_string(neuron):
+    """Warning: gen_neuron_string is deprecated and will be removed in a future release, use str(Neuron) instead.
+    """
     print("Warning: gen_neuron_string is deprecated and will be removed in a future release, use str(Neuron) instead.")
 
     return str(neuron)
 
 def is_same_neuron(neuron1, neuron2):
+    """Warning: is_same_neuron is deprecated and will be removed in a future release, use == instead.
+    """
+    print("Warning: is_same_neuron is deprecated and will be removed in a future release, use == instead.")
     if neuron1.chip_id == neuron2.chip_id and\
         neuron1.core_id == neuron2.core_id and\
         neuron1.neuron_id == neuron2.neuron_id and\
@@ -224,6 +229,16 @@ def is_same_neuron(neuron1, neuron2):
         return False
 
 def find_neuron_in_dict(neuron, post_neuron_dict):
+    """Find neuron in the post_neuron_dict according neuron ID.
+
+    Args:
+        neuron (netgen.Neuron): neuron
+        post_neuron_dict (dictionary): post_neuron_dict
+
+    Returns:
+        netgen.Neuron: neuron in the post_neuron_dict if neuron is in the dictionary,
+            None otherwise.
+    """
     # if the key exist
     if (neuron.chip_id, neuron.core_id) in post_neuron_dict.keys():
         # if the neuron exists in the corresponding key

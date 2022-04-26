@@ -12,34 +12,7 @@ The implementation of the higher-level mothods are in files NetworkGenerator.py 
 Neuron event filter
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. py:method:: Dynapse1Utils.create_neuron_select_graph(model, global_neuron_ids)
 
-    Create a graph: source_node in model -> filter_node in graph -> sink_node to get events.
-    Only filter_node is in the graph. Source and sink nodes are outside graph.
-    To use the graph, first graph.start().
-    To get events, sink_node.get_buf().
-    If you graph.stop(), for now the graph actually won't stop, all events are still
-    streamed into the buffer of sink_node. This is work in progess.
-    Thus to get events for 1 second, you need to first clear the buffer of sink_node using get_buf(). i.e.,  
-
-        sink_node.get_buf()
-
-        sleep(1)
-
-        events = sink_node.get_buf()
-
-    :param Dynapse1Model model: model.
-    :param list[int] global_neuron_ids: global neuron ids of selected neurons. The id should be in the range of [0, 4096).
-
-    :returns: graph: samna graph.
-
-        filter_node: filter_node that filters the events of selected neurons.
-        
-        sink_node: sink_node that receives the events from the filter_node.
-    
-    :rtype: samna.graph.EventFilterGraph.
-        samna.graph.nodes.Dynapse1NeuronSelect_dynapse1_dynapse1_event
-        BufferSinkNode_dynapse1_dynapse1_event.
 
 NetworkGenerator
 ^^^^^^^^^^^^^^^^^^^^
