@@ -6,7 +6,7 @@ pages:
   image: python:3.8.3
   before_script:
     - apt-get update && apt-get install make --no-install-recommends -y
-    - python -m pip install sphinx furo sphinx-autodoc-typehints sphinx-book-theme sphinx-rtd-theme sphinx-autopackagesummary
+    - python -m pip install sphinx furo sphinx-autodoc-typehints sphinxcontrib-napoleon
   script:
     - cd doc && make html
   after_script:
