@@ -4,7 +4,7 @@ API Summary
 .. autosummary::
    :toctree: generated
 
-   dynapse1utils
+   .dynapse1utils
    netgen
    params
    stdp
