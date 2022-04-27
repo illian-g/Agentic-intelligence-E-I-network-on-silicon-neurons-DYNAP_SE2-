@@ -15,8 +15,8 @@
 # sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
 
 import sys, os
-sys.path.append(os.path.abspath('../..'))
-print('**************abspath: ', os.path.abspath('../..'))
+sys.path.append(os.path.abspath('../../'))
+print('**************abspath: ', os.path.abspath('../../'))
 # sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib")
 
 
