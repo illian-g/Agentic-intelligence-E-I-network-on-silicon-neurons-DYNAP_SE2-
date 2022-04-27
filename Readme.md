@@ -5,7 +5,7 @@ dynapSeSeries/dynapse1/summary.html). The documentation of this Python utilities
 Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
   Note: The automatically generated APIs may still have some issues to be displayed in 
-  [APIs](https://neuroinf.gitlab.io/ctxctl_contrib/contents/apis.html) and [API Summary](
+  [Modules](https://neuroinf.gitlab.io/ctxctl_contrib/contents/modules.html) and [APIs Summary](
   https://neuroinf.gitlab.io/ctxctl_contrib/contents/api_sum.html). Please compile the 
   doc locally following this [section](#How-to-compile-the-doc-?).
 
