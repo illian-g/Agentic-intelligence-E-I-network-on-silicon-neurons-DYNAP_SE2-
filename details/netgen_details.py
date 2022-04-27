@@ -221,9 +221,9 @@ def gen_neuron_string(neuron):
     return str(neuron)
 
 def is_same_neuron(neuron1, neuron2):
-    """Warning: is_same_neuron is deprecated and will be removed in a future release, use == instead.
+    """Warning: is_same_neuron is deprecated and will be removed in a future release, use "==" instead.
     """
-    print("Warning: is_same_neuron is deprecated and will be removed in a future release, use == instead.")
+    print("Warning: is_same_neuron is deprecated and will be removed in a future release, use '==' instead.")
     if neuron1.chip_id == neuron2.chip_id and\
         neuron1.core_id == neuron2.core_id and\
         neuron1.neuron_id == neuron2.neuron_id and\
@@ -249,7 +249,7 @@ def find_neuron_in_dict(neuron, post_neuron_dict):
         neuron_list = post_neuron_dict[(neuron.chip_id, neuron.core_id)]
         for i in range(len(neuron_list)):
             neuron_in_dict = neuron_list[i]
-            if is_same_neuron(neuron, neuron_in_dict):
+            if neuron == neuron_in_dict:
                 return i
 
         return None
