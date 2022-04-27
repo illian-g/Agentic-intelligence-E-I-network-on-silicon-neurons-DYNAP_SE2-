@@ -6,7 +6,7 @@ import dynapse1utils as ut
 from dynapse1constants import MAX_NUM_CAMS
 
 def weight_matrix2lists(weight_matrix, pre_group, post_group):
-    # convert w to pre_list and post_list
+    """convert w to pre_list and post_list"""
     if weight_matrix.shape[0] == len(pre_group.neurons) and weight_matrix.shape[1] == len(post_group.neurons):
         pre_list = []
         post_list = []
