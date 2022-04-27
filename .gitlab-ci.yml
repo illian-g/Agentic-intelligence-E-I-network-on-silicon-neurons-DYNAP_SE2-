@@ -5,10 +5,8 @@ pages:
   stage: deploy
   image: python:3.8.3
   before_script:
-    - conda env create -f environment.y
-    - conda init bash
-    - source ~/.bashrc    # <- !!!
-    - conda activate base
+    - apt-get update && apt-get install make --no-install-recommends -y
+    - python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxcontrib-napoleon numpy samna==0.14.10.0 jinja2==3.0.0
   script:
     - cd doc && make html
   after_script:

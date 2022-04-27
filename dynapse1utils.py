@@ -1,12 +1,10 @@
 import samna
-import samnagui
 import samna.dynapse1 as dyn1
 import socket
-from dynapse1constants import *
+# from dynapse1constants import *
 import random
 import time
 import json
-from multiprocessing import Process
 from threading import Thread
 import numpy as np
 import sys, os
