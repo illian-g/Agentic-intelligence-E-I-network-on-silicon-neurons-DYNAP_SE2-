@@ -51,6 +51,7 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
     Validate if the network meets the DYNAP-SE1 hardware constraits.
 
     Validation rules:
+
     First check cams: check the number of incoming connections of each neuron (after reusing cam):
         for each neuron, check its pre neurons:
             if there's pre with same (core_id, neuron_id, synapse_type):
@@ -63,8 +64,7 @@ def validate(network, max_num_cams=MAX_NUM_CAMS):
 
     Then check aliasing: for neurons in the same core, check their pre neurons.
         if two different post neurons have two different pres with
-        same (core_id, neuron_id, synapse_type) but not in same chip:
-            raise exception
+        same (core_id, neuron_id, synapse_type) but not in same chip: raise exception
 
     No need to check srams
     '''

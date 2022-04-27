@@ -271,6 +271,7 @@ class Synapses:
     """
     Stores the information of the connectivity from a pre NeuronGroup to a post NeuronGroup.
     The connections can be defined in 3 ways:
+    
         - using self-defined pre_list and post_list
         - using connectivity pattern, conn_type
         - using weight_matrix
@@ -446,8 +447,10 @@ class Network:
     Attributes:
         post_neuron_dict (dictionary): a dictionary which stores all the post neurons
             (and their incoming connections).
+
             - key: tuple, (post.chip_id, post.core_id).
                 Divide the post neurons by its location (core) for aliasing check.
+
             - value: list of neurons each of which has incoming connections.
     """
     def __init__(self):

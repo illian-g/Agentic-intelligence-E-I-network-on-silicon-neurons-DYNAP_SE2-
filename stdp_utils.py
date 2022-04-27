@@ -8,6 +8,7 @@ def create_stdp_graph(model, spike_sink_debug=False):
     """
     Create on pre and on post traces in which pre and post are the trigger neurons, respectively.
     Graph:
+    
         source_node in model -> Dynapse1NeuronSelect filter_node
         -> Dynapse1NeuronTrace onpost and onpre trace filter_nodes
         -> onpost and onpre trace sink_nodes
@@ -58,6 +59,7 @@ def bad_traces(onpre_traces, onpost_traces, max_num=10, max_time_interval=3*1e5)
     To handle the abnormal traces after restart of stdp.
     Bad traces should be dropped, not processed anymore.
     Traces are bad if
+
         1) not synchronized: time difference between the traces is too large.
         2) too many traces received which will take too long to process.
     

@@ -89,13 +89,13 @@ def open_dynapse1(gui=True, select_device=False, sender_port=33336, receiver_por
     'Dynapse1DevKit:index' by open_dynapse1()
 
     :param bool gui: whether to open the gui or not. "True" will return store and gui_process;
-    "False" will only return store.
+        "False" will only return store.
     :param bool select_device: whether to select one DYNAP-SE1 board out of some connected ones.
-    "False": board 0 will be opened; "True": user will be asked to choose the board index
+        "False": board 0 will be opened; "True": user will be asked to choose the board index
     :param int sender_port: samnaNode's sending port. Should be 33336 if gui=True, 
-    otherwise you can use a 5-digits port number.
+        otherwise you can use a 5-digits port number.
     :param int receiver_port: samnaNode's receiving port. Should be 33335 if gui=True, 
-    otherwise you can use a 5-digits port number which is different from sender_port.
+        otherwise you can use a 5-digits port number which is different from sender_port.
 
     :returns:
         Dynapse1Model: model, DYNAP-SE1 model of the selected device.
@@ -303,10 +303,10 @@ def close_dynapse1(model, gui_process=''):
     Close DYNAP-SE1 board with or without the GUI.
 
     :param Dynapse1Model model: the DYNAP-SE1 model you get when you 
-    :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
+        :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
 
     :param Process gui_process: the GUI process handler you created when you 
-    :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
+        :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
 
     '''
     if gui_process != '':
@@ -521,13 +521,16 @@ def set_parameters_in_json_file(model, filename="./dynapse_parameters.json"):
         model.update_single_parameter(param, int(p['chip']), int(p['core']))
 
 def get_serial_number(device_idx=0, select_device=False):
-    """
-    Get serial number of an opened DYNAP-SE1 board.
+    """Get serial number of an opened DYNAP-SE1 board.
+
     Args:
-        device_idx (int): DYNAP-SE1 board index.
-        select_device (bool): whether to select one DYNAP-SE1 board out of 
-            multiple connected ones.
-    """
+        device_idx (int, optional): DYNAP-SE1 board index. Defaults to 0.
+        select_device (bool, optional): whether to select one DYNAP-SE1 board out of 
+            multiple connected ones. Defaults to False.
+
+    Returns:
+        int: serial_number
+    """    
     if type(device_idx) is str:
         warnings.warn("device_name is deprecated, please use device_idx.", DeprecationWarning)
         device_idx = 0
@@ -620,20 +623,23 @@ def set_fpga_spike_gen(fpga_spike_gen, spike_times, indices, target_chips, isi_b
     in sec, correspondent input neuron ids and the target chips, i.e. the
     chip destination of each input event. 
     
-    About  `isi_base`:
+    About isi_base:
     Given a list of spike times (in sec) a list of isi (Inter Stimulus Interval) 
     is generated. Given a list of isi, the resulting list of isi set from the 
     FPGA will be:
-        isi*unit_fpga
+
+        isi * unit_fpga
         with             
         unit_fpga = isi_base/90 * us    
         
     Thus, given a list of spike_times in sec:
+    
         - first the spike times are converted in us
         - then a list of isi (in us) is generated
         - then the list of isi is divided by the unit_fpga (so that the
             resulting list of isi set on FPGA will have the correct unit
-            given the input isi_base)        
+            given the input isi_base)
+
     E.g.: if isi_base=900 the list of generated isi will be multiplied on
     FPGA by 900/90 us = 10 us
 
