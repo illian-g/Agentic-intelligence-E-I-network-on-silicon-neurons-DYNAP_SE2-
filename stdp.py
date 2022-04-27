@@ -33,9 +33,10 @@ class Stdp:
             Defaults to False.
         spike_sink_debug (bool, optional): whether to add spike filters to debug trace filters. 
             Defaults to False. 
-        max_trace_num (int, optional): max_trace_num of bad traces. Defaults to 10.
-        max_time_interval (int, optional): max_time_interval of bad traces. 
-            Defaults to 3*1e5, in microsecond.
+        max_num (int, optional): number of received traces at one get_events(). 
+            Defaults to 10.
+        max_time_interval (int, optional): time difference between the traces, 
+            in microsecond. Defaults to 3*1e5.
 
     Attributes:
         model (samna.dynapse1.Dynapse1Model): Dynapse1Model you use to configure DYNAP-SE1 board.
@@ -59,7 +60,7 @@ class Stdp:
         max_time_interval (int, optional): max_time_interval of bad traces. 
             Defaults to 3*1e5, in microsecond.
         graph (samna.graph.EventFilterGraph): samna filtering graph.
-        nodes (dictionary): if spike_sink_debug is False, nodes contains
+        nodes (dictionary{'str':samna_nodes}): if spike_sink_debug is False, nodes contains
             .. code-block::
 
                 nodes = {

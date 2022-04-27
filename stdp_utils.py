@@ -5,14 +5,36 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 from dynapse1constants import MAX_NUM_CAMS
 
 def create_stdp_graph(model, spike_sink_debug=False):
-    """
-    Create on pre and on post traces in which pre and post are the trigger neurons, respectively.
-    Graph:
-    
+    """Create a filtering graph to track the neuron traces required by
+    STDP-like learning algorithms. Graph:
         source_node in model -> Dynapse1NeuronSelect filter_node
         -> Dynapse1NeuronTrace onpost and onpre trace filter_nodes
         -> onpost and onpre trace sink_nodes
-    """  
+
+    Returned nodes:
+        - 'spike_filter': passes spikes of pre and post neurons.
+        - 'onpre_trace_filter': tracks and generates traces that are updated 
+        at pre neurons' spiking times, which triggers LTD.
+        - 'onpost_trace_filter': tracks and generates traces that are updated 
+        at post neurons' spiking times, which triggers LTP.
+        - 'onpre_trace_sink': receives onpre trace events for LTD weight update.
+        - 'onpost_trace_sink': receives onpost trace events for LTP weight update.
+
+        If spike_sink_debug is True, the following nodes will also be created:
+            - 'pre_spike_filter': passes pre neurons' spikes.
+            - 'post_spike_filter': passes post neurons' spikes.
+            - 'pre_spike_sink': receives pre neurons' spikes.
+            - 'post_spike_sink': receives post neurons' spikes.
+
+    Args:
+        model (samna.dynapse1.Dynapse1Model): Dynapse1Model.
+        spike_sink_debug (bool, optional): whether to add spike filtering nodes for 
+            debugging. Defaults to False.
+
+    Returns:
+        graph (samna.graph.EventFilterGraph): samna filtering graph.
+        nodes (dictionary{'str':samna_nodes}): See explanation above.
+    """    
     graph = samna.graph.EventFilterGraph()
 
     # create sink nodes
@@ -55,18 +77,27 @@ def create_stdp_graph(model, spike_sink_debug=False):
     return graph, nodes
 
 def bad_traces(onpre_traces, onpost_traces, max_num=10, max_time_interval=3*1e5):
-    """
-    To handle the abnormal traces after restart of stdp.
+    """Checks if the received traces are abnormal.
+    To handle the abnormal traces after restart of STDP.
     Bad traces should be dropped, not processed anymore.
     Traces are bad if
 
         1) not synchronized: time difference between the traces is too large.
         2) too many traces received which will take too long to process.
-    
-    Parameters:
-        max_num: int
-        max_time_interval: int, in microsecond
-    """
+
+    Args:
+        onpre_traces (list[samna.dynapse1.Dynapse1Trace]): onpre traces
+            which triggers LTD.
+        onpost_traces (list[samna.dynapse1.Dynapse1Trace]): onpost traces
+            which triggers LTP.
+        max_num (int, optional): number of received traces at one get_events(). 
+            Defaults to 10.
+        max_time_interval (int, optional): time difference between the traces, 
+            in microsecond. Defaults to 3*1e5.
+
+    Returns:
+        bool: True if the received traces are abnormal.
+    """    
     if len(onpre_traces)>max_num or len(onpost_traces)>max_num:
         return True
 
@@ -87,10 +118,21 @@ def bad_traces(onpre_traces, onpost_traces, max_num=10, max_time_interval=3*1e5)
     return False
 
 def floatW2intW(float_w_plast, max_pre_count, rand_seed=None, unit=0.1):
-    """
-    Convert a float w_plast into a network.
-    0.1 -> 1 connection
-    """
+    """An example to do weight discretization.
+    Converts a float weight matrix learned by STDP into an int matrix
+    that can be applied to DYNAP-SE1 board.
+    Here, 0.1 -> 1 connection
+
+    Args:
+        float_w_plast (numpy.array): float weight matrix
+        max_pre_count (int): the maximum number of incoming synapses of a neuron.
+        rand_seed (int or None, optional): rand seed. Defaults to None.
+        unit (float, optional): unit value that will become 1 connection. 
+            Defaults to 0.1.
+
+    Returns:
+        _type_: _description_
+    """    
     np.random.seed(rand_seed)
     int_w_plast = float_w_plast*(1/unit)
     int_w_plast = int_w_plast.astype(int)
