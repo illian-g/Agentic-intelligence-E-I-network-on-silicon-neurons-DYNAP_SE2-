@@ -264,8 +264,8 @@ Set up parameters
 -----------------------
 Each parameter group :class:`Dynapse1ParameterGroup <samna.dynapse1.
 Dynapse1ParameterGroup>` has 25 different parameters. A parameter 
-:class:`Dynapse1Parameter <samna.dynapse1.Dynapse1Parameter>` has name, coarse value, and
- fine value. Below is recommended initial values of the parameters.
+:class:`Dynapse1Parameter <samna.dynapse1.Dynapse1Parameter>` has name, coarse value, and 
+fine value. Below is recommended initial values of the parameters.
 
 .. code-block:: 
 

@@ -3,7 +3,9 @@ import json
 
 class TripletStdp:
     """
-    Implementation of all to all plastic connections between pre and post population, including trace graph setup and algorithm implementation with retrieved traces. http://arxiv.org/abs/1608.08267.
+    Implementation of all to all plastic connections between pre and post 
+    population, including trace graph setup and algorithm implementation with
+    retrieved traces. http://arxiv.org/abs/1608.08267.
 
     Triplet STDP is implemented, but can be replaced with other Hebbian-like learning algorithms
 
