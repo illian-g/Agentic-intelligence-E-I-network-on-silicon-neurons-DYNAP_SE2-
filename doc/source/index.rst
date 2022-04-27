@@ -1,5 +1,5 @@
 Welcome to samna-dynapse1 documentation!
-===================================
+========================================
 
 Contents
 ----------
@@ -9,6 +9,6 @@ Contents
    contents/intro
    contents/tutorial1
    contents/tutorial2
-   contents/apis
+   contents/modules
    contents/debug
    contents/api_sum

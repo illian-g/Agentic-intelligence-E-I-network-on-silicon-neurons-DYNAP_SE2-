@@ -65,11 +65,14 @@ if __name__ == "__main__":
     pre_neuron_group = NeuronGroup(chip,core,pre_nids)
     post_neuron_group = NeuronGroup(chip,core,post_nids)
 
-    # connect spikegen_group to pre_neuron_group
+    # connect spikegen_group to pre and post neuron_group, connect pre to post
     connectivity = {
-        'pre_gen2pre': Synapses(spikegen_group, pre_neuron_group, dyn1.Dynapse1SynType.NMDA, conn_type='one2one', mux_conn=mux_conn_spikegen),
-        'post_gen2post': Synapses(spikegen_group, post_neuron_group, dyn1.Dynapse1SynType.NMDA, conn_type='one2one', mux_conn=mux_conn_spikegen),
-        'pre2post': Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.AMPA, weight_matrix=int_w_plast)
+        'pre_gen2pre': Synapses(spikegen_group, pre_neuron_group, dyn1.Dynapse1SynType.
+        NMDA, conn_type='one2one', mux_conn=mux_conn_spikegen),
+        'post_gen2post': Synapses(spikegen_group, post_neuron_group, dyn1.Dynapse1SynType.
+        NMDA, conn_type='one2one', mux_conn=mux_conn_spikegen),
+        'pre2post': Synapses(pre_neuron_group, post_neuron_group, dyn1.Dynapse1SynType.
+        AMPA, weight_matrix=int_w_plast)
     }
 
     for conn in connectivity:
@@ -89,12 +92,13 @@ if __name__ == "__main__":
     poisson_gen = model.get_poisson_gen()
     poisson_gen.set_chip_id(chip)
 
-    # set 1st sample
+    # start poisson_gen
     for i in range(len(global_poisson_gen_ids)):
-        poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], rates[i])
+        poisson_gen.write_poisson_rate_hz(global_poisson_gen_ids[i], np.zeros(3))
     poisson_gen.start()
 
-    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, stdp_param_file, algorithm=algorithm, new_thread=stdp_new_thread)
+    stdp = Stdp(model, net_gen, pre_neuron_ids, post_neuron_ids, w_plast, stdp_param_file, 
+    algorithm=algorithm, new_thread=stdp_new_thread)
 
     print(w_plast)
     print(int_w_plast)

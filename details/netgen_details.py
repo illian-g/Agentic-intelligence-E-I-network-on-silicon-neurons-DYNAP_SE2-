@@ -6,7 +6,7 @@ import dynapse1utils as ut
 from dynapse1constants import MAX_NUM_CAMS
 
 def weight_matrix2lists(weight_matrix, pre_group, post_group):
-    # convert w to pre_list and post_list
+    """convert w to pre_list and post_list."""
     if weight_matrix.shape[0] == len(pre_group.neurons) and weight_matrix.shape[1] == len(post_group.neurons):
         pre_list = []
         post_list = []
@@ -21,6 +21,7 @@ def weight_matrix2lists(weight_matrix, pre_group, post_group):
         raise Exception('Row count of weight_matrix should equals pre_group neuron count, and column count of weight_matrix should equals post_group neuron count!')
 
 def gen_one2one_lists(pre_neurons, post_neurons):
+    """Generate one-to-one lists."""
     assert(len(pre_neurons)==len(post_neurons)), 'Pre neuron group '+\
     ' and post neuron group need to have the same length for one2one connections'
     pre_list = np.arange(len(pre_neurons))
@@ -28,6 +29,7 @@ def gen_one2one_lists(pre_neurons, post_neurons):
     return pre_list, post_list
 
 def gen_all2all_lists(pre_neurons, post_neurons, p, rand_seed):
+    """Generate all-to-all lists."""
     random.seed(rand_seed)
 
     all2all_conns = []
@@ -253,6 +255,7 @@ def find_neuron_in_dict(neuron, post_neuron_dict):
         return None
 
 def find_pre_in_post_incoming(pre_neuron, post_neuron_in_dict, synapse_type):
+    """Find pre in post incoming synapses."""
     pre_dict = post_neuron_in_dict.incoming_connections
     # if the key exist
     if (pre_neuron.core_id, pre_neuron.neuron_id, synapse_type) in pre_dict.keys():
@@ -268,6 +271,7 @@ def find_pre_in_post_incoming(pre_neuron, post_neuron_in_dict, synapse_type):
 
 def write_pre_destination(pre_destinations, pre_dest_id, virtual_core_id, target_chip_id,\
     sx, sy, dx, dy, core_mask, in_use):
+    """Write pre destination."""
     pre_destinations[pre_dest_id].virtual_core_id = virtual_core_id
     pre_destinations[pre_dest_id].target_chip_id = target_chip_id
     pre_destinations[pre_dest_id].sx = sx
@@ -278,6 +282,7 @@ def write_pre_destination(pre_destinations, pre_dest_id, virtual_core_id, target
     pre_destinations[pre_dest_id].in_use = in_use
 
 def write_post_synapse(post_synapses, post_synapse_id, listen_core_id, listen_neuron_id, synapse_type):
+    """Write post synapse."""
     post_synapses[post_synapse_id].listen_core_id = listen_core_id
     post_synapses[post_synapse_id].listen_neuron_id = listen_neuron_id
     post_synapses[post_synapse_id].syn_type = synapse_type
@@ -346,6 +351,8 @@ def get_usable_post_synapse_id(post_synapses, listen_core_id, listen_neuron_id, 
     return post_available, post_synapse_id
 
 def check_and_write_pre_sram(pre, post_chip_id, post_core_id):
+    """Check and write pre SRAM.
+    """   
     pre_destinations = pre.destinations
     pre_chip_id = pre.chip_id
 
@@ -392,7 +399,8 @@ def check_and_write_pre_sram(pre, post_chip_id, post_core_id):
             sx, sy, dx, dy, core_mask, True)
 
 def check_and_write_post_cam(post, pre_core_id, pre_neuron_id, synapse_type, weight):
-
+    """Check and write post CAM.
+    """    
     post_available, post_synapse_id = get_usable_post_synapse_id(post.synapses,
                                                 pre_core_id,
                                                 pre_neuron_id,
