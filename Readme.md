@@ -47,8 +47,8 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation.
 
 # How to compile the doc?
-- To compile the sphinx doc in this repository, install [sphinx](https://www.sphinx-doc.
-org/en/master/) following the instructions
+- To compile the sphinx doc in this repository, install [sphinx](
+https://www.sphinx-doc.org/en/master/) following the instructions
 [here](https://www.sphinx-doc.org/en/master/usage/installation.html).
 
 ```bash
@@ -80,14 +80,14 @@ and you need to change `master` branch to `samna-dynapse1`.
 
 - We added some new features to the Python libs (mainly in [netgen.py](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/netgen.py)), e.g. NeuronGroup, several 
 add_connections* functions to create connections between 2 neuron groups, more convenient 
-printing for Neuron and Network, etc. Specifically, this [example](https://gitlab.com/
-neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_neuron_group.py) shows you a
-more convenient way of creating a network.
+printing for Neuron and Network, etc. Specifically, this [example](
+https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_neuron_group.py) 
+shows you a more convenient way of creating a network.
 
 - New Samna version 0.8.22.0 comes with new features!
-  - "Dynapse1NeuronTrace" filter node is implemented, which can be used to track instantaneous firing rates, or to do STDP-like learning. [Here](https://gitlab.com/
-  neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/test/with_hardware/trace_stdp_WIP/
-  neuron_trace_test.py) is an example showing how the trace filter works, and this [script]
+  - "Dynapse1NeuronTrace" filter node is implemented, which can be used to track instantaneous firing rates, or to do STDP-like learning. [Here](
+  https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/test/with_hardware/trace_stdp_WIP/neuron_trace_test.py) 
+  is an example showing how the trace filter works, and this [script]
   (https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) 
   is a simple STDP learning example.
   - "Dynapse1NeuronSelect" update: `set_neurons()` now accepts tuple neuron ID list, i.e. 
@@ -100,5 +100,5 @@ more convenient way of creating a network.
   dynapse1utils.py, etc. Sorry for the inconvenience, but please modify your import 
   accordingly.
   - STDP modules are added so that implementation of STDP-like learning are supported. 
-  Check this [script](https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/
-  example/test_stdp.py) as a simple learning example.
+  Check this [script](
+  https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) as a simple learning example.
