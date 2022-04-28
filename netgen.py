@@ -105,14 +105,14 @@ class Neuron:
     
     def __eq__(self, other):
         """
-        Check if 2 neurons have the same physical ID. Consider a neuron as an individual neuron without 
-        any external connections (i.e. not in a Network)
+        Check if 2 neurons have the same physical ID and same incoming connections.
 
         Args:
             other (netgen.Neuron): a neuron.
         
         Returns:
-            True if neuron IDs are the same, False otherwise.
+            True if both neuron IDs and incoming connectionsare the same, 
+                False otherwise.
              
         """
         eq_flag1 = self.chip_id == other.chip_id and \

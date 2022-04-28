@@ -23,7 +23,7 @@
       gen_one2one_lists
       get_usable_post_synapse_id
       get_usable_pre_destination_id
-      is_same_neuron
+      is_same_neuron_loc
       validate
       weight_matrix2lists
       write_post_synapse
