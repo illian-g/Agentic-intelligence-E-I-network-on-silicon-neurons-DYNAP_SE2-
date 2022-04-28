@@ -23,10 +23,13 @@ Dynapse1FpgaSpikeGen>`.
 How to use it?
 ----------------
 
-To use DYNAP-SE1, we recommend a utilities `library <https://gitlab.com/neuroinf/ctxctl_contrib/-/
-tree/samna-dynapse1>`_ based on Samna, developed primarily by the `NCS 
-group <https://www.ini.uzh.ch/en/research/groups/ncs.html>`_ of `INI <https://www.ini.uzh.ch/en.html>`_. 
-This Python repository adds more features to Samna for DYNAP-SE1, which wraps around the plain
+To use DYNAP-SE1, we recommend `Samna <https://synsense-sys-int.gitlab.io/samna/>`_ and its
+Python utilities `library <https://gitlab.com/neuroinf/ctxctl_contrib/-/
+tree/samna-dynapse1>`_. The latter is developed primarily by the `NCS 
+group <https://www.ini.uzh.ch/en/research/groups/ncs.html>`_ of `INI <https://www.ini.uzh.ch/en.html>`_.
+DYNAP-SE1 related section in Samna documentation is `here <https://synsense-sys-int.
+gitlab.io/samna/devkits/dynapSeSeries/dynapse1/summary.html>`_ which describes some basic core APIs.
+The Python repository adds more features to Samna for DYNAP-SE1, which wraps around the plain
 Samna classes and functions to provide more user-friendly and convenient Python APIs 
 for constructing networks, configuring hardware parameters, monitoring neurons activity, 
 implementing learning algorithms, etc.

@@ -1,7 +1,8 @@
 # Documentation 
 - The documentation of Samna is [here](https://synsense-sys-int.gitlab.io/samna/) in which 
-DYNAP-SE1 related part is this [section](https://synsense-sys-int.gitlab.io/samna/devkits/\
-dynapSeSeries/dynapse1/summary.html). The documentation of this [Python utilities library
+DYNAP-SE1 related part is this [section](
+https://synsense-sys-int.gitlab.io/samna/devkits/dynapSeSeries/dynapse1/summary.html). 
+The documentation of this [Python utilities library
 ](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1) of 
 Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
