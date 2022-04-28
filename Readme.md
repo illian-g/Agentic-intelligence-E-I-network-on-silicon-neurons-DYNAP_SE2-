@@ -11,9 +11,9 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
   The automatically generated APIs of this library may still have some issues to be displayed in 
   [Modules](https://neuroinf.gitlab.io/ctxctl_contrib/contents/modules.html) and [APIs Summary](
   https://neuroinf.gitlab.io/ctxctl_contrib/contents/api_sum.html). The PDF version 
-  of the manual is at the [samna-dynapse1-doc](https://gitlab.com/neuroinf/ctxctl_contrib/\
-  -/tree/samna-dynapse1-doc) branch of this repository. To compile the 
-  doc locally, please follow this [section](#How-to-compile-the-doc-?).
+  of the manual is at the [samna-dynapse1-doc](https://gitlab.com/neuroinf/\
+  ctxctl_contrib/-/tree/samna-dynapse1-doc) branch of this repository. To compile the 
+  doc locally, please follow this `How to compile the doc?` [section](#How-to-compile-the-doc-?).
 
   ---
 
