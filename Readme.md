@@ -1,13 +1,22 @@
 # Documentation 
 - The documentation of Samna is [here](https://synsense-sys-int.gitlab.io/samna/) in which 
-DYNAP-SE1 related part is this [section](https://synsense-sys-int.gitlab.io/samna/devkits/
-dynapSeSeries/dynapse1/summary.html). The documentation of this Python utilities library of 
+DYNAP-SE1 related part is this [section](https://synsense-sys-int.gitlab.io/samna/devkits/\
+dynapSeSeries/dynapse1/summary.html). The documentation of this [Python utilities library
+](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1) of 
 Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
-  Note: The automatically generated APIs may still have some issues to be displayed in 
+  ---
+  **NOTE**
+
+  The automatically generated APIs of this library may still have some issues to be displayed in 
   [Modules](https://neuroinf.gitlab.io/ctxctl_contrib/contents/modules.html) and [APIs Summary](
-  https://neuroinf.gitlab.io/ctxctl_contrib/contents/api_sum.html). Please compile the 
-  doc locally following this [section](#How-to-compile-the-doc-?).
+  https://neuroinf.gitlab.io/ctxctl_contrib/contents/api_sum.html). The PDF version 
+  of the manual is at the [samna-dynapse1-doc](https://gitlab.com/neuroinf/ctxctl_contrib/\
+  -/tree/samna-dynapse1-doc) branch of this repository. To compile the 
+  doc locally, please follow this [section](#How-to-compile-the-doc-?).
+
+  ---
+
 
 - This branch (```samna-dynapse1```) works with Samna 0.14.10.0. For an old version, please use branch ```samna-dynapse1-0.8.32.0``` which is compatible with Samna 0.8.32.0.
 
@@ -42,13 +51,22 @@ org/en/master/) following the instructions
 ```bash
 python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxcontrib-napoleon
 ```
-- Then go to the `doc` folder and compile the document.
+- Then go to the `doc` folder and compile the document into html or PDF format.
+  - html:
 
-```bash
-cd doc
-make html
-```
-The html files will be generated under `doc/build/html`.
+    ```bash
+    cd doc
+    make html
+    ```
+    The html files will be generated under `doc/build/html`.
+
+  - PDF:
+    ```bash
+    cd doc
+    make latexpdf
+    ```
+    The PDF file `samna-dynapse1.pdf` will be generated under `doc/build/latex`.
+
 
 # How to contribute?
 Please read [How to contribute?](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/master)
