@@ -87,8 +87,8 @@ shows you a more convenient way of creating a network.
 - New Samna version 0.8.22.0 comes with new features!
   - "Dynapse1NeuronTrace" filter node is implemented, which can be used to track instantaneous firing rates, or to do STDP-like learning. [Here](
   https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/test/with_hardware/trace_stdp_WIP/neuron_trace_test.py) 
-  is an example showing how the trace filter works, and this [script]
-  (https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) 
+  is an example showing how the trace filter works, and this [script](
+  https://gitlab.com/neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/test_stdp.py) 
   is a simple STDP learning example.
   - "Dynapse1NeuronSelect" update: `set_neurons()` now accepts tuple neuron ID list, i.e. 
   list[(int,int,int)] indicating (chip,core,neuron) IDs, instead of global neuron ids. 
