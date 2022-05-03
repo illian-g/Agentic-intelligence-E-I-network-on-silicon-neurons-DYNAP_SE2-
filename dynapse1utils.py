@@ -147,7 +147,7 @@ def open_gui(device, visualizer_id=3):
     # Add a streamer node that streams visualization events to our graph
     
     source_node, converter_node, streamer_node = gui_graph.sequential([device.get_source_node(), 
-    dynapse1_to_visualizer_converter_id, "VizEventStreamer"])
+    dynapse1_to_visualizer_converter_node, "VizEventStreamer"])
 
     gui_graph.start()
 
@@ -791,4 +791,4 @@ def get_trace_value(traces, timestamp):
         print("Timestamp%i not found, < list start %i." % (timestamp, traces[0].timestamp))
     if timestamp > traces[-1].timestamp:
         print("Timestamp %i not found, > list end %i." % (timestamp, traces[-1].timestamp))
-    return None
+    return None\ No newline at end of file
