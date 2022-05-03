@@ -791,4 +791,4 @@ def get_trace_value(traces, timestamp):
         print("Timestamp%i not found, < list start %i." % (timestamp, traces[0].timestamp))
     if timestamp > traces[-1].timestamp:
         print("Timestamp %i not found, > list end %i." % (timestamp, traces[-1].timestamp))
-    return None\ No newline at end of file
+    return None
