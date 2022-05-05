@@ -60,7 +60,8 @@ class Stdp:
         max_time_interval (int, optional): max_time_interval of bad traces. 
             Defaults to 3*1e5, in microsecond.
         graph (samna.graph.EventFilterGraph): samna filtering graph.
-        nodes (dictionary{'str':samna_nodes}): if spike_sink_debug is False, nodes contains
+        nodes (dictionary{'str', samna_nodes}): if spike_sink_debug is False, nodes contains
+
             .. code-block::
 
                 nodes = {
@@ -71,6 +72,7 @@ class Stdp:
                     'onpost_trace_sink': onpost_trace_sink
                 }
             Otherwise, nodes also has the following elements:
+            
             .. code-block::
             
                 spike_nodes = {

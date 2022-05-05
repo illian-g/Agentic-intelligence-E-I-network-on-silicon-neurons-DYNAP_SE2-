@@ -564,6 +564,7 @@ def create_neuron_select_graph(model, neuron_ids):
     Thus to get events for 1 second, you need to first clear the buffer 
     of sink_node using get_events().
     i.e.,
+    
     .. code-block::
 
         sink_node.get_events()
