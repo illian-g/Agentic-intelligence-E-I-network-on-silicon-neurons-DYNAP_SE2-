@@ -143,11 +143,11 @@ def open_gui(device, visualizer_id=3):
     global gui_graph
     gui_graph = samna.graph.EventFilterGraph()
     # Add a converter node that translate the raw DVS events
-    dynapse1_to_visualizer_converter_id = get_Dynapse1_viz_converter() # Dynapse1EventToVizConverter
+    dynapse1_to_visualizer_converter_node = get_Dynapse1_viz_converter() # Dynapse1EventToVizConverter
     # Add a streamer node that streams visualization events to our graph
     
     source_node, converter_node, streamer_node = gui_graph.sequential([device.get_source_node(), 
-    dynapse1_to_visualizer_converter_id, "VizEventStreamer"])
+    dynapse1_to_visualizer_converter_node, "VizEventStreamer"])
 
     gui_graph.start()
 
