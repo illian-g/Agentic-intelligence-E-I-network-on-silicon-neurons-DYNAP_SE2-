@@ -9,7 +9,7 @@ sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 import dynapse1utils as ut
 from netgen import Neuron, NeuronGroup, Synapses, add_synapses, NetworkGenerator
 from params import set_params
-from plotter import plot_raster, plot_trace
+from plotter import plot_raster, plot_trace, save_samna_objects2file, load_samna_objects_file
 import matplotlib.pyplot as plt
 
 """
@@ -90,6 +90,8 @@ if __name__ == "__main__":
     # configure filter node: which neurons to filter?
     tau = int(40*1e3) # 50*1e3 in microsec
     spike_filter_node.set_neurons(neuron_ids)
+
+    # set_neurons params: trace_map_neuron_ids, trigger_neuron_ids, tau_list
     trace_filter_node.set_neurons([neuron_ids[0]], [neuron_ids[1]], [tau])
     method = "increase_by" # increase_by increase_to
     delta = 3
@@ -123,6 +125,14 @@ if __name__ == "__main__":
     for trace in timed_traces:
         print(trace.timestamp, trace.trace_map, end=',')
     print('')
+
+    spike_file = '/home/jingyue/Desktop/0_thesis/data/plasticity/spikes.json'
+    trace_file = '/home/jingyue/Desktop/0_thesis/data/plasticity/traces.json'
+    save_samna_objects2file(spikes, spike_file)
+    save_samna_objects2file(timed_traces, trace_file)
+
+    spikes = load_samna_objects_file(spike_file)
+    timed_traces = load_samna_objects_file(trace_file)
 
     fig = plt.figure()
     plot_raster(spikes, neuron_ids) # [neuron_ids[1]]
