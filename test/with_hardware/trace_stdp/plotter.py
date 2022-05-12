@@ -3,8 +3,6 @@ import seaborn as sns; sns.set()
 import numpy as np
 import os
 import time
-import json
-import samna.dynapse1 as d
 import sys
 sys.path.append("/home/jingyue/aa_projects/samna_projects/ctxctl_contrib/")
 from dynapse1utils import get_selected_timestamps, get_selected_traces
