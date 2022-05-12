@@ -128,8 +128,8 @@ if __name__ == "__main__":
 
     # optional, just to show how the spikes and traces can be stored to file
     # and loaded as samna objects from the file.
-    spike_file = '/home/jingyue/Desktop/0_thesis/data/plasticity/spikes.json'
-    trace_file = '/home/jingyue/Desktop/0_thesis/data/plasticity/traces.json'
+    spike_file = './spikes.json'
+    trace_file = './traces.json'
     ut.save_samna_objects2file(spikes, spike_file)
     ut.save_samna_objects2file(timed_traces, trace_file)
     spikes = ut.load_samna_objects_file(spike_file)

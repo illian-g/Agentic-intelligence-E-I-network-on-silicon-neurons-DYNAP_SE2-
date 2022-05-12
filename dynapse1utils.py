@@ -9,6 +9,7 @@ from threading import Thread
 import numpy as np
 import sys, os
 import warnings
+import re
 
 def free_port():
     """
@@ -801,6 +802,11 @@ def save_samna_objects2file(objects, fname='./spikes.txt'):
         objects (samna objects): list of samna objects, samna.dynapse1.Spike and samna.dynapse1.Dynapse1Trace are tested.
         fname (str, optional): file path and name. Defaults to './spikes.txt'.
     """
+    parser_pos = [_.start() for _ in re.finditer('/', fname)]
+    path = fname[:parser_pos[-1]]
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     list_obj = []
     for obj in objects:
         list_obj.append(json.loads(obj.to_json()))
