@@ -20,7 +20,7 @@ def plot_w(w_plast, figpath="./w"):
     fig.savefig(figpath+"/w"+str(int(round(time.time() * 1000))))
     del fig
 
-def plot_raster(spikes, neuron_ids, t_start=None, t_end=None):
+def plot_raster(spikes, neuron_ids, t_start=None, t_end=None, axvline_spikes=False):
     """
     plot the raster of neuron_ids from collected spikes.
     spikes: spike
@@ -34,8 +34,10 @@ def plot_raster(spikes, neuron_ids, t_start=None, t_end=None):
     for i in range(len(neuron_ids)):
         print(i, timestamps[i])
         ax.plot(timestamps[i], np.ones(len(timestamps[i]))*i, '.', label=str(i)+': '+str(neuron_ids[i]))
-        # for time in timestamps[i]:
-        #     plt.axvline(time)
+
+        if axvline_spikes:
+            for time in timestamps[i]:
+                plt.axvline(time)
     
     if t_start != None and t_end != None:
         ax.set_xlim(t_start, t_end)

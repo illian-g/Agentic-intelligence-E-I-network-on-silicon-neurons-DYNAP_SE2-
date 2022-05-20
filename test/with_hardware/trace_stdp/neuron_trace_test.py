@@ -90,6 +90,8 @@ if __name__ == "__main__":
     # configure filter node: which neurons to filter?
     tau = int(40*1e3) # 50*1e3 in microsec
     spike_filter_node.set_neurons(neuron_ids)
+
+    # set_neurons params: trace_map_neuron_ids, trigger_neuron_ids, tau_list
     trace_filter_node.set_neurons([neuron_ids[0]], [neuron_ids[1]], [tau])
     method = "increase_by" # increase_by increase_to
     delta = 3
@@ -124,13 +126,21 @@ if __name__ == "__main__":
         print(trace.timestamp, trace.trace_map, end=',')
     print('')
 
+    # optional, just to show how the spikes and traces can be stored to file
+    # and loaded as samna objects from the file.
+    spike_file = './spikes.json'
+    trace_file = './traces.json'
+    ut.save_samna_objects2file(spikes, spike_file)
+    ut.save_samna_objects2file(timed_traces, trace_file)
+    spikes = ut.load_samna_objects_file(spike_file)
+    timed_traces = ut.load_samna_objects_file(trace_file)
+
     fig = plt.figure()
-    plot_raster(spikes, neuron_ids) # [neuron_ids[1]]
-    plot_trace(timed_traces, [neuron_ids[0]]) # [neuron_ids[1]]
+    plot_raster(spikes, neuron_ids)
+    plot_trace(timed_traces, [neuron_ids[0]])
     plt.xlabel('Time (us)')
     plt.ylabel('Trace')
     plt.show()
-
 
     graph.stop()
     poisson_gen.stop()

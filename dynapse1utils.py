@@ -9,6 +9,7 @@ from threading import Thread
 import numpy as np
 import sys, os
 import warnings
+import re
 
 def free_port():
     """
@@ -793,3 +794,79 @@ def get_trace_value(traces, timestamp):
     if timestamp > traces[-1].timestamp:
         print("Timestamp %i not found, > list end %i." % (timestamp, traces[-1].timestamp))
     return None
+
+def save_samna_objects2file(objects, fname='./spikes.txt'):
+    """Save a list of samna objects to json file.
+
+    Args:
+        objects (samna objects): list of samna objects, samna.dynapse1.Spike and samna.dynapse1.Dynapse1Trace are tested.
+        fname (str, optional): file path and name. Defaults to './spikes.txt'.
+    """
+    parser_pos = [_.start() for _ in re.finditer('/', fname)]
+    path = fname[:parser_pos[-1]]
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    list_obj = []
+    for obj in objects:
+        list_obj.append(json.loads(obj.to_json()))
+    
+    with open(fname, 'w') as json_file:
+        json.dump(list_obj, json_file, indent=4)
+
+def load_samna_objects_file(fname='./spikes.txt'):
+    """Load a json file storing samna objects to a list of samna objects.
+
+    Args:
+        fname (str, optional): file path and name. Defaults to './spikes.txt'.
+
+    Returns:
+        list[samna object]: list of samna objects, samna.dynapse1.Spike and samna.dynapse1.Dynapse1Trace are tested.
+    """
+    with open(fname) as json_file:
+        list_obj_dict = json.load(json_file)
+    
+    list_obj = []
+    for obj_dict in list_obj_dict:
+        list_obj.append(convert_dict2samna_object(obj_dict))
+    return list_obj
+
+def convert_dict2samna_object(obj_dict):
+    """Convert a to_json() string to a samna object.
+
+    Args:
+        obj_dict (samna object): samna object, samna.dynapse1.Spike and samna.dynapse1.Dynapse1Trace are supported.
+
+    Raises:
+        Exception: if the object is not samna.dynapse1.Spike or samna.dynapse1.Dynapse1Trace, it cannot be parsed by this function.
+
+    Returns:
+        samna object: samna.dynapse1.Spike or samna.dynapse1.Dynapse1Trace.
+    """
+    obj_dict = obj_dict['value0']
+    # Dynapse1Trace
+    if 'traceMap' in obj_dict.keys():
+        trace_event = dyn1.Dynapse1Trace()
+        trace_event.timestamp = obj_dict['timestamp']
+        trace_map_list = obj_dict['traceMap']
+        trace_map = {}
+        for trace_item in trace_map_list:
+            neuron = (trace_item['key']['tuple_element0'], trace_item['key']
+            ['tuple_element1'], trace_item['key']['tuple_element2'])
+            trace_value = trace_item['value']
+            trace_map.update({neuron:trace_value})
+        trace_event.trace_map = trace_map
+        trace_event.trigger_neuron = (obj_dict['triggerNeuron']['tuple_element0'],\
+            obj_dict['triggerNeuron']['tuple_element1'],obj_dict['triggerNeuron']['tuple_element2'])
+        return trace_event
+    # spike
+    elif 'timestamp' in obj_dict.keys() and 'neuronId' in obj_dict\
+    .keys():
+        spike = dyn1.Spike()
+        spike.timestamp = obj_dict['timestamp']
+        spike.neuron_id = obj_dict['neuronId']
+        spike.core_id = obj_dict['coreId']
+        spike.chip_id = obj_dict['chipId']
+        return spike
+    else:
+        raise Exception("Samna object type not supported by the conversion function.")
