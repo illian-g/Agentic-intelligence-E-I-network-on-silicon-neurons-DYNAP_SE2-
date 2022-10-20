@@ -97,8 +97,8 @@ maintained by the STDP module is applied to the hardware. To change the connecti
 the network generator, the old 'pre2post' connections are first removed using ``remove_synapses(net_gen, connectivity['pre2post'])``, then the new ``int_w_plast`` discretized using ``stdp.w_plast``
 are added to the network generator using ``add_synapses(net_gen, connectivity['pre2post'])``.
 Note that the ``remove_synapses`` and ``add_synapses`` are only operated inside the network
-generator, not the hardware. The new DYNAP-SE1 configuration has to be generated using ``
-net_gen.make_dynapse1_configuration()``, and applied to the hardware.
+generator, not the hardware. The new DYNAP-SE1 configuration has to be generated using 
+``net_gen.make_dynapse1_configuration()``, and applied to the hardware.
 
 Since the rates of the spike generators are set to ``rates = [0, 200, 0]``, i.e. the middle 
 neuron in each neural population receives the strongest stimulation, the synapse between this
