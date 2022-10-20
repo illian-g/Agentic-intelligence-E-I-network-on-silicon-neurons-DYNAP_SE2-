@@ -20,13 +20,13 @@ Open DYNAP-SE1 board to get Dynapse1Model
 
 You can open the board with or without the Graphical User Interfaces (GUI) using :func:`open_dynapse1 <dynapse1utils.open_dynapse1>`.
 
-With the GUI, you should see blinking spikes of the firing silicon neurons.
+With the GUI: you should see blinking spikes of the firing silicon neurons.
 
 .. code-block::
 
     model, gui_process = ut.open_dynapse1()
 
-Without the GUI, if your PC cannot have the required visualization libraries e.g. glx.
+Without the GUI: if your PC cannot get the required visualization libraries, e.g. glx, installed.
 
 .. code-block::
 
@@ -53,7 +53,7 @@ information of the network, the latter maintains the hardware-specific data stru
 required by the :func:`Dynapse1Configuration <samna.dynapse1.Dynapse1Configuration>`.
 
 Apart from the basic unit :func:`Neuron <NetworkGenerator.Neuron>`, we provide some building
-blocks, e.g. ``NeuronGroup``, ``Synapses``, ``WTA_connections`` that uses groups of 
+blocks, e.g. ``NeuronGroup``, ``Synapses``, ``WTA_connections`` that use groups of 
 :func:`Neuron <NetworkGenerator.Neuron>` to construct the network. 
 
 Define neuron groups
@@ -94,7 +94,7 @@ defined connectivity by multiplying the weights by ``mux_conn``.
 
     syn = Synapses(pre_group, post_group, dyn1.Dynapse1SynType.AMPA, conn_type='one2one')
 
-* All-to-all random connections with possibility of 0.7. When 'all2all' is used, ``p`` can be used to specify the possibility of all2all random connections and ``rand_seed`` can be defined.
+* All-to-all random connections with a possibility of 0.7. When 'all2all' is used, ``p`` can be used to specify the possibility of all2all random connections and ``rand_seed`` can be defined.
 
 .. code-block::
 
@@ -117,9 +117,9 @@ defined connectivity by multiplying the weights by ``mux_conn``.
 
     syn = Synapses(pre_group, post_group, dyn1.Dynapse1SynType.AMPA, pre_list=[1,0,2], post_list=[0,2,1])
     
-Add synapses into network generator
+Add synapses into the network generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-We need to add synapses (which contain also the related neuron groups information) into the
+We need to add synapses (which contain also the related neuron groups' information) into the
 network generator to create a network, then convert the network into a DYNAP-SE1 
 configuration and apply it to the hardware.
 
@@ -131,7 +131,7 @@ configuration and apply it to the hardware.
     # add synapses into the netgen
     add_synapses(net_gen, syn)
 
-    # print the network so you can double check (optional)
+    # print the network so you can double-check (optional)
     print(net_gen.network)
 
     # make a dynapse1config using the network
@@ -163,7 +163,7 @@ Define a network using individual neurons
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can also customize your network by selecting the spike generators and neurons you want 
-to use, and build connections between individual neurons. An example is shown below.
+to use, and building connections between individual neurons. An example is shown below.
 
 .. code-block::
 
@@ -195,7 +195,7 @@ to use, and build connections between individual neurons. An example is shown be
     net_gen.add_connection(neurons[1], neurons[4], dyn1.Dynapse1SynType.GABA_B)
     net_gen.add_connection(neurons[2], neurons[5], dyn1.Dynapse1SynType.GABA_B)
 
-    # print the network so you can double check (optional)
+    # print the network so you can double-check (optional)
     net_gen.print_network()
 
     # make a dynapse1config using the network
@@ -233,7 +233,7 @@ Set up Dynapse1FpgaSpikeGen
 Below is an example of how to set up the FPGA spike generators 
 :class:`Dynapse1FpgaSpikeGen <Dynapse1FpgaSpikeGen>` using :func:`set_fpga_spike_gen 
 <dynapse1utils.set_fpga_spike_gen>`. Here, we use spike generator No.15 on the FPGA to 
-generate 400 spikes in 2 second with constant inter-spike interval.
+generate 400 spikes in 2 seconds with a constant inter-spike interval.
 
 .. code-block::
     
@@ -265,7 +265,7 @@ Set up parameters
 Each parameter group :class:`Dynapse1ParameterGroup <samna.dynapse1.
 Dynapse1ParameterGroup>` has 25 different parameters. A parameter 
 :class:`Dynapse1Parameter <samna.dynapse1.Dynapse1Parameter>` has name, coarse value, and 
-fine value. Below is recommended initial values of the parameters.
+fine value. Below are recommended initial values of the parameters.
 
 .. code-block:: 
 
@@ -323,9 +323,8 @@ Set parameters per core
 
 You have 3 ways to set up the parameters.
 
-1. Generate paremeter groups and apply them using :func:`update_parameter_group()
- <Dynapse1Model.update_parameter_group>`. Below is an example of configuration 
-that silence the neurons of the 16 cores in 4 chips.
+1. Generate parameter groups and apply them using :func:`update_parameter_group() <Dynapse1Model.update_parameter_group>`. 
+Below is an example of a configuration that silences the neurons of the 16 cores in 4 chips.
 
 .. code-block:: 
 
@@ -338,7 +337,7 @@ that silence the neurons of the 16 cores in 4 chips.
             model.update_parameter_group(paramGroup, chip, core)
 
 2. Set the parameters saved in a JSON file. Below is an example. JSON is a standard 
-formating style. An example JSON parameter file is `here <https://gitlab.com/neuroinf/
+formatting style. An example JSON parameter file is `here <https://gitlab.com/neuroinf/
 ctxctl_contrib/-/blob/samna-dynapse1/example/example_parameter_files/FS_EXC_parameters.
 json>`_.
 
@@ -354,7 +353,7 @@ json>`_.
     save_parameters2json_file(config, filename="./dynapse_parameters.json")
 
 3. Set the parameters saved in a txt file. Below is an example. The txt format here is 
-self-defined and more compact. An example txt parameter file is `here <https://gitlab.com/
+self-defined and more compact than JSON format. An example txt parameter file is `here <https://gitlab.com/
 neuroinf/ctxctl_contrib/-/blob/samna-dynapse1/example/example_parameter_files/parameters.
 txt>`_.
 
@@ -371,7 +370,7 @@ txt>`_.
 Change a single parameter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want change only 1 single parameter value, you can use the method :func:`update_single_parameter <Dynapse1Model.update_single_parameter>`.
+If you want to change only 1 single parameter value, you can use the method :func:`update_single_parameter <Dynapse1Model.update_single_parameter>`.
 
 .. code-block:: 
 
@@ -384,14 +383,14 @@ If you want change only 1 single parameter value, you can use the method :func:`
 Get spikes out of DYNAP-SE1
 --------------------------------------
 
-Usually we want monitor spikes of some specific neurons in our network. For this, we need
+In most cases, we would need to monitor spikes of some specific neurons in our network during the experiments. For this, we need
 to create a graph using :func:`create_neuron_select_graph() <dynapse1utils. 
 create_neuron_select_graph>` to stream the spikes out. In this graph, we connect the 
 source node in Dynapse1Model to a filter node that filters the spikes of the selected 
 neurons, then this filter node is connected to a sink node which receives the spikes and 
-store them in its buffer.
+stores them in its buffer.
 
-``monitored_neurons`` require neuron ids as a list of tuples (chip_id, core_id, neuron_id).
+``monitored_neurons`` requires neuron IDs as a list of tuples (chip_id, core_id, neuron_id).
 
 
 .. code-block:: 
@@ -424,8 +423,8 @@ store them in its buffer.
     graph.stop()
 
 
-Monitor membrane potential of neurons using an oscilloscope
--------------------------------------------------------------
+Monitor the membrane potential of neurons using an oscilloscope
+------------------------------------------------------------------
 
 To monitor Imem of the silicon neurons using an oscilloscope, you first get the 
 Dynapse1Model model, then get the Dynapse1Interface api, then :func:`monitor_neuron 
@@ -447,8 +446,8 @@ You should use :func:`close_dynapse1 <dynapse1utils.close_dynapse1>` at the end 
 
 If you opened DYNAP-SE1 with the GUI, this function will block the running program of your 
 script til you click the close button of the GUI window. If you close the GUI window when 
-your script is still running, it will NOT affect the running program, however you will not 
-be able open the GUI again until next time you open the device.
+your script is still running, it will NOT affect the running program, however, you will not 
+be able open the GUI again until the next time you open the device.
 
 .. code-block:: 
 

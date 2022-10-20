@@ -14,6 +14,7 @@
    .. autosummary::
    
       close_dynapse1
+      convert_dict2samna_object
       create_neuron_select_graph
       free_port
       gen_destination_string
@@ -29,6 +30,7 @@
       get_serial_number
       get_time_wrap_events
       get_trace_value
+      load_samna_objects_file
       open_device
       open_dynapse1
       open_gui
@@ -38,6 +40,7 @@
       print_neuron_synapses
       save_parameters2json_file
       save_parameters2txt_file
+      save_samna_objects2file
       set_fpga_spike_gen
       set_parameters_in_json_file
       set_parameters_in_txt_file

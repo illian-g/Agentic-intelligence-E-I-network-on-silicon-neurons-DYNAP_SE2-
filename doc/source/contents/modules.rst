@@ -3,7 +3,7 @@ Modules
 
 dynapse1utils
 --------------
-`dynapse1utils.py` contains functions that wraps around low-level Samna APIs for DYNAP-SE1 users. 
+`dynapse1utils.py` contains functions that wrap around low-level Samna APIs for DYNAP-SE1 users. 
 
 .. automodule:: dynapse1utils
     :members:
@@ -13,7 +13,7 @@ dynapse1utils
 
 netgen
 --------------
-`netgen.py` includes basic network elements, e.g. neuron groups, synapses and Winner-Take-All
+`netgen.py` includes basic network elements, e.g. neuron groups, synapses, and Winner-Take-All
 (WTA) structures, that can be added into ``NetworkGenerator`` to implement Spiking Neural Networks
 (SNNs) on DYNAP-SE1 processor.
 

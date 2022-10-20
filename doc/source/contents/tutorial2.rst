@@ -9,14 +9,15 @@ implemented by users. An example of training the plastic connections between a
 presynaptic and a postsynaptic neuron group is given in `example/test_stdp.py`.
 
 `example/test_stdp.py` is a demo of STDP training with 10 samples. The samples have 
-the same value. The learned weight matrix should be similar to 
+the same value. The learned weight matrix should be similar to
+
 .. code-block::
 
     w = [[ 1  1  1]
         [ 0 10  0]
         [ 1  1  1]]
 
-i.e. w[1][1] has the strongest weights because pre neuron1 and post neuron1 receive 
+I.e., w[1][1] has the strongest weights because pre neuron1 and post neuron1 receive 
 the strongest stimulation from the spike generators and thus fire the most.
 
 A network consisting of a spike generator group of 3 spike generators, a pre and a post 
@@ -71,7 +72,7 @@ are fed to the SNN in a loop:
 
         poisson_gen.stop()
 
-        # remove the current pre post connections
+        # remove the current pre-post connections
         remove_synapses(net_gen, connectivity['pre2post'])
 
         # add new pre-post connections using the latest w_plast
@@ -96,7 +97,7 @@ maintained by the STDP module is applied to the hardware. To change the connecti
 the network generator, the old 'pre2post' connections are first removed using ``remove_synapses(net_gen, connectivity['pre2post'])``, then the new ``int_w_plast`` discretized using ``stdp.w_plast``
 are added to the network generator using ``add_synapses(net_gen, connectivity['pre2post'])``.
 Note that the ``remove_synapses`` and ``add_synapses`` are only operated inside the network
-generator, not the hardware. The new DYNAP-SE1 configuration has to been generated using ``
+generator, not the hardware. The new DYNAP-SE1 configuration has to be generated using ``
 net_gen.make_dynapse1_configuration()``, and applied to the hardware.
 
 Since the rates of the spike generators are set to ``rates = [0, 200, 0]``, i.e. the middle 
