@@ -1,0 +1,3 @@
+[submodule "pygetscope"]
+	path = pygetscope
+	url = git@code.ini.uzh.ch:ncs/libs/pygetscope.git
