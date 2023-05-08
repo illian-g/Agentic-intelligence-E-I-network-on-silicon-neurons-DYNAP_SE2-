@@ -82,7 +82,7 @@ def open_device(sender_port=33336, receiver_port=33335, select_device=False):
 
     return device, samna_info_dict
 
-def open_dynapse1(gui=True, select_device=False, sender_port=33336, receiver_port=33335):
+def open_dynapse1(gui=False, select_device=False, sender_port=33336, receiver_port=33335):
     """
     open DYNAP-SE1 board with or without GUI. Note that input parameter device_name 
     has been deprecated now, please do not assign device_name anymore! 
