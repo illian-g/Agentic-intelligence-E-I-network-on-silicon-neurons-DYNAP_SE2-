@@ -73,6 +73,7 @@ def open_device(sender_port=33336, receiver_port=33335, select_device=False):
     device = samna.device.open_device(devices[int(idx)])
 
     samna_info_dict = {
+        "serial_number":devices[int(idx)].serial_number,
         "sender_port":sender_endpoint,
         "receiver_port":receiver_endpoint,
         "samna_node_id":node_id,
@@ -82,7 +83,7 @@ def open_device(sender_port=33336, receiver_port=33335, select_device=False):
 
     return device, samna_info_dict
 
-def open_dynapse1(gui=False, select_device=False, sender_port=33336, receiver_port=33335):
+def open_dynapse1(gui=False, select_device=False, sender_port=free_port(), receiver_port=free_port()):
     """
     open DYNAP-SE1 board with or without GUI. Note that input parameter device_name 
     has been deprecated now, please do not assign device_name anymore! 
@@ -123,6 +124,7 @@ def open_dynapse1(gui=False, select_device=False, sender_port=33336, receiver_po
         print("GUI receiving port:", samna_info_dict["gui_receiving_port"])
         print("GUI node ID:", samna_info_dict["gui_node_id"])
 
+    print("Selected device:", samna_info_dict["serial_number"])
     print("Sender port:", samna_info_dict["sender_port"])
     print("Receiver port:", samna_info_dict["receiver_port"])
     print("Opened device name:", samna_info_dict["device_name"])
