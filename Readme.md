@@ -37,10 +37,10 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
 # Installation
 
-Install Samna version 0.18 (verified to work with this repository)
+Install Samna version 0.17 (verified to work with this repository)
 
   ```bash
-  pip install samna==0.18
+  pip install samna==0.17
   ```
 
 See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation.
