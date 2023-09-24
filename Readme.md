@@ -35,6 +35,16 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
 - [`Paper with DPI equations`](https://ieeexplore.ieee.org/document/6809149)
 
+## Inventory
+-------
+
+- [`Google Sheets for DYNAP-SE Inventory`](https://docs.google.com/spreadsheets/d/1nH2ihmJopggJwHB5A8NmtKlDbAkQdN7nsJvuaCBwr5c/edit?usp=sharing)
+
+## Booking-System
+-------
+
+- [`Team-up Booking for access to dynapse1`](https://teamup.com/kszuuhkh7ss24gerzz)
+
 # Installation
 
 Install Samna version 0.17 (verified to work with this repository)
@@ -44,6 +54,41 @@ Install Samna version 0.17 (verified to work with this repository)
   ```
 
 See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation.
+
+# Connecting to VPN and Zemo
+
+## INI's new VPN
+
+ ```bash
+  sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u saghos  --trusted-cert 389bf6fd691373e230f11d05acba0634c45d0ded98eaaec49b521e9374af81ca
+  ```
+
+You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available from https://forticlient.com/downloads If you do not have a UZH account, please contact us.
+
+On Windows 10 you can use [https://www.microsoft.com/en-us/p/forticlient/9wzdncrdh6mc?activetab=pivot:overviewtab  FortiClient-Win10] if you want to remember your username and password.  But no one has managed to make this client work yet. If you make it work, please edit wiki to show the magic. Setting DNS server numbers manually in network WAN miniport does not help.
+
+On linux we suggest you install the *openfortivpn* package and run VPN via the following command, replacing <UZH-shortname> with your UZH shortname:
+
+<tt>$ sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u </tt>'''<UZH-shortname>'''<tt> </tt>
+
+Note that you need to use UZH credentials, i.e. UZH shortname and password, not INI credentials, as this service is provided by UZH.
+
+openfortivpn is also solution when you need command line VPN. 
+
+It is possible to set up fortivpn via the package network-manager-fortisslvpn-gnome that makes it available to the gnome network manager (might need reboot or restart of network-manager service after install of package). 
+
+If it does not work with that method (DNS problem), edit the VPN connection, go to IPv4 and add the following two DNS servers (instead of automatic):
+
+<tt>130.60.128.3</tt>
+
+<tt>130.60.64.51</tt>
+
+Install Samna version 0.17 (verified to work with this repository)
+
+  ```bash
+  pip install samna==0.17
+  ```
+
 
 # How to compile the doc?
 - To compile the sphinx doc in this repository, install [sphinx](
