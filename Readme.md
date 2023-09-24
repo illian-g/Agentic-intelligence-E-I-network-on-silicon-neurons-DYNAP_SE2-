@@ -53,41 +53,71 @@ Install Samna version 0.17 (verified to work with this repository)
   pip install samna==0.17
   ```
 
-See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation.
+See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation. You will also need [`Numpy'](https://numpy.org/install/) and [`Matplotlib`](https://matplotlib.org/stable/index.html)for basic usage. 
 
 # Connecting to VPN and Zemo
 
-## INI's new VPN
+First you need to have access to INI network. Please drop a mail to [`Pawel Pyk`](https://www.ini.uzh.ch/en/institute/people?uname=ppyk). Ignore if you already have an INI username.
+Next, you would need an account in Zemo. Please drop a mail to [`Saptarshi Ghosh`](https://www.ini.uzh.ch/en/institute/people?uname=sapta).
+The  setup the VPN to INI network for remore access. First install
 
+## INI's VPN
+TLDR
  ```bash
-  sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u saghos  --trusted-cert 389bf6fd691373e230f11d05acba0634c45d0ded98eaaec49b521e9374af81ca
+  sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u <UZH username>  --trusted-cert 389bf6fd691373e230f11d05acba0634c45d0ded98eaaec49b521e9374af81ca
   ```
+ ```bash
+  
+  ```
+### Excerpt for [`INI WIKI`](https://services.ini.uzh.ch/wiki/index.php/VPN)
+You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available from https://forticlient.com/downloads If you do not have a UZH account, please contact [`Pawel Pyk`](https://www.ini.uzh.ch/en/institute/people?uname=ppyk)
 
-You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available from https://forticlient.com/downloads If you do not have a UZH account, please contact us.
+**On Windows 10** you can use [https://www.microsoft.com/en-us/p/forticlient/9wzdncrdh6mc?activetab=pivot:overviewtab  FortiClient-Win10] if you want to remember your username and password.  
+**On linux** we suggest you install the *openfortivpn* package and run VPN via the following command, replacing <UZH-shortname> with your UZH shortname:
 
-On Windows 10 you can use [https://www.microsoft.com/en-us/p/forticlient/9wzdncrdh6mc?activetab=pivot:overviewtab  FortiClient-Win10] if you want to remember your username and password.  But no one has managed to make this client work yet. If you make it work, please edit wiki to show the magic. Setting DNS server numbers manually in network WAN miniport does not help.
-
-On linux we suggest you install the *openfortivpn* package and run VPN via the following command, replacing <UZH-shortname> with your UZH shortname:
-
-<tt>$ sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u </tt>'''<UZH-shortname>'''<tt> </tt>
-
-Note that you need to use UZH credentials, i.e. UZH shortname and password, not INI credentials, as this service is provided by UZH.
-
-openfortivpn is also solution when you need command line VPN. 
-
-It is possible to set up fortivpn via the package network-manager-fortisslvpn-gnome that makes it available to the gnome network manager (might need reboot or restart of network-manager service after install of package). 
+```bash
+sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u </tt>'''<UZH-shortname>'''
+```
+Note that you need to use UZH credentials, i.e. UZH shortname and password, not INI credentials, as this service is provided by UZH. openfortivpn is also solution when you need command line VPN. It is possible to set up fortivpn via the package network-manager-fortisslvpn-gnome that makes it available to the gnome network manager (might need reboot or restart of network-manager service after install of package). 
 
 If it does not work with that method (DNS problem), edit the VPN connection, go to IPv4 and add the following two DNS servers (instead of automatic):
-
 <tt>130.60.128.3</tt>
-
 <tt>130.60.64.51</tt>
 
-Install Samna version 0.17 (verified to work with this repository)
+## Connecting to Zemo
 
-  ```bash
-  pip install samna==0.17
-  ```
+**Step 1:** Connect to VPN
+***
+**Run this on your local terminal**
+
+**Step 2:** ssh -X username@10.65.48.134
+
+***
+
+**Run this command on Zemo**
+
+**Step 3:** pip install samna==0.14.06
+
+Install jupyter or create python scripts to run on Zemo
+
+**Step 4** [To run notebook]:  jupyter notebook --no-browser --port=8866
+
+***
+
+**Run this on your local terminal**
+
+**Step 5**: ssh -N -f -L 8866:localhost:8866 username@10.65.48.134
+
+Remark: you can use any port
+
+**Additional useful commands:**
+
+- Map remote directory to local folder: 
+`sshfs username@10.65.48.134:/home/username/dir_name local_directory`
+
+- To copy (same PC) `cp -R <source_folder> <destination_folder>`
+
+- To copy (remote PC) `scp username@10.65.48.134:/dir_path/Hello_world* /dir_path/folder_name`
 
 
 # How to compile the doc?
