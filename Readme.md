@@ -59,15 +59,12 @@ See more details in the [install](https://synsense-sys-int.gitlab.io/samna/insta
 
 First you need to have access to INI network. Please drop a mail to [`Pawel Pyk`](https://www.ini.uzh.ch/en/institute/people?uname=ppyk). Ignore if you already have an INI username.
 Next, you would need an account in Zemo. Please drop a mail to [`Saptarshi Ghosh`](https://www.ini.uzh.ch/en/institute/people?uname=sapta).
-The  setup the VPN to INI network for remore access. First install
+Then setup the VPN to INI network for remore access to Zemo. 
 
 ## INI's VPN
 TLDR
  ```bash
   sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u <UZH username>  --trusted-cert 389bf6fd691373e230f11d05acba0634c45d0ded98eaaec49b521e9374af81ca
-  ```
- ```bash
-  
   ```
 ### Excerpt for [`INI WIKI`](https://services.ini.uzh.ch/wiki/index.php/VPN)
 You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available from https://forticlient.com/downloads If you do not have a UZH account, please contact [`Pawel Pyk`](https://www.ini.uzh.ch/en/institute/people?uname=ppyk)
