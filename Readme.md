@@ -85,24 +85,22 @@ If it does not work with that method (DNS problem), edit the VPN connection, go 
 
 **Step 1:** Connect to VPN
 
-**Step 2:** ssh -X username@10.65.48.134
+**Step 2:** `ssh -X username@zemo.lan.ini.uzh.ch` (If the DNS name fails to resolve, you should be able to use 10.65.48.134 instead.)
 
-**Step 3:** pip install samna==0.17
+**Step 3:** `pip install samna==0.17`
 
-**Step 4** [To run notebook]:  jupyter notebook --no-browser --port=8866
+**Step 4** [To run notebook]:  `jupyter notebook --no-browser --port=8866`
 
-**Step 5**: ssh -N -f -L 8866:localhost:8866 username@10.65.48.134
-
-Remark: you can use any port
+**Step 5**: `ssh -N -f -L 8866:localhost:8866 username@zemo.lan.ini.uzh.ch` (you can use any port)
 
 **Additional useful commands:**
 
 - Map remote directory to local folder: 
-`sshfs username@10.65.48.134:/home/username/dir_name local_directory`
+`sshfs username@:zemo.lan.ini.uzh.ch/home/username/dir_name local_directory`
 
 - To copy (same PC) `cp -R <source_folder> <destination_folder>`
 
-- To copy (remote PC) `scp username@10.65.48.134:/dir_path/Hello_world* /dir_path/folder_name`
+- To copy (remote PC) `scp username@zemo.lan.ini.uzh.ch:/dir_path/Hello_world* /dir_path/folder_name`
 
 
 # How to compile the doc
