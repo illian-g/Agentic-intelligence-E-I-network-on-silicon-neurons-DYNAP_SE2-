@@ -57,9 +57,13 @@ See more details in the [install](https://synsense-sys-int.gitlab.io/samna/insta
 
 # Connecting to VPN and Zemo
 
-First you need to have access to INI network. Please drop a mail to [`Pawel Pyk`](https://www.ini.uzh.ch/en/institute/people?uname=ppyk). Ignore if you already have an INI username.
-Next, you would need an account in Zemo. Please drop a mail to [`Saptarshi Ghosh`](https://www.ini.uzh.ch/en/institute/people?uname=sapta).
-Then setup the VPN to INI network for remore access to Zemo. 
+First you need to have an INI username. If you don't have one, you need to get your INI supervisor to request one for you.
+
+If you have an INI username, then you need to have access to INI network. If you need remote access or access via Wifi, you'll need to use a VPN. If you're not yet a user of INI's VPN, please drop a mail to [`Pawel Pyk`](mailto:ppyk@ini.uzh.ch?subject=VPN%20Access).
+
+Next, you need an account on Zemo. Please drop a mail to [`Saptarshi Ghosh`](mailto:sapta@ini.uzh.ch?subject=Account%20on%20zemo).
+
+Then setup the VPN to INI network for remote access to Zemo.
 
 ## INI's VPN
 #### TL;DR
@@ -72,8 +76,8 @@ Then setup the VPN to INI network for remore access to Zemo.
   ```
 Note that you need to use UZH credentials, i.e. UZH shortname and password, not INI credentials, as this service is provided by UZH. openfortivpn is also solution when you need command line VPN. It is possible to set up fortivpn via the package network-manager-fortisslvpn-gnome that makes it available to the gnome network manager (might need reboot or restart of network-manager service after install of package). 
 
-### Excerpt for [`INI WIKI`](https://services.ini.uzh.ch/wiki/index.php/VPN)
-You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available [`from here`](https://forticlient.com/downloads). If you do not have a UZH account, please contact [`Pawel Pyk`](https://www.ini.uzh.ch/en/institute/people?uname=ppyk)
+### Excerpt from [`INI WIKI`](https://services.ini.uzh.ch/wiki/index.php/VPN)
+You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available [`from here`](https://forticlient.com/downloads). If you do not have a UZH account, please contact [`Pawel Pyk`](mailto:ppyk@ini.uzh.ch?subject=UZH%20Account)
 
 If it does not work with that method (DNS problem), edit the VPN connection, go to IPv4 and add the following two DNS servers (instead of automatic): *130.60.128.3*,*130.60.64.51*
 
