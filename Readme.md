@@ -49,7 +49,7 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
 Install Samna version 0.17 (verified to work with this repository)
 
-  ```bash
+  ```
   pip install samna==0.17
   ```
 
@@ -112,14 +112,14 @@ python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxco
 - Then go to the `doc` folder and compile the document into html or PDF format.
   - html:
 
-    ```bash
+    ```
     cd doc
     make html
     ```
     The html files will be generated under `doc/build/html`.
 
   - PDF:
-    ```bash
+    ```
     cd doc
     make latexpdf
     ```
