@@ -1,7 +1,9 @@
 import numpy as np
+import tkinter.filedialog
 import tkinter as tk
 from tkinter import ttk
-import os
+import os, sys
+sys.path.append(os.path.dirname(__file__))
 
 from bias_names import BIAS_NAMES
 
@@ -14,6 +16,15 @@ class sliderGui():
         
         map_file_path = os.path.join(os.path.dirname(__file__), "linear_fine_coarse_bias_map.npy")
         print(map_file_path)
+        self.top_folder_path = "/".join(map_file_path.split("/")[:-2]) + "/"
+        sys.path.append(self.top_folder_path)
+        
+        try:
+            import dynapse1utils as ut
+            self.utils = ut
+        except ImportError:
+            print("Failed to import Dynapse1Utils")
+    
         
         self.linear_bias_map = np.load(map_file_path)
         
@@ -99,6 +110,15 @@ class sliderGui():
         # for slider, spinbox in zip(self.scales, self.spinboxes):
         #     spinbox
         
+    def _save_biases_to_file(self, filename : str):
+        config = self.model.get_configuration()
+        self.utils.save_parameters2txt_file(config, filename)
+        print("Biases saved to: " + filename)
+
+    def _load_biases_from_file(self, filename : str):
+        self.utils.set_parameters_in_txt_file(self.model, filename)
+        print("Biases loaded from: " + filename)
+        
     def update_biases(self):
         
         self.flag_loading_config = True
@@ -132,8 +152,31 @@ def create_core_bias_block(gui):
     
     notebook = ttk.Notebook(gui.frame_main)
     gui.frame_main.grid_rowconfigure(0, weight=1)
+    gui.frame_main.grid_rowconfigure(1, weight=100)
     gui.frame_main.grid_columnconfigure(0, weight=1)
-    notebook.grid(row=0, column=0, sticky='nesw')
+    gui.frame_main.grid_columnconfigure(1, weight=5)
+    gui.frame_main.grid_columnconfigure(2, weight=100)
+    
+    bias_filename = tk.StringVar(value="BIAS FILE: None", name="Label: bias filename")
+    
+    def open_file_dialog():
+        filename = tk.filedialog.askopenfilename(title="Load Biases")
+        bias_filename.set("BIAS FILE: " + filename)
+        gui._load_biases_from_file(filename)
+        
+    def save_file_dialog():
+        filename = tk.filedialog.asksaveasfilename(title="Save Biases")
+        bias_filename.set("BIAS FILE: " + filename)
+        gui._save_biases_to_file(filename)
+    
+    bias_filename_label = ttk.Label(gui.frame_main, textvariable=bias_filename)
+    btn_save = ttk.Button(gui.frame_main, text = "Save biases", command=save_file_dialog)
+    btn_load = ttk.Button(gui.frame_main, text = "Load biases", command=open_file_dialog)
+    
+    btn_load.grid(row=0, column=1, sticky='nw', ipady=6, ipadx=6)
+    btn_save.grid(row=0, column=0, sticky='nw', ipady=6, ipadx=6)
+    bias_filename_label.grid(row=0, column=2, columnspan=2, sticky='nw', ipady=6, ipadx=6)
+    notebook.grid(row=1, column=0, columnspan=3, sticky='nesw')
     
     chip_frames = [ttk.Frame(notebook, width=800, height=800) for chip_id in range(4)]
     
