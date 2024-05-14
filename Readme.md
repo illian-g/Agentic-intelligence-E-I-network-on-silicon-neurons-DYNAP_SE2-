@@ -67,7 +67,7 @@ and then import and update the submodules with
   git submodule update
   ```
 
-Note, you will need your token from your Gitlab to access the submodules. See [here](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#clone-repository-using-personal-access-token) for details about tokens Now you should have all the files needed to work with the DY1 Bluebox system.
+Now you should have all the files needed to work with the DY1 Bluebox system.
 
 # Connecting to VPN and Zemo
 
@@ -86,7 +86,7 @@ Then setup the VPN to INI network for remote access to Zemo.
 **On linux** we suggest you install the *openfortivpn* package and run VPN via the following command, replacing <UZH-shortname> with your UZH shortname:
 
  ```bash
-  sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u <UZH username>  --trusted-cert 389bf6fd691373e230f11d05acba0634c45d0ded98eaaec49b521e9374af81ca
+  sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u <UZH Shortname>  --trusted-cert 73771a1626625472674e4b8b907b8a97b870394746c4071b0e54ea3cc3479a93
   ```
 Note that you need to use UZH credentials, i.e. UZH shortname and password, not INI credentials, as this service is provided by UZH. openfortivpn is also solution when you need command line VPN. It is possible to set up fortivpn via the package network-manager-fortisslvpn-gnome that makes it available to the gnome network manager (might need reboot or restart of network-manager service after install of package). 
 
