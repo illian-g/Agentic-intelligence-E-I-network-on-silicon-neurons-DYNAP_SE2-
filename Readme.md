@@ -55,8 +55,7 @@ Install Samna version 0.17 (verified to work with this repository)
 
 See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation. You will also need [`Numpy`](https://numpy.org/install/) and [`Matplotlib`](https://matplotlib.org/stable/index.html)for basic usage. 
 
-# Git Repository 
-  ## Cloning
+# Git Repository Cloning
 First clone the repository to get all the necessary files
 ```
 git clone https://code.ini.uzh.ch/ncs/libs/dynap-se1
@@ -68,7 +67,7 @@ and then import and update the submodules with
   git submodule update
   ```
 
-Note, you will need your token from your Gitlab to access the submodules. Now you should have all the files needed to work with the DY1 Bluebox system.
+Note, you will need your token from your Gitlab to access the submodules. See [here](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#clone-repository-using-personal-access-token) for details about tokens Now you should have all the files needed to work with the DY1 Bluebox system.
 
 # Connecting to VPN and Zemo
 
