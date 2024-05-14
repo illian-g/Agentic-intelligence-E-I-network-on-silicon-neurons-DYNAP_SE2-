@@ -29,7 +29,7 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 -------
 - teili: [`pypi`](https://pypi.org/project/teili/), [`documentation`](https://teili.readthedocs.io/en/latest/) - a Brian2 library to model the on-chip circuit behaviour
 - [`PyGetScope`](https://code.ini.uzh.ch/ncs/libs/pygetscope) library for working with Agilent scopes as a standalone repository (same as the included submodule here)
-
+- [`PySpcmScope`](https://code.ini.uzh.ch/sapta/pyspcmscope) library for working with on-board digitizer PCIE Card (M2i.3132-Exp) as a standalone repository (same as the included submodule here)
 ## Papers
 -------
 
@@ -54,6 +54,21 @@ Install Samna version 0.17 (verified to work with this repository)
   ```
 
 See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation. You will also need [`Numpy`](https://numpy.org/install/) and [`Matplotlib`](https://matplotlib.org/stable/index.html)for basic usage. 
+
+# Git Repository 
+  ## Cloning
+First clone the repository to get all the necessary files
+```
+git clone https://code.ini.uzh.ch/ncs/libs/dynap-se1
+```
+and then import and update the submodules with 
+
+  ```
+  git submodule init
+  git submodule update
+  ```
+
+Note, you will need your token from your Gitlab to access the submodules. Now you should have all the files needed to work with the DY1 Bluebox system.
 
 # Connecting to VPN and Zemo
 
