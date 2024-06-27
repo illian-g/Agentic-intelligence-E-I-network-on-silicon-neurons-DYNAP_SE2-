@@ -1,3 +1,52 @@
+
+
+# Getting Started
+1. [Login to Zemo](#connecting-to-vpn-and-zemo)
+(*and all following instructions are to be run on Zemo*)
+1. [Git-clone the Dy1 Repository](#git-repository-cloning)
+1. Creating a Virtual environment (virtualenv recommended)
+- using ** virtualenv**
+  - pip install --user virtualenv
+  - python3 -m virtualenv test
+  - source test/bin/activate
+- Using ** python3-venv ** 
+  - python3 -m venv test --without-pip
+  - source test/bin/activate
+4. Installing Jupyter, [samna](#samna-details) and other dependencies
+    - pip install jupyter
+    - pip install samna==0.17
+
+    - pip install ipython
+    - pip install ipykernel
+    - ipython kernel install --user --name=test
+    - python -m ipykernel install --user --name=test
+
+    - pip install bash_kernel
+    - python -m bash_kernel.install
+5. Starting jupyter notebook server
+`jupyter notebook --no-browser --port=8080 --ip=0.0.0.0`
+6. Accesing the server in you local machine (*this is to be run on local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----`
+with using whatever token that you generated in Zemo
+
+7. [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to using this repository
+
+**Additional useful commands:**
+
+- Map remote directory to local folder: 
+`sshfs username@:zemo.lan.ini.uzh.ch/home/username/dir_name local_directory`
+
+- To copy (same PC) `cp -R <source_folder> <destination_folder>`
+
+- To copy (remote PC) `scp username@zemo.lan.ini.uzh.ch:/dir_path/Hello_world* /dir_path/folder_name`
+
+Inventory
+-------
+- [`Google spreadsheet for DYNAP-SE Inventory`](https://docs.google.com/spreadsheets/d/1nH2ihmJopggJwHB5A8NmtKlDbAkQdN7nsJvuaCBwr5c/edit?usp=sharing)
+
+Booking-System 
+-------
+- [`Team-up Booking for access to dynapse1`](https://teamup.com/kszuuhkh7ss24gerzz)
+
 # Documentation 
 - The documentation for Samna is [here](https://synsense-sys-int.gitlab.io/samna/);
 the DYNAP-SE1 related part is
@@ -6,21 +55,6 @@ the DYNAP-SE1 related part is
 [Python utilities library](https://code.ini.uzh.ch/ncs/libs/dynap-se1) for
 Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
-  ---
-  **NOTE**
-
-  The automatically generated API documentation for this library may still have some issues being displayed in
-  [Modules](https://neuroinf.gitlab.io/ctxctl_contrib/contents/modules.html) and
-  [APIs Summary](https://neuroinf.gitlab.io/ctxctl_contrib/contents/api_sum.html). To compile the latest
-  doc locally, please follow this [How to compile the doc?](#how-to-compile-the-doc) section.
-  The PDF version of the manual is at the
-  [samna-dynapse1-doc](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1-doc)
-  branch of this repository, which might be a bit
-  out-dated compared to the compiled one. 
-
-  ---
-
-- [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to using this repository
 - [`User Guide - DYNAP-SE1`](https://docs.google.com/document/d/e/2PACX-1vQV36QRWsQl4ROfvRo7mbHb5_ZQ4Q1Qw64AkfdhuPEtIXYq1kf_ZsD3-GZkYPKqrlkOiizCq-Jjt_kD/pub?urp=gmail_link&gxid=8203366) - in-detail overview of the lower level chip behaviour with the legacy chip control software cAER
 - [`Video tutorial from the course NI06 - Neuromorphic Processor `](https://tube.switch.ch/switchcast/uzh.ch/events/383ee32a-58b8-48d5-bed0-a915ce341961) 
 - [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to logic behind setting the biases of the chip
@@ -30,23 +64,9 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 - teili: [`pypi`](https://pypi.org/project/teili/), [`documentation`](https://teili.readthedocs.io/en/latest/) - a Brian2 library to model the on-chip circuit behaviour
 - [`PyGetScope`](https://code.ini.uzh.ch/ncs/libs/pygetscope) library for working with Agilent scopes as a standalone repository (same as the included submodule here)
 - [`PySpcmScope`](https://code.ini.uzh.ch/sapta/pyspcmscope) library for working with on-board digitizer PCIE Card (M2i.3132-Exp) as a standalone repository (same as the included submodule here)
-## Papers
--------
 
-- [`Paper with DPI equations`](https://ieeexplore.ieee.org/document/6809149)
 
-## Inventory
--------
-
-- [`Google spreadsheet for DYNAP-SE Inventory`](https://docs.google.com/spreadsheets/d/1nH2ihmJopggJwHB5A8NmtKlDbAkQdN7nsJvuaCBwr5c/edit?usp=sharing)
-
-## Booking-System
--------
-
-- [`Team-up Booking for access to dynapse1`](https://teamup.com/kszuuhkh7ss24gerzz)
-
-# Installation
-
+# Samna
 Install Samna version 0.17 (verified to work with this repository)
 
   ```
@@ -68,6 +88,11 @@ and then import and update the submodules with
   ```
 
 Now you should have all the files needed to work with the DY1 Bluebox system.
+
+## Papers
+
+- [`Paper with DPI equations`](https://ieeexplore.ieee.org/document/6809149)
+
 
 # Connecting to VPN and Zemo
 
@@ -95,27 +120,19 @@ You’ll need to use a new VPN server provided for INI by UZH. The UZH is using 
 
 If it does not work with that method (DNS problem), edit the VPN connection, go to IPv4 and add the following two DNS servers (instead of automatic): *130.60.128.3*,*130.60.64.51*
 
-## Connecting to Zemo
 
-**Step 1:** Connect to VPN
+## NOTE
 
-**Step 2:** `ssh -X username@zemo.lan.ini.uzh.ch` (If the DNS name fails to resolve, you should be able to use 10.65.48.134 instead.)
+The automatically generated API documentation for this library may still have some issues being displayed in
+[Modules](https://neuroinf.gitlab.io/ctxctl_contrib/contents/modules.html) and
+[APIs Summary](https://neuroinf.gitlab.io/ctxctl_contrib/contents/api_sum.html). To compile the latest
+doc locally, please follow this [How to compile the doc?](#how-to-compile-the-doc) section.
+The PDF version of the manual is at the
+[samna-dynapse1-doc](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1-doc)
+branch of this repository, which might be a bit
+out-dated compared to the compiled one. 
 
-**Step 3:** `pip install samna==0.17`
-
-**Step 4** [To run notebook]:  `jupyter notebook --no-browser --port=8866`
-
-**Step 5**: `ssh -N -f -L 8866:localhost:8866 username@zemo.lan.ini.uzh.ch` (you can use any port)
-
-**Additional useful commands:**
-
-- Map remote directory to local folder: 
-`sshfs username@:zemo.lan.ini.uzh.ch/home/username/dir_name local_directory`
-
-- To copy (same PC) `cp -R <source_folder> <destination_folder>`
-
-- To copy (remote PC) `scp username@zemo.lan.ini.uzh.ch:/dir_path/Hello_world* /dir_path/folder_name`
-
+---
 
 # How to compile the doc
 - To compile the sphinx doc in this repository, install [sphinx](
