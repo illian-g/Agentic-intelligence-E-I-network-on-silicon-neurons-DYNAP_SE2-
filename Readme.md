@@ -1,6 +1,6 @@
 This repository provides Python-based extentions of Samna API specifically for DYNAP-SE1 chips.
 
-%TBA: explanation of relation of Samna to CTXCTL_Contrib to this.
+[//]: # (explanation of relation of Samna to CTXCTL_Contrib to this.)
 
 # Documentation 
 - The documentation for Samna is [here](https://synsense-sys-int.gitlab.io/samna/);
