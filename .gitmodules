@@ -1,6 +1,6 @@
 [submodule "pygetscope"]
 	path = pygetscope
-	url = https://code.ini.uzh.ch:ncs/libs/pygetscope.git
+	url = git@code.ini.uzh.ch:ncs/libs/pygetscope.git
 [submodule "pyspcmscope"]
 	path = pyspcmscope
-	url = https://code.ini.uzh.ch:sapta/pyspcmscope.git
+	url = git@code.ini.uzh.ch:sapta/pyspcmscope.git
