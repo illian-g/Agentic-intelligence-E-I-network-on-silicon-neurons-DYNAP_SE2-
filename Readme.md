@@ -79,6 +79,8 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 - [`User Guide - DYNAP-SE1`](https://docs.google.com/document/d/e/2PACX-1vQV36QRWsQl4ROfvRo7mbHb5_ZQ4Q1Qw64AkfdhuPEtIXYq1kf_ZsD3-GZkYPKqrlkOiizCq-Jjt_kD/pub?urp=gmail_link&gxid=8203366) - **[LEGACY]:** **software examples are not relevant anymore. To be used for chip understanding only** - in-detail overview of the lower level chip behaviour with the legacy chip control software cAER.
 
 
+- [`User Guide - DYNAP-SE1`](https://docs.google.com/document/d/e/2PACX-1vQV36QRWsQl4ROfvRo7mbHb5_ZQ4Q1Qw64AkfdhuPEtIXYq1kf_ZsD3-GZkYPKqrlkOiizCq-Jjt_kD/pub?urp=gmail_link&gxid=8203366) - **[LEGACY]:** **software examples are not relevant anymore. To be used for chip understanding only** - in-detail overview of the lower level chip behaviour with the legacy chip control software cAER.
+
 ## Related Repositories 
 -------
 - teili: [`pypi`](https://pypi.org/project/teili/), [`documentation`](https://teili.readthedocs.io/en/latest/) - a Brian2 library to model the on-chip circuit behaviour
@@ -98,7 +100,7 @@ See more details in the [install](https://synsense-sys-int.gitlab.io/samna/insta
 # Git Repository Cloning
 First clone the repository to get all the necessary files
 ```
-git clone git@code.ini.uzh.ch/ncs/libs/dynap-se1
+git clone git@code.ini.uzh.ch:ncs/libs/dynap-se1.git
 ```
 and then import and update the submodules with 
 
