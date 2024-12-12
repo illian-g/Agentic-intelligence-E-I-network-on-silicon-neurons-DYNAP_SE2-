@@ -1,4 +1,25 @@
-This repository provides Python-based extentions of Samna API specifically for DYNAP-SE1 chips.
+This repository is provided by the Institute of Neuroinformatics (INI) and offers Python-based extentions of Samna API ((c) SynSense) specifically for mixed-signal analog-digital DYNAP-SE1 chips.
+
+The code allows users to **configure networks** of spiking neurons on the chip, **set the parameters** of the analog synapse and neuron circuits (time constants, refractory periods, weights, gains, etc.), **send input spike trains** and **record the activity** of the physical on-chip neurons. The repository also contains the [introductory guiding materials](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) to introduce new users to the framework, as well as a few basic code [examples](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/examples) that can be used as starting points for projects.
+
+**Note**: DYNAP-SE1 software is written and tested to operate under **Ubuntu**. However, it is possible to enable partial or even full functionality on **MacOS** or on Windows using **WSL**. _The latter options, however, may raise system-specific problems and are not the priority of the development._
+
+The following sections cover installation, setup and of the DYNAP-SE1 software framework:
+
+- [Access to DYNAP-SE1 chips](#)\
+- [Getting started](#getting-started)\
+- [Installation]()
+- [Documentation]()
+- [Tutorials and demos]()
+
+
+
+# Access to DYNAP-SE1 boards
+
+**DYNAP-SE1** boards can be used in 3 different scenarios:
+1. **Remote** *(VPN, SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** through the VPN access provided by the **University of Zurich** (UZH) that has several DYNAP-SE1 boards attached.
+2. **Local** *(USB)*: The chip can 
+
 
 # Getting Started
 1. [Login to Zemo](#connecting-to-vpn-and-zemo)
