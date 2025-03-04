@@ -6,8 +6,8 @@ The code allows users to **configure networks** of spiking neurons on the chip, 
 
 The following sections cover installation, setup and of the DYNAP-SE1 software framework:
 
-- [Access to DYNAP-SE1 chips](#)\
-- [Getting started](#getting-started)\
+- [Access to DYNAP-SE1 chips](#)
+- [Getting started](#getting-started)
 - [Installation]()
 - [Documentation]()
 - [Tutorials and demos]()
