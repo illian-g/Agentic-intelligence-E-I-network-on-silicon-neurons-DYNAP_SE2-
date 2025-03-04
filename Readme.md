@@ -103,7 +103,7 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 -------
 - teili: [`pypi`](https://pypi.org/project/teili/), [`documentation`](https://teili.readthedocs.io/en/latest/) - a Brian2 library to model the on-chip circuit behaviour
 - [`PyGetScope`](https://code.ini.uzh.ch/ncs/libs/pygetscope) library for working with Agilent scopes as a standalone repository (same as the included submodule here)
-- [`PySpcmScope`](https://code.ini.uzh.ch/sapta/pyspcmscope) library for working with on-board digitizer PCIE Card (M2i.3132-Exp) as a standalone repository (same as the included submodule here)
+- [`PySpcmScope`](https://code.ini.uzh.ch/ncs/libs/pyspcmscope.git) library for working with on-board digitizer PCIE Card (M2i.3132-Exp) as a standalone repository (same as the included submodule here)
 
 
 # Samna
