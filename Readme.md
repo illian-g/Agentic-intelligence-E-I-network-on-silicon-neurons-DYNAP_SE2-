@@ -6,12 +6,13 @@ The code allows users to **configure networks** of spiking neurons on the chip, 
 
 The following sections cover installation, setup and of the DYNAP-SE1 software framework:
 
-- [Access to DYNAP-SE1 chips](#)
+- [Access to DYNAP-SE1 chips](#access-to-dynap-se1-boards)
 - [Getting started](#getting-started)
 - [Installation]()
 - [Documentation]()
 - [Tutorials and demos]()
 
+- [FAQ and Known Issues](#frequently-asked-questions-(FAQ)-and-known-issues)
 
 
 # Access to DYNAP-SE1 boards
@@ -188,4 +189,19 @@ python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxco
     make latexpdf
     ```
     The PDF file `samna-dynapse1.pdf` will be generated under `doc/build/latex`.
-       
+   
+
+# Frequently asked questions (FAQ) and known issues
+
+  - Requires replug\reset:
+
+    - no device connected
+    - Store ID error
+    - Store name taken error
+    - Core shutdown (overload)
+    
+  - Known usolved Samna-side issues:
+    - Device selection (when multiple connected)
+    - Doubled FPGA input
+    - 
+
