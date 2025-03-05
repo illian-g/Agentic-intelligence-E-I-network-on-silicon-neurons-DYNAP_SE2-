@@ -195,13 +195,14 @@ python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxco
 
   - Requires replug\reset:
 
-    - no device connected
+    - no device connected - check that the DYNAP-SE1 board is
+    listed by `lsusb`. The USB udev rules might need to be set (Ubuntu) or the device needs to be attached again (WSL).
     - Store ID error
     - Store name taken error
     - Core shutdown (overload)
     
   - Known usolved Samna-side issues:
-    - Device selection (when multiple connected)
-    - Doubled FPGA input
+    - **Device selection (when multiple connected)** - the first one is always selected
+    - **Doubled FPGA input** - in `RepeatMode==False` the spike generator plays the preloaded sequence twice. This is a known firmware issue.
     - 
 
