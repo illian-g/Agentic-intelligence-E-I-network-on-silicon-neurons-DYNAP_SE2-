@@ -19,8 +19,13 @@ The following sections cover installation, setup and of the DYNAP-SE1 software f
 
 **DYNAP-SE1** boards can be used in 3 different scenarios:
 1. **Remote** *(VPN, SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** through the VPN access provided by the **University of Zurich** (UZH) that has several DYNAP-SE1 boards attached.
-      - Please drop a mail to `support@ini.uzh.ch` if you need to use the VPN. Every user needs to be registered to INI-database to use the server.
-2. **Local** *(USB)*: The chip can 
+To record the analog membrane voltage traces, the built-in SPCM card should be used.
+      - Please drop an e-mail to `support@ini.uzh.ch` if you need to use the VPN. Every user needs to be registered to INI-database to use the server.
+2. **Local** *(USB)*: The chip is connected the user's personal machine. This way the online GUI is available to monitor the spiking activity of the board,
+and any other oscilloscope could be used to monitor the membrane voltages.
+
+3. **Local** *(Zemo)*: The user logs into their account on the **ZEMO** server at INI in person, gaining access to the GUI functionality of
+the Ubuntu system installed there.
 
 ![Ways to access DYNAP-SE boards](doc/dynapse_access.png)
 
