@@ -25,26 +25,22 @@ The following sections cover installation, setup and of the DYNAP-SE1 software f
 # Getting Started
 1. [Login to Zemo](#connecting-to-vpn-and-zemo)
 (*and all following instructions are to be run on Zemo*)
-1. [Git-clone the Dy1 Repository](#git-repository-cloning)
-1. Creating a Virtual environment (virtualenv recommended)
-- using ** virtualenv**
-  - pip install --user virtualenv
-  - python3 -m virtualenv test
-  - source test/bin/activate
-- Using ** python3-venv ** 
-  - python3 -m venv test --without-pip
-  - source test/bin/activate
+2. [Git-clone the Dy1 Repository](#git-repository-cloning)
+3. Creating a Virtual environment (conda recommended)
+- using ** conda **
+  - To Install Conda at `$HOME` folder (Ignore you already have it):
+    - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh
+    - echo 'export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc
+    - source ~/.bashrc
+  - conda create -n test python=3.8 jupyter pip ipython ipykernel bash_kernel -y
+  - conda activate test
 4. Installing Jupyter, [samna](#samna-details) and other dependencies
-    - pip install jupyter
+  
     - pip install samna==0.17
-
-    - pip install ipython
-    - pip install ipykernel
     - ipython kernel install --user --name=test
     - python -m ipykernel install --user --name=test
-
-    - pip install bash_kernel
     - python -m bash_kernel.install
+
 5. Starting jupyter notebook server
 `jupyter notebook --no-browser --port=8080 --ip=0.0.0.0`
 6. Accesing the server in you local machine (*this is to be run on local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using whatever token that you generated in Zemo
