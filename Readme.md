@@ -115,9 +115,9 @@ See more details in the [install](https://synsense-sys-int.gitlab.io/samna/insta
 # Git Repository Cloning
 First clone the repository to get all the necessary files
 ```
-git clone git@code.ini.uzh.ch:ncs/libs/dynap-se1.git
+git clone https://code.ini.uzh.ch/ncs/libs/dynap-se1.git
 ```
-and then import and update the submodules with 
+and then import and update the submodules with (Ignore Submodules for now!)
 
   ```
   git submodule init
