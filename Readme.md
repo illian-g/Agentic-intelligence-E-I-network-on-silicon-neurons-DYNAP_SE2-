@@ -27,7 +27,7 @@ The following sections cover installation, setup and of the DYNAP-SE1 software f
 1. [Login to Zemo](#connecting-to-vpn-and-zemo)
 (*and all following instructions are to be run on Zemo*)
 2. [Git-clone the Dy1 Repository](#git-repository-cloning)
-3. Creating a Virtual environment (conda recommended)
+3. Creating a Virtual environment/kernel (conda recommended)
 - using ** conda **
   - To Install Conda at `$HOME` folder (Ignore you already have it):
     - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh
@@ -47,13 +47,13 @@ The following sections cover installation, setup and of the DYNAP-SE1 software f
 6. Accesing the server in you local machine (*this is to be run on local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
       - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
-      - If you want to open and work with `Samna_demo.ipynb`
-      (which you can open from file explorer on right-side), remember to chnage the kernel from top-right **after openning the notebook**.
-      ![Welcome Jupyter Lab](doc/kernel_selection.png)
+      - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
+      - Remember to change the kernel from top-right **after openning the Samna_demo notebook**.
+      ![Jupyter Kernel Change](doc/kernel_selection.png)
 
 7. [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to this repository
-
-8. [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to logic behind setting the biases of the chip
+8. (Optional) You can also use VS code to interact with the Jupyter Lab, follow instructions [here](https://code.visualstudio.com/docs/datascience/jupyter-notebooks#_connect-to-a-remote-jupyter-server)
+9. [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to logic behind setting the biases of the chip
 
 
 **Additional useful commands:**
