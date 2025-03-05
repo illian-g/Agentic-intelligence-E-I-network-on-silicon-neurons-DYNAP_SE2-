@@ -20,6 +20,7 @@ The following sections cover installation, setup and of the DYNAP-SE1 software f
 1. **Remote** *(VPN, SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** through the VPN access provided by the **University of Zurich** (UZH) that has several DYNAP-SE1 boards attached.
 2. **Local** *(USB)*: The chip can 
 
+![Ways to access DYNAP-SE boards](doc/dynapse_access.png)
 
 # Getting Started
 1. [Login to Zemo](#connecting-to-vpn-and-zemo)
