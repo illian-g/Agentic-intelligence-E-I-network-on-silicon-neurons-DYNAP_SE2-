@@ -43,8 +43,13 @@ The following sections cover installation, setup and of the DYNAP-SE1 software f
     - python -m bash_kernel.install
 
 5. Starting jupyter notebook server
-`jupyter notebook --no-browser --port=8080 --ip=0.0.0.0`
-6. Accesing the server in you local machine (*this is to be run on local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using whatever token that you generated in Zemo
+`jupyter lab --no-browser --port=8080 --ip=0.0.0.0`
+6. Accesing the server in you local machine (*this is to be run on local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
+      - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
+      ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
+      - If you want to open and work with `Samna_demo.ipynb`
+      (which you can open from file explorer on right-side), remember to chnage the kernel from top-right **after openning the notebook**.
+      ![Welcome Jupyter Lab](doc/kernel_selection.png)
 
 7. [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to this repository
 
