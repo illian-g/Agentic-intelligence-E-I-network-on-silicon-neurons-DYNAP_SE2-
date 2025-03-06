@@ -204,7 +204,9 @@ python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxco
     listed by `lsusb`. The USB udev rules might need to be set (Ubuntu) or the device needs to be attached again (WSL).
     - Store ID error
     - Store name taken error
-    - Core shutdown (overload)
+    - Core shutdown (overload) - likely happens because of excessive spiking activity of the core
+
+    - Netgen new configuration overrides the biases so they need to be copied
     
   - Known usolved Samna-side issues:
     - **Device selection (when multiple connected)** - the first one is always selected
