@@ -151,7 +151,7 @@ If you have an INI username, then you need to have access to INI network. If you
 
 Next, you need an account on Zemo. Please drop a mail to [`Saptarshi Ghosh`](mailto:sapta@ini.uzh.ch?subject=Account%20on%20zemo).
 
-Then setup the VPN to INI network for remote access to Zemo.
+Then setup the VPN to INI network for remote access to Zemo. Zemo can be accessed though ssh as `ssh <user name>@ncs-zemo.ini.uzh.ch`
 
 ## INI's VPN
 #### TL;DR
