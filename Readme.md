@@ -36,14 +36,14 @@ the Ubuntu system installed there.
 3. Creating a Virtual environment/kernel (conda recommended)
 - using ** conda **
   - To Install Conda at `$HOME` folder (Ignore you already have it):
-    - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh
-    - echo 'export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc
-    - source ~/.bashrc
+    - `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh`
+    - `echo export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc`
+    - `source ~/.bashrc`
   - conda create -n test python=3.8 jupyter pip ipython ipykernel bash_kernel -y
   - conda activate test
 4. Installing Jupyter, [samna](#samna-details) and other dependencies
   
-    - pip install samna==0.17
+    - pip install samna==0.17 (0.17.4 for mac)
     - ipython kernel install --user --name=test
     - python -m ipykernel install --user --name=test
     - python -m bash_kernel.install
@@ -65,11 +65,11 @@ the Ubuntu system installed there.
 **Additional useful commands:**
 
 - Map remote directory to local folder: 
-`sshfs username@:zemo.lan.ini.uzh.ch/home/username/dir_name local_directory`
+`sshfs username@:ncs-zemo.ini.uzh.ch/home/username/dir_name local_directory`
 
 - To copy (same PC) `cp -R <source_folder> <destination_folder>`
 
-- To copy (remote PC) `scp username@zemo.lan.ini.uzh.ch:/dir_path/Hello_world* /dir_path/folder_name`
+- To copy (remote PC) `scp username@ncs-zemo.ini.uzh.ch:/dir_path/Hello_world* /dir_path/folder_name`
 
 Inventory
 -------
@@ -147,7 +147,7 @@ Now you should have all the files needed to work with the DY1 Bluebox system.
 
 First you need to have an INI username. If you don't have one, you need to get your INI supervisor to request one for you.
 
-If you have an INI username, then you need to have access to INI network. If you need remote access or access via Wifi, you'll need to use a VPN. If you're not yet a user of INI's VPN, please drop a mail to [`Pawel Pyk`](mailto:ppyk@ini.uzh.ch?subject=VPN%20Access).
+If you have an INI username, then you need to have access to INI network. If you need remote access or access via Wifi, you'll need to use a VPN. If you're not yet a user of INI's VPN, please drop a mail to [`IT Support`](mailto:support@ini.uzh.ch?subject=VPN%20Access).
 
 Next, you need an account on Zemo. Please drop a mail to [`Saptarshi Ghosh`](mailto:sapta@ini.uzh.ch?subject=Account%20on%20zemo).
 
