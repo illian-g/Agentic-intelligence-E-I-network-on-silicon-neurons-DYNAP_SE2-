@@ -3,4 +3,4 @@
 	url = git@code.ini.uzh.ch:ncs/libs/pygetscope.git
 [submodule "pyspcmscope"]
 	path = pyspcmscope
-	url = git@code.ini.uzh.ch:sapta/pyspcmscope.git
+	url = git@code.ini.uzh.ch:ncs/libs/pyspcmscope.git
