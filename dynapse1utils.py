@@ -522,6 +522,250 @@ def set_parameters_in_json_file(model, filename="./dynapse_parameters.json"):
     for p in data['parameters']:
         param = dyn1.Dynapse1Parameter(p['parameter_name'], int(p['coarse_value']), int(p['fine_value']))
         model.update_single_parameter(param, int(p['chip']), int(p['core']))
+        
+
+def load_ctxctl_biases(model, filename):
+    #TODO: refactor + description
+    
+    f_in = open(filename, "r")
+    
+    configuration = model.get_configuration()
+    
+    for line in f_in.readlines()[2:]:
+        core_id = int(line.split("]")[0].split("[")[1])
+        bias_id = str(line.split('"')[1])
+        val_coarse = int(line[:-2].split(",")[-1])
+        val_fine = int(line[:-2].split(",")[-2])
+        
+        configuration.chips[core_id//4].cores[core_id%4].parameter_group.param_map[bias_id].fine_value=val_fine
+        configuration.chips[core_id//4].cores[core_id%4].parameter_group.param_map[bias_id].coarse_value=val_coarse
+        
+    f_in.close()
+    
+    for core_id in range(16):
+        model.update_parameter_group(configuration.chips[core_id//4].cores[core_id%4].parameter_group,
+                                     core_id//4, core_id%4)
+
+def apply_biases_from_configuration(source_config, target_config):
+    #TODO: refactor
+    '''
+    Copy all biases between the configurations
+
+    Parameters
+    ----------
+    source_config : Dynapse1Configuration
+    target_config : Dynapse1Configuration
+    '''
+    
+    for chip_id in range(NUM_CHIPS):
+        for core_id in range(CORES_PER_CHIP):
+            target_config.chips[chip_id].cores[core_id].parameter_group.param_map = \
+                source_config.chips[chip_id].cores[core_id].parameter_group.param_map
+                
+        
+def get_coarse_and_fine_from_linear_bias(linear : int):
+    """Function to get coarse and fine bias value given the nearest valid linear bias value
+
+    Args:
+        linear (int): linear bias [0 .. 2.4e+09]
+
+    Returns:
+        fine, coarse (int, int): fine and coarse bias values to be used for the param_map of the Dynapse1Configuraion
+    """
+    
+    linear=int(linear)
+    assert (linear<=24e+08 and linear>=0), f"ERROR: {linear} invalid linear bias value"
+
+    idx = np.searchsorted(LINEAR_BIAS_MAP[:,2], linear, side='left')
+    linear_prev = LINEAR_BIAS_MAP[idx-1,2]
+    linear_next = LINEAR_BIAS_MAP[idx,2]
+    
+    if idx > 0 and (idx == len(LINEAR_BIAS_MAP[:,2]) or np.abs(linear - linear_prev) < np.abs(linear - linear_next)):
+        return (LINEAR_BIAS_MAP[idx-1,0], LINEAR_BIAS_MAP[idx-1,1])
+    else:
+        return (LINEAR_BIAS_MAP[idx,0], LINEAR_BIAS_MAP[idx,1])
+    
+def set_bias_by_index(idx : int):
+    """ Set coarse and fine values of the parameter from the id in the parameter mapping
+
+    Args:
+        index (int): index in the linear bias map
+    """
+    assert (idx >= 0 and idx < len(LINEAR_BIAS_MAP)), f"ERROR: {idx} is an invalid index value"
+    
+    return (LINEAR_BIAS_MAP[idx,0], LINEAR_BIAS_MAP[idx,1])
+
+def get_linear_bias_current(coarse : int, fine : int):
+    """Function to calculate the theoretical biasing current of the bias generator given the coarse and fine values
+
+    Args:
+        fine (int): fine value
+        coarse (int): coarse value
+
+    Returns:
+        I_bias (int): resultsing biasing current
+    """
+    coarse=int(coarse)
+    fine=int(fine)
+    assert (coarse<8 and coarse>=0), f"ERROR: {coarse} Invalid coarse bias value"
+    assert (fine<256 and fine>=0), f"ERROR: {fine} Invalid fine bias value"
+    
+    I_max=[15, 105, 820, 6.5*1e+03, 50*1e+03, 0.4*1e+06, 3.2*1e+06, 24*1e+06]
+    
+    I_bias = fine*I_max[coarse]/255
+    
+    return I_bias
+
+def get_linear_bias(coarse : int, fine : int):
+    """Returns linear bias value proportional to the biasing current from the bias generator given the coarse and the fine values
+
+    Args:
+        coarse (int): coarse
+        fine (int): fine
+
+    Returns:
+        linear_bias (int): linear bias value
+    """
+    return 100*get_linear_bias_current(coarse, fine)
+
+def copy_parameters2core(model, source_core : int, target_core : int):
+    configuration = model.get_configuration()
+    
+    for bias_id in configuration.chips[source_core//4].cores[source_core%4].parameter_group.param_map.keys():
+        val_fine = configuration.chips[source_core//4].cores[source_core%4].parameter_group.param_map[bias_id].fine_value
+        val_coarse = configuration.chips[source_core//4].cores[source_core%4].parameter_group.param_map[bias_id].coarse_value
+        
+        configuration.chips[target_core//4].cores[target_core%4].parameter_group.param_map[bias_id].fine_value=val_fine
+        configuration.chips[target_core//4].cores[target_core%4].parameter_group.param_map[bias_id].coarse_value=val_coarse
+        
+    model.update_parameter_group(configuration.chips[target_core//4].cores[target_core%4].parameter_group,
+                                     target_core//4, target_core%4)
+    
+    
+    
+
+def set_neuron_tau1(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_TAU1_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_neuron_tau2(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_TAU2_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_neuron_gain(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_THR_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_neuron_refractory_period(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_RFR_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_neuron_dc(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_DC_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_neuron_adaptation_tau(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    #TODO: Allow clamping threshold
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_AHTAU_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_neuron_adaptation_weight(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_AHW_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_neuron_adaptation_gain(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_AHTHR_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_adaptation_enable(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    #TODO: Can I call it this?
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_CASC_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_ampa_weight(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="PS_WEIGHT_EXC_F_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_ampa_gain(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPIE_THR_F_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_ampa_tau(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    #TODO: Allow clamping threshold
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPIE_TAU_F_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_nmda_weight(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="PS_WEIGHT_EXC_S_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_nmda_gain(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPIE_THR_S_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_nmda_tau(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    #TODO: Allow clamping threshold
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPIE_TAU_S_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_nmda_enable(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_NMDA_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_gaba_a_weight(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="PS_WEIGHT_INH_F_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_gaba_a_gain(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPII_THR_F_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_gaba_a_tau(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    #TODO: Allow clamping threshold
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPII_TAU_F_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_gaba_b_weight(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="PS_WEIGHT_INH_S_N", bias_value=bias_value, bias_format=bias_format)
+    
+def set_gaba_b_gain(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPII_THR_S_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_gaba_b_tau(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    #TODO: Allow clamping threshold
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="NPDPII_TAU_S_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_pulse_width(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="PULSE_PWLK_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_r2r_bias(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="R2R_P", bias_value=bias_value, bias_format=bias_format)
+    
+def set_buf_bias(model, chip_id : int, core_id : int, bias_value, bias_format=None):
+    _set_bias(model, chip_id=chip_id, core_id=core_id, bias_name="IF_BUF_P", bias_value=bias_value, bias_format=bias_format)
+    
+    
+    
+
+def _set_bias(model, chip_id : int, core_id : int, bias_name : str, bias_value, bias_format=None):
+    #TODO: Add input checks
+    
+    if type(bias_value)==int:
+        coarse_value, fine_value = get_coarse_and_fine_from_linear_bias(bias_value)
+    elif type(bias_value)==tuple:
+        coarse_value, fine_value = bias_value
+    else:
+        raise "ERROR: Unknown bias format"
+    
+    param = dyn1.Dynapse1Parameter(bias_name, coarse_value, fine_value)
+    model.update_single_parameter(param, chip_id, core_id)
+        
+def set_neuron_monitor(model, chip_id, neuron_id):
+    #TODO: Add input checks
+    api  =  model.get_dynapse1_api()
+    api.monitor_neuron(chip_id, neuron_id)
+    
+    
+    
+def dc_steps(model, chip_id, core_id, period, duration, bias_value):
+    """ Create square steps of DC current using the IF_DC_P bias with
+	the specified period and within the specified time_interval, with coarse_val amplitude.
+
+	Args:
+        chip_id (int): target chip
+	    core_id (int): target core
+	    period (int): period of DC steps, in seconds
+	    time_interval (int): time interval for the method to run, in seconds
+	    coarse_val (int): amplitude of DC steps set by the bias value of the IF_DC_P bias"""
+
+    start_time = time.time()
+    while (time.time() - start_time < duration):
+        model.update_single_parameter(dyn1.Dynapse1Parameter("IF_DC_P", *bias_value), chip_id, core_id)
+        time.sleep(period)
+        model.update_single_parameter(dyn1.Dynapse1Parameter("IF_DC_P", 0, 0), chip_id, core_id)
+        time.sleep(period)
+        
 
 def get_serial_number(device_idx=0, select_device=False):
     """Get serial number of an opened DYNAP-SE1 board.
