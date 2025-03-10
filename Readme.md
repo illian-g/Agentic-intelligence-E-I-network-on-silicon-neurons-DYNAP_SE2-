@@ -4,8 +4,9 @@ The code allows users to **configure networks** of spiking neurons on the chip, 
 
 **Note**: DYNAP-SE1 software is written and tested to operate under **Ubuntu**. However, it is possible to enable partial or even full functionality on **MacOS** or on Windows using **WSL**. _The latter options, however, may raise system-specific problems and are not the priority of the development._
 
-The following sections cover installation, setup and of the DYNAP-SE1 software framework:
+The following sections cover installation, setup and usage of the DYNAP-SE1 software framework:
 
+- [About the DYNAP-SE1 chip]
 - [Access to DYNAP-SE1 chips](#access-to-dynap-se1-boards)
 - [Getting started](#getting-started)
 - [Installation]()
@@ -13,6 +14,19 @@ The following sections cover installation, setup and of the DYNAP-SE1 software f
 - [Tutorials and demos]()
 
 - [FAQ and Known Issues](#frequently-asked-questions-(FAQ)-and-known-issues)
+
+# Introduction
+
+Useful links to learn about DYNAP-SE1 chip:
+
+- DYNAP-SE1 chip functionality [`introduction video`](https://www.youtube.com/watch?v=NoSPNOGYVMY) on YouTube
+
+- The neuron and synapse circuits implemented on the DYNAP-SE1 chip are
+published and analysed in the paper [`Chicca et al. 2014`](https://ieeexplore.ieee.org/document/6809149).
+
+- The asynchronous routing scheme and characterization of the DYNAP-SE1 chip is published in [`Moradi et al. 2017`](https://ieeexplore.ieee.org/document/8094868)
+
+- The on-chip parameter heterogeneity characterization and coping strategies for robustness of computation are published in [`Zendrikov et al. 2023`](https://iopscience.iop.org/article/10.1088/2634-4386/ace64c)
 
 
 # Access to DYNAP-SE1 boards
@@ -30,27 +44,30 @@ the Ubuntu system installed there.
 ![Ways to access DYNAP-SE boards](doc/dynapse_access.png)
 
 # Getting Started
+### Option 1: Remote access via Zemo
 1. [Login to Zemo](#connecting-to-vpn-and-zemo)
 (*and all following instructions are to be run on Zemo*)
-2. [Git-clone the Dy1 Repository](#git-repository-cloning)
-3. Creating a Virtual environment/kernel (conda recommended)
-- using ** conda **
-  - To Install Conda at `$HOME` folder (Ignore you already have it):
-    - `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh`
-    - `echo export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc`
-    - `source ~/.bashrc`
-  - conda create -n test python=3.8 jupyter pip ipython ipykernel bash_kernel -y
-  - conda activate test
-4. Installing Jupyter, [samna](#samna-details) and other dependencies
-  
-    - pip install samna==0.17 (0.17.4 for mac)
-    - ipython kernel install --user --name=test
-    - python -m ipykernel install --user --name=test
-    - python -m bash_kernel.install
+2. [Git-clone this DYNAP-SE1 Repository](#git-repository-cloning)
+3. Create a Virtual environment/kernel (**conda** recommended)
+  - using **conda**
+    - To Install **Conda** at `$HOME` folder (ignore if you already have it):
+      - `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh`
+      - `echo export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc`
+      - `source ~/.bashrc`
+    - create environment named "dynap-se1": `conda create -n dynapse1 python=3.8 jupyter pip ipython ipykernel bash_kernel -y`
+    - activate the environment: `conda activate dynapse1`
 
-5. Starting jupyter notebook server
+4. Install Jupyter, [Samna](#samna-details) and other dependencies
+  
+    - `pip install samna==0.17` (0.17.4 for mac)
+    - `ipython kernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
+    - `python -m ipykernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
+    - `python -m bash_kernel.install`
+
+5. Start the Jupyter notebook server:
 `jupyter lab --no-browser --port=8080 --ip=0.0.0.0`
-6. Accesing the server in you local machine (*this is to be run on local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
+
+6. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
       - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
       - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
@@ -58,8 +75,13 @@ the Ubuntu system installed there.
       ![Jupyter Kernel Change](doc/kernel_selection.png)
 
 7. [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to this repository
-8. (Optional) You can also use VS code to interact with the Jupyter Lab, follow instructions [here](https://code.visualstudio.com/docs/datascience/jupyter-notebooks#_connect-to-a-remote-jupyter-server)
+8. **(Optional)** To use **VS Code** to interact with the Jupyter Lab, use the URL to the Jupyter Server obtained above to connect to the remote kernel (full explanation [here](https://code.visualstudio.com/docs/datascience/jupyter-notebooks#_connect-to-a-remote-jupyter-server))
 9. [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to logic behind setting the biases of the chip
+
+### Option 2: Local access (supported Ubuntu; optionally possible for Mac or WSL)
+
+0. Install Samna using
+1. Install Samna following [instructions](https://synsense-sys-int.gitlab.io/samna/install.html) depending on your system.
 
 
 **Additional useful commands:**
@@ -156,15 +178,15 @@ Then setup the VPN to INI network for remote access to Zemo. Zemo can be accesse
 ## INI's VPN
 #### TL;DR
 
-**On Windows 10** you can use [`FortiClient-Win10`](https://www.microsoft.com/en-us/p/forticlient/9wzdncrdh6mc?activetab=pivot:overviewtab) 
-**On linux** we suggest you install the *openfortivpn* package and run VPN via the following command, replacing <UZH-shortname> with your UZH shortname:
+- **On Windows 10** one can use [`FortiClient-Win10`](https://www.microsoft.com/en-us/p/forticlient/9wzdncrdh6mc?activetab=pivot:overviewtab) 
+- **On Linux** we suggest you install the *openfortivpn* package and run VPN via the following command, replacing <UZH-shortname> with your UZH shortname:
 
  ```bash
   sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u <UZH Shortname>  --trusted-cert 73771a1626625472674e4b8b907b8a97b870394746c4071b0e54ea3cc3479a93
   ```
 Note that you need to use UZH credentials, i.e. UZH shortname and password, not INI credentials, as this service is provided by UZH. openfortivpn is also solution when you need command line VPN. It is possible to set up fortivpn via the package network-manager-fortisslvpn-gnome that makes it available to the gnome network manager (might need reboot or restart of network-manager service after install of package). 
 
-### Excerpt from [`INI WIKI`](https://services.ini.uzh.ch/wiki/index.php/VPN)
+### Excerpt from [INI WIKI](https://services.ini.uzh.ch/wiki/index.php/VPN):
 You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available [`from here`](https://forticlient.com/downloads). If you do not have a UZH account, please contact [`Pawel Pyk`](mailto:ppyk@ini.uzh.ch?subject=UZH%20Account)
 
 If it does not work with that method (DNS problem), edit the VPN connection, go to IPv4 and add the following two DNS servers (instead of automatic): *130.60.128.3*,*130.60.64.51*
@@ -202,14 +224,16 @@ python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxco
 
     - no device connected - check that the DYNAP-SE1 board is
     listed by `lsusb`. The USB udev rules might need to be set (Ubuntu) or the device needs to be attached again (WSL).
-    - Store ID error
-    - Store name taken error
+    - Store ID error - restart the python kernel
+    - Store name taken error - instance of Samna already exists with the opened device model - restart the python kernel
     - Core shutdown (overload) - likely happens because of excessive spiking activity of the core
-
+    - Libcaer\libusb errors:
+      - `CRITICAL: Dynap-se ID-0 SN-00000002 [1:11]: failed to start data transfers`
+      - `RuntimeError: Dynap-se ID-0 SN-00000002 [1:11]: failed to set configuration parameter, modAddr=16, paramAddr=0, param=1.`
     - Netgen new configuration overrides the biases so they need to be copied
     
   - Known usolved Samna-side issues:
     - **Device selection (when multiple connected)** - the first one is always selected
-    - **Doubled FPGA input** - in `RepeatMode==False` the spike generator plays the preloaded sequence twice. This is a known firmware issue.
+    - **Doubled FPGA input** [(Issue #2)](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/issues/2) - in `RepeatMode==False` the spike generator plays the preloaded sequence twice. This is a known firmware issue.
     - 
 
