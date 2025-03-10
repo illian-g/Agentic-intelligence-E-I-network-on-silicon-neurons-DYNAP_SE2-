@@ -6,15 +6,15 @@ The code allows users to **configure networks** of spiking neurons on the chip, 
 
 The following sections cover installation, setup and usage of the DYNAP-SE1 software framework:
 
-- [About the DYNAP-SE1 chip]
+- [Chip introduction](#introduction)
 - [Access to DYNAP-SE1 chips](#access-to-dynap-se1-boards)
 - [Getting started](#getting-started)
-- [Installation]()
-- [Documentation]()
+- [Inventory](#inventory)
+- [Documentation](#documentation)
 - [Tutorials and demos]()
 
-- [FAQ and Known Issues](#frequently-asked-questions-(FAQ)-and-known-issues)
-
+- [FAQ and Known Issues](#frequently-asked-questions-and-known-issues)
+Frequently asked questions (FAQ) and known issues
 # Introduction
 
 Useful links to learn about DYNAP-SE1 chip:
@@ -35,6 +35,7 @@ published and analysed in the paper [`Chicca et al. 2014`](https://ieeexplore.ie
 1. **Remote** *(VPN, SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** through the VPN access provided by the **University of Zurich** (UZH) that has several DYNAP-SE1 boards attached.
 To record the analog membrane voltage traces, the built-in SPCM card should be used.
       - Please drop an e-mail to `support@ini.uzh.ch` if you need to use the VPN. Every user needs to be registered to INI-database to use the server.
+      - Make sure to **use the [booking system](https://teamup.com/kszuuhkh7ss24gerzz)**
 2. **Local** *(USB)*: The chip is connected the user's personal machine. This way the online GUI is available to monitor the spiking activity of the board,
 and any other oscilloscope could be used to monitor the membrane voltages.
 
@@ -44,44 +45,57 @@ the Ubuntu system installed there.
 ![Ways to access DYNAP-SE boards](doc/dynapse_access.png)
 
 # Getting Started
-### Option 1: Remote access via Zemo
-1. [Login to Zemo](#connecting-to-vpn-and-zemo)
-(*and all following instructions are to be run on Zemo*)
-2. [Git-clone this DYNAP-SE1 Repository](#git-repository-cloning)
-3. Create a Virtual environment/kernel (**conda** recommended)
-  - using **conda**
-    - To Install **Conda** at `$HOME` folder (ignore if you already have it):
+
+0. **`Remote only`**: [Login to Zemo](#connecting-to-vpn-and-zemo)
+(*and run all following instructions on Zemo*)
+
+1. Create a virtual environment and attach the kernel (**conda** recommended)
+  - using **conda**:
+    - To Install **Conda** at `$HOME` folder (on Linux; ignore if you already have it):
       - `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh`
       - `echo export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc`
       - `source ~/.bashrc`
-    - create environment named "dynap-se1": `conda create -n dynapse1 python=3.8 jupyter pip ipython ipykernel bash_kernel -y`
-    - activate the environment: `conda activate dynapse1`
+      - create an environment named "dynapse1": `conda create -n dynapse1 python=3.8 jupyter pip ipython ipykernel bash_kernel -y`
+       activate the environment: `conda activate dynapse1`
 
-4. Install Jupyter, [Samna](#samna-details) and other dependencies
-  
-    - `pip install samna==0.17` (0.17.4 for mac)
-    - `ipython kernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
-    - `python -m ipykernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
-    - `python -m bash_kernel.install`
+    - Make the ipykernel with the created environment by running:
+      - `ipython kernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
+      - `python -m ipykernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
+      - `python -m bash_kernel.install`
 
-5. Start the Jupyter notebook server:
+2. Install Samna **version 0.17**:
+
+    - `pip install samna==0.17` (**0.17.4 for Mac**)
+    - **for local access (Linux, Mac, WSL)** follow the additional [installation instructions](https://synsense-sys-int.gitlab.io/samna/install.html) enabling USB port access depending on your system.
+
+
+3. Git-clone this DYNAP-SE1 Repository
+
+  ```
+  git clone https://code.ini.uzh.ch/ncs/libs/dynap-se1.git
+  ```
+and then import and update the submodules with
+
+  ```
+  git submodule init
+  git submodule update
+  ```
+
+4. Start the Jupyter notebook server:
 `jupyter lab --no-browser --port=8080 --ip=0.0.0.0`
 
-6. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
+5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
       - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
       - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
       - Remember to change the kernel from top-right **after openning the Samna_demo notebook**.
       ![Jupyter Kernel Change](doc/kernel_selection.png)
 
-7. [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to this repository
-8. **(Optional)** To use **VS Code** to interact with the Jupyter Lab, use the URL to the Jupyter Server obtained above to connect to the remote kernel (full explanation [here](https://code.visualstudio.com/docs/datascience/jupyter-notebooks#_connect-to-a-remote-jupyter-server))
-9. [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to logic behind setting the biases of the chip
+      - Alternatively, **VS Code** can be used to interact with the Jupyter server. Use the URL to the Jupyter Server obtained above to connect to the remote kernel (the full explanation how to attach a kernel is [here](https://code.visualstudio.com/docs/datascience/jupyter-notebooks#_connect-to-a-remote-jupyter-server))
 
-### Option 2: Local access (supported Ubuntu; optionally possible for Mac or WSL)
+6. Try to run the [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to this repository
 
-0. Install Samna using
-1. Install Samna following [instructions](https://synsense-sys-int.gitlab.io/samna/install.html) depending on your system.
+7. Take a looke at the guide [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to the logic behind setting the biases of the chip
 
 
 **Additional useful commands:**
@@ -93,38 +107,29 @@ the Ubuntu system installed there.
 
 - To copy (remote PC) `scp username@ncs-zemo.ini.uzh.ch:/dir_path/Hello_world* /dir_path/folder_name`
 
-Inventory
--------
-- [`Google spreadsheet for DYNAP-SE Inventory`](https://docs.google.com/spreadsheets/d/1nH2ihmJopggJwHB5A8NmtKlDbAkQdN7nsJvuaCBwr5c/edit?usp=sharing)
+# Inventory
 
-Booking-System 
--------
-- [`Team-up Booking for access to dynapse1`](https://teamup.com/kszuuhkh7ss24gerzz)
+- [`Google spreadsheet for DYNAP-SE1 Inventory`](https://docs.google.com/spreadsheets/d/1nH2ihmJopggJwHB5A8NmtKlDbAkQdN7nsJvuaCBwr5c/edit?usp=sharing)
+
+# Booking System 
+- [`Team-up Booking for access to DYNAP-SE1`](https://teamup.com/kszuuhkh7ss24gerzz)
 
 [//]: # (explanation of relation of Samna to CTXCTL_Contrib to this.)
 
 
-# Documentation 
+# Documentation
+
+- The main DYNAP-SE1 repository [documentation PDF](doc/samna-dynapse1-doc.pdf) (_slightly outdated_)
+
+- DYNAP-SE1 chip functionality [`introduction video`](https://www.youtube.com/watch?v=NoSPNOGYVMY) on YouTube
+
 - The documentation for Samna is [here](https://synsense-sys-int.gitlab.io/samna/);
 the DYNAP-SE1 related part is
 [this section](https://synsense-sys-int.gitlab.io/samna/devkits/dynapSeSeries/dynapse1/summary.html).
 - The documentation of this
 [Python utilities library](https://code.ini.uzh.ch/ncs/libs/dynap-se1) for
-Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
+Samna DYNAP-SE1 library in its online form is also [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 
-  ---
-  **NOTE**
-
-  The automatically generated API documentation for this library may still have some issues being displayed in
-  [Modules](https://neuroinf.gitlab.io/ctxctl_contrib/contents/modules.html) and
-  [APIs Summary](https://neuroinf.gitlab.io/ctxctl_contrib/contents/api_sum.html). To compile the latest
-  doc locally, please follow this [How to compile the doc?](#how-to-compile-the-doc) section.
-  The PDF version of the manual is at the
-  [samna-dynapse1-doc](https://gitlab.com/neuroinf/ctxctl_contrib/-/tree/samna-dynapse1-doc)
-  branch of this repository, which might be a bit
-  out-dated compared to the compiled one. 
-
-  ---
 
 [//]: # (- `Video tutorial from the course NI06 - Neuromorphic Processor https://tube.switch.ch/switchcast/uzh.ch/events/383ee32a-58b8-48d5-bed0-a915ce341961) 
 
@@ -137,41 +142,14 @@ Samna for DYNAP-SE1 is [here](https://neuroinf.gitlab.io/ctxctl_contrib/).
 - [`PySpcmScope`](https://code.ini.uzh.ch/ncs/libs/pyspcmscope.git) library for working with on-board digitizer PCIE Card (M2i.3132-Exp) as a standalone repository (same as the included submodule here)
 
 
-# Samna
-Install Samna version 0.17 (verified to work with this repository)
-
-  ```
-  pip install samna==0.17
-  ```
-
-See more details in the [install](https://synsense-sys-int.gitlab.io/samna/install.html) section of Samna documentation. You will also need [`Numpy`](https://numpy.org/install/) and [`Matplotlib`](https://matplotlib.org/stable/index.html)for basic usage. 
-
-# Git Repository Cloning
-First clone the repository to get all the necessary files
-```
-git clone https://code.ini.uzh.ch/ncs/libs/dynap-se1.git
-```
-and then import and update the submodules with (Ignore Submodules for now!)
-
-  ```
-  git submodule init
-  git submodule update
-  ```
-
-Now you should have all the files needed to work with the DY1 Bluebox system.
-
-## Papers
-
-- [`Paper with DPI equations`](https://ieeexplore.ieee.org/document/6809149)
-
 
 # Connecting to VPN and Zemo
 
 First you need to have an INI username. If you don't have one, you need to get your INI supervisor to request one for you.
 
-If you have an INI username, then you need to have access to INI network. If you need remote access or access via Wifi, you'll need to use a VPN. If you're not yet a user of INI's VPN, please drop a mail to [`IT Support`](mailto:support@ini.uzh.ch?subject=VPN%20Access).
+If you have an INI username, then you need to have access to INI network. If you need remote access or access via Wifi, you'll need to use a VPN. If you're not yet a user of INI's VPN, please drop an  e-mail to [`IT Support`](mailto:support@ini.uzh.ch?subject=VPN%20Access).
 
-Next, you need an account on Zemo. Please drop a mail to [`Saptarshi Ghosh`](mailto:sapta@ini.uzh.ch?subject=Account%20on%20zemo).
+Next, you need an account on Zemo. Please drop an e-mail to [`Saptarshi Ghosh`](mailto:sapta@ini.uzh.ch?subject=Account%20on%20zemo).
 
 Then setup the VPN to INI network for remote access to Zemo. Zemo can be accessed though ssh as `ssh <user name>@ncs-zemo.ini.uzh.ch`
 
@@ -193,32 +171,7 @@ If it does not work with that method (DNS problem), edit the VPN connection, go 
 
 
 
-# How to compile the doc
-- To compile the sphinx doc in this repository, install [sphinx](
-https://www.sphinx-doc.org/en/master/) following the instructions
-[here](https://www.sphinx-doc.org/en/master/usage/installation.html).
-
-```bash
-python -m pip install sphinx sphinx_book_theme sphinx-autodoc-typehints sphinxcontrib-napoleon
-```
-- Then go to the `doc` folder and compile the document into html or PDF format.
-  - html:
-
-    ```
-    cd doc
-    make html
-    ```
-    The html files will be generated under `doc/build/html`.
-
-  - PDF:
-    ```
-    cd doc
-    make latexpdf
-    ```
-    The PDF file `samna-dynapse1.pdf` will be generated under `doc/build/latex`.
-   
-
-# Frequently asked questions (FAQ) and known issues
+# Frequently asked questions and known issues
 
   - Requires replug\reset:
 
