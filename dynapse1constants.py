@@ -13,5 +13,5 @@ ISI_NUM_BITS = 16
 MAX_ISI = 2**ISI_NUM_BITS-1
 MAX_FPGA_LEN = 2**ADDR_NUM_BITS-1
 
-map_file_path = os.path.join(os.path.dirname(__file__) + "/details/linear_fine_coarse_bias_map.npy")
+map_file_path = os.path.join(os.path.dirname(__file__) + "/live_gui/linear_fine_coarse_bias_map.npy")
 LINEAR_BIAS_MAP = np.load(map_file_path).astype(int)
