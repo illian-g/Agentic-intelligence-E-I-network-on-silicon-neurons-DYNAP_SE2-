@@ -84,7 +84,9 @@ and then import and update the submodules with
 4. Start the Jupyter notebook server:
 `jupyter lab --no-browser --port=8080 --ip=0.0.0.0`
 
-5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.lan.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
+The terminal would provide a link to the server that can be opened either through the browser on your local machine or given to **VS Code**
+
+5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
       - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
       - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
