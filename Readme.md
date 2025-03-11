@@ -55,13 +55,15 @@ the Ubuntu system installed there.
       - `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh`
       - `echo export PATH="$HOME/miniconda/bin:$PATH" >> ~/.bashrc`
       - `source ~/.bashrc`
-      - create an environment named "dynapse1": `conda create -n dynapse1 python=3.8 jupyter pip ipython ipykernel bash_kernel -y`
+      - create an environment named "dynapse1": `conda create -n dynapse1 python=3.8 jupyter pip ipython ipykernel -y`
        activate the environment: `conda activate dynapse1`
+      <!--- - create an environment named "dynapse1": `conda create -n dynapse1 python=3.8 jupyter pip ipython ipykernel bash_kernel -y`
+       activate the environment: `conda activate dynapse1` -->
 
     - Make the ipykernel with the created environment by running:
       - `ipython kernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
       - `python -m ipykernel install --user --name=dynapse1 --display-name "DYNAP-SE1 Kernel"`
-      - `python -m bash_kernel.install`
+      <!-- - `python -m bash_kernel.install` -->
 
 2. Install Samna **version 0.17**:
 
@@ -74,7 +76,7 @@ the Ubuntu system installed there.
   ```
   git clone https://code.ini.uzh.ch/ncs/libs/dynap-se1.git
   ```
-and then import and update the submodules with
+(optional) and then import and update the submodules with
 
   ```
   git submodule init
@@ -86,7 +88,7 @@ and then import and update the submodules with
 
 The terminal would provide a link to the server that can be opened either through the browser on your local machine or given to **VS Code**
 
-5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.ini.uzh.ch:8080/tree/tree?token=-----` with using the token that you generated in Zemo
+5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.ini.uzh.ch:8080/lab?token=----` with using the token that you generated in Zemo
       - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
       - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
