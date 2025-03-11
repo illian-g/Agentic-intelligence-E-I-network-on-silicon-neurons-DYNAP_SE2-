@@ -53,7 +53,7 @@ the Ubuntu system installed there.
   - using **conda**:
     - To Install **Conda** at `$HOME` folder (on Linux; ignore if you already have it):
       - `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && bash ~/miniconda.sh -b -p ~/miniconda && rm ~/miniconda.sh`
-      - `echo export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc`
+      - `echo export PATH="$HOME/miniconda/bin:$PATH" >> ~/.bashrc`
       - `source ~/.bashrc`
       - create an environment named "dynapse1": `conda create -n dynapse1 python=3.8 jupyter pip ipython ipykernel bash_kernel -y`
        activate the environment: `conda activate dynapse1`
