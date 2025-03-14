@@ -46,7 +46,7 @@ the Ubuntu system installed there.
 
 # Getting Started
 
-0. **`Remote only`**: [Login to Zemo](#connecting-to-vpn-and-zemo)
+0. **`Remote only`**: [Login to Zemo](doc/Generating_SSH-Keypair_and_sharing_the_public_key.md)
 (*and run all following instructions on Zemo*)
 
 1. Create a virtual environment and attach the kernel (**conda** recommended)
@@ -89,6 +89,7 @@ the Ubuntu system installed there.
 The terminal would provide a link to the server that can be opened either through the browser on your local machine or given to **VS Code**
 
 5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.ini.uzh.ch:8080/lab?token=----` with using the token that you generated in Zemo
+(When accessing remotely without VPN, port forwarding is needed)
       - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
       - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
