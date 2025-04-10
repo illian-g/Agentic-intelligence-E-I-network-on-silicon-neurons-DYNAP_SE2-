@@ -68,7 +68,7 @@ the Ubuntu system installed there.
 2. Install Samna **version 0.17**:
 
     - `pip install samna==0.17` (**0.17.4 for Mac**)
-    - **for local access (Linux, Mac, WSL)** follow the additional [installation instructions](https://synsense-sys-int.gitlab.io/samna/install.html) enabling USB port access depending on your system.
+    - **for local access (Linux, Mac, WSL)** follow the additional [installation instructions](https://synsense-sys-int.gitlab.io/samna) enabling USB port access depending on your system.
 
 
 3. Git-clone this DYNAP-SE1 Repository
