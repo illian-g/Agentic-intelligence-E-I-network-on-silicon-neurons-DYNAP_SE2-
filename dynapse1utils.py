@@ -138,6 +138,33 @@ def open_dynapse1(gui=False, select_device=False, sender_port=free_port(), recei
         return model, gui_process
     else:
         return model, ''
+    
+    
+def open_specific_device_in_sequence(device_id : int):
+    """ Open specific DYNAP-SE1 board among multiple connected by sequentially opening the boards and then closing those unused.
+
+    Args:
+        device_id (int): identifier of the device in the list of unopened devices
+
+    Returns:
+        Dynapse1Model: model, DYNAP-SE1 model of the selected device
+    """
+
+    opened_devices = {}
+    print(f"Opening device #{device_id} (approx. {time.strftime("%M min %S sec", time.gmtime(102*device_id))})...")
+    
+    for idx in range(device_id):
+        unopened_devices = samna.device.get_unopened_devices()
+        opened_devices[idx]=samna.device.open_device(unopened_devices[0])
+    
+    unopened_devices = samna.device.get_unopened_devices() 
+    device = samna.device.open_device(unopened_devices[0])
+    
+    for idx in range(device_id):
+        close_dynapse1(opened_devices[idx])
+        
+    return device
+    
 
 def open_gui(device, visualizer_id=3):
     """Open DYNAP-SE1 spiking GUI.
@@ -640,7 +667,6 @@ def copy_parameters2core(model, source_core : int, target_core : int):
         
     model.update_parameter_group(configuration.chips[target_core//4].cores[target_core%4].parameter_group,
                                      target_core//4, target_core%4)
-    
     
     
 
