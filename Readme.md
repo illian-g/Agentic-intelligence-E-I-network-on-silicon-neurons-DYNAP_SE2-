@@ -32,7 +32,7 @@ published and analysed in the paper [`Chicca et al. 2014`](https://ieeexplore.ie
 # Access to DYNAP-SE1 boards
 
 **DYNAP-SE1** boards can be used in 3 different scenarios:
-1. **Remote** *(VPN, SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** through the VPN access provided by the **University of Zurich** (UZH) that has several DYNAP-SE1 boards attached.
+1. **Remote** *(SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** through the VPN access provided by the **University of Zurich** (UZH) that has several DYNAP-SE1 boards attached.
 To record the analog membrane voltage traces, the built-in SPCM card should be used.
       - Please drop an e-mail to `support@ini.uzh.ch` if you need to use the VPN. Every user needs to be registered to INI-database to use the server.
       - Make sure to **use the [booking system](https://teamup.com/kszuuhkh7ss24gerzz)**
@@ -46,7 +46,7 @@ the Ubuntu system installed there.
 
 # Getting Started
 
-0. **`Remote only`**: [Login to Zemo](doc/Generating_SSH-Keypair_and_sharing_the_public_key.md)
+0. **`Remote only`**: [Connect via SSH and login to Zemo](doc/Generating_SSH-Keypair_and_sharing_the_public_key.md)
 (*and run all following instructions on Zemo*)
 
 1. Create a virtual environment and attach the kernel (**conda** recommended)
@@ -148,7 +148,7 @@ Samna DYNAP-SE1 library in its online form is also [here](https://neuroinf.gitla
 
 
 
-# Connecting to VPN and Zemo
+# Remote access to Zemo
 
 First you need to have an INI username. If you don't have one, you need to get your INI supervisor to request one for you.
 
@@ -158,21 +158,7 @@ Next, you need an account on Zemo. Please drop an e-mail to [`Saptarshi Ghosh`](
 
 Then setup the VPN to INI network for remote access to Zemo. Zemo can be accessed though ssh as `ssh <user name>@ncs-zemo.ini.uzh.ch`
 
-## INI's VPN
-#### TL;DR
 
-- **On Windows 10** one can use [`FortiClient-Win10`](https://www.microsoft.com/en-us/p/forticlient/9wzdncrdh6mc?activetab=pivot:overviewtab) 
-- **On Linux** we suggest you install the *openfortivpn* package and run VPN via the following command, replacing <UZH-shortname> with your UZH shortname:
-
- ```bash
-  sudo openfortivpn sslvpn.ini.uzh.ch:10443 -u <UZH Shortname>  --trusted-cert 73771a1626625472674e4b8b907b8a97b870394746c4071b0e54ea3cc3479a93
-  ```
-Note that you need to use UZH credentials, i.e. UZH shortname and password, not INI credentials, as this service is provided by UZH. openfortivpn is also solution when you need command line VPN. It is possible to set up fortivpn via the package network-manager-fortisslvpn-gnome that makes it available to the gnome network manager (might need reboot or restart of network-manager service after install of package). 
-
-### Excerpt from [INI WIKI](https://services.ini.uzh.ch/wiki/index.php/VPN):
-You’ll need to use a new VPN server provided for INI by UZH. The UZH is using a VPN solution from Fortinet. The name of the server is sslvpn.ini.uzh.ch (130.60.23.50) port 10443. For some clients this may be entered as <tt>sslvpn.ini.uzh.ch:10443</tt>.  Remember this is now a UZH service so please make sure to login with your UZH credentials (not INI). Clients for almost all system are available [`from here`](https://forticlient.com/downloads). If you do not have a UZH account, please contact [`Pawel Pyk`](mailto:ppyk@ini.uzh.ch?subject=UZH%20Account)
-
-If it does not work with that method (DNS problem), edit the VPN connection, go to IPv4 and add the following two DNS servers (instead of automatic): *130.60.128.3*,*130.60.64.51*
 
 
 
@@ -191,7 +177,6 @@ If it does not work with that method (DNS problem), edit the VPN connection, go 
     - Netgen new configuration overrides the biases so they need to be copied
     
   - Known usolved Samna-side issues:
-    - **Device selection (when multiple connected)** - the first one is always selected
+    - **Device selection (when multiple connected)** - the first one is always selected. Tentative solution is pushed onto a respective dev branch. 
     - **Doubled FPGA input** [(Issue #2)](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/issues/2) - in `RepeatMode==False` the spike generator plays the preloaded sequence twice. This is a known firmware issue.
-    - 
 
