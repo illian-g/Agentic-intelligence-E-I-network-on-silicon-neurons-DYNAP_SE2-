@@ -32,9 +32,9 @@ published and analysed in the paper [`Chicca et al. 2014`](https://ieeexplore.ie
 # Access to DYNAP-SE1 boards
 
 **DYNAP-SE1** boards can be used in 3 different scenarios:
-1. **Remote** *(SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** through the VPN access provided by the **University of Zurich** (UZH) that has several DYNAP-SE1 boards attached.
+1. **Remote** *(SSH, recommended)*: The user connects to the **ZEMO** server at **INI** using **SSH** that has several DYNAP-SE1 boards attached.
 To record the analog membrane voltage traces, the built-in SPCM card should be used.
-      - Please drop an e-mail to `support@ini.uzh.ch` if you need to use the VPN. Every user needs to be registered to INI-database to use the server.
+      - Please drop an e-mail to `support@ini.uzh.ch` if you need to use the remote access. Every user needs to be registered in INI-database to use the server.
       - Make sure to **use the [booking system](https://teamup.com/kszuuhkh7ss24gerzz)**
 2. **Local** *(USB)*: The chip is connected the user's personal machine. This way the online GUI is available to monitor the spiking activity of the board,
 and any other oscilloscope could be used to monitor the membrane voltages.
@@ -89,7 +89,7 @@ the Ubuntu system installed there.
 The terminal would provide a link to the server that can be opened either through the browser on your local machine or given to **VS Code**
 
 5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.ini.uzh.ch:8080/lab?token=----` with using the token that you generated in Zemo
-(When accessing remotely without VPN, port forwarding is needed)
+(When accessing remotely port forwarding is needed)
       - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
       - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
@@ -152,13 +152,10 @@ Samna DYNAP-SE1 library in its online form is also [here](https://neuroinf.gitla
 
 First you need to have an INI username. If you don't have one, you need to get your INI supervisor to request one for you.
 
-If you have an INI username, then you need to have access to INI network. If you need remote access or access via Wifi, you'll need to use a VPN. If you're not yet a user of INI's VPN, please drop an  e-mail to [`IT Support`](mailto:support@ini.uzh.ch?subject=VPN%20Access).
+Next, you need an account on Zemo and SSH access. To set it up, please drop an e-mail to [`Saptarshi Ghosh`](mailto:sapta@ini.uzh.ch?subject=Account%20on%20zemo) and send him your public SSH key.
+Here is the [`instruction`](doc/Generating_SSH-Keypair_and_sharing_the_public_key.md) how to generate it if you need one.
 
-Next, you need an account on Zemo. Please drop an e-mail to [`Saptarshi Ghosh`](mailto:sapta@ini.uzh.ch?subject=Account%20on%20zemo).
-
-Then setup the VPN to INI network for remote access to Zemo. Zemo can be accessed though ssh as `ssh <user name>@ncs-zemo.ini.uzh.ch`
-
-
+Zemo can be accessed though ssh as `ssh <user name>@ncs-zemo.ini.uzh.ch`
 
 
 
