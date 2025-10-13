@@ -90,7 +90,7 @@ The terminal would provide a link to the server that can be opened either throug
 
 5. Accesing the server on you local machine (*this is to be run in the local machine browser*)</br>`http://ncs-zemo.ini.uzh.ch:8080/lab?token=----` with using the token that you generated in Zemo
 (When accessing remotely port forwarding is needed)
-      - You should be greeted with the follwoing welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
+      - You should be greeted with the following welcome screen. You can use the `test` on top-right to start a new notebook with the test kernel.
       ![Welcome Jupyter Lab](doc/jupyter_lab_welcome.png)
       - If you want to open and work with `Samna_demo.ipynb`, you can open that from file explorer on left-side of the Jupyter Lab. 
       - Remember to change the kernel from top-right **after openning the Samna_demo notebook**.
@@ -100,7 +100,7 @@ The terminal would provide a link to the server that can be opened either throug
 
 6. Try to run the [`Introductory Jupyter Notebook with the basic functionality rundown`](https://code.ini.uzh.ch/ncs/libs/dynap-se1/-/blob/main/Samna_demo.ipynb) - the main introduction to this repository
 
-7. Take a looke at the guide [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to the logic behind setting the biases of the chip
+7. Take a look at the guide [`How to Set up Biases`](dynapse-biases-howtosetup.md) - A guide to the logic behind setting the biases of the chip
 
 
 **Additional useful commands:**
@@ -161,7 +161,7 @@ Zemo can be accessed though ssh as `ssh <user name>@ncs-zemo.ini.uzh.ch`
 
 # Frequently asked questions and known issues
 
-  - Requires replug\reset:
+  - Requires replug/reset:
 
     - no device connected - check that the DYNAP-SE1 board is
     listed by `lsusb`. The USB udev rules might need to be set (Ubuntu) or the device needs to be attached again (WSL).
