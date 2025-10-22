@@ -22,10 +22,10 @@ max_usb_current=1
 ```
 
 This setting will:
-- Sets GPIO38 to high
-- Turns on a FET (Field Effect Transistor)
-- Connects a second 39K resistor in parallel to an existing one on pin 5 of U13 (the AP2553W6 USB power manager)
-- Lifts the current limit from 0.6A to 1.2A
+- Set GPIO38 to high
+- Turn on a FET (Field Effect Transistor)
+- Connect a second 39K resistor in parallel to an existing one on pin 5 of U13 (the AP2553W6 USB power manager)
+- Lift the current limit from 0.6A to 1.2A
 
 #### For Raspberry Pi 5:
 The Pi 5 has higher current limits by default (up to 1.6A with the official power supply), but this setting is still needed to properly 
