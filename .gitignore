@@ -22,3 +22,7 @@ igruenberg/trial_list.csv
 igruenberg/spike_plots
 igruenberg/time.csv
 igruenberg/spike_plots_straight
+igruenberg/spike_plots_left/
+igruenberg/spike_plots_right/
+igruenberg/spike_plots_right_raw/
+igruenberg/spike_plots_straight_a/
